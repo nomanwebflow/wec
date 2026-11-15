@@ -1,0 +1,470 @@
+- generic [ref=f5e2]:
+  - generic:
+    - link "Skip to main content" [ref=f5e3] [cursor=pointer]:
+      - /url: "#main"
+    - region "Announcement" [ref=f5e5]:
+      - paragraph [ref=f5e9]: Open today until 5:00 PM
+    - banner:
+      - generic [ref=f5e10]:
+        - link "Home Page" [ref=f5e11] [cursor=pointer]:
+          - /url: /
+        - generic [ref=f5e34]:
+          - generic [ref=f5e35]:
+            - link:
+              - /url: "#"
+          - button "menu" [ref=f5e36] [cursor=pointer]
+  - main [ref=f5e40]:
+    - generic [ref=f5e53]:
+      - generic [ref=f5e54]:
+        - generic [ref=f5e55]: Non-Surgical Treatment
+        - heading [level=2] [ref=f5e57]:
+          - text: Downtown Austin chiropractic care that gets you
+          - strong [ref=f5e58]: back to your life
+        - paragraph [ref=f5e60]: If you've seen a chiropractor before and nothing changed, the problem probably never got found. Casey Morgan D.C. finds it first, then fixes it.
+        - generic [ref=f5e62]:
+          - generic [ref=f5e63]:
+            - button "Book Your Visit" [ref=f5e65] [cursor=pointer]
+            - generic [ref=f5e68]:
+              - generic [aria-hidden] [ref=f5e69]: Book Your Visit
+              - generic [aria-hidden] [ref=f5e70]: Book Your Visit
+          - generic [ref=f5e71]:
+            - button "Verify My Insurance" [ref=f5e73] [cursor=pointer]
+            - generic [ref=f5e82]:
+              - generic [aria-hidden] [ref=f5e83]: Verify My Insurance
+              - generic [aria-hidden] [ref=f5e84]: Verify My Insurance
+      - generic [ref=f5e86]:
+        - generic [ref=f5e88]:
+          - list [ref=f5e104]:
+            - listitem [ref=f5e105]:
+              - paragraph [ref=f5e106]: 5.0 stars, 250+ Google reviews
+          - button [ref=f5e108] [cursor=pointer]
+        - list [ref=f5e109]:
+          - listitem [ref=f5e110]:
+            - paragraph [ref=f5e113]: In and out in minutes, not rushed
+          - listitem [ref=f5e114]:
+            - paragraph [ref=f5e117]: Digital X-rays on site
+          - listitem [ref=f5e118]:
+            - paragraph [ref=f5e121]: Same-day appointments available
+    - generic [ref=f5e128]:
+      - img "Video thumbnail, conditions we treat" [ref=f5e133]
+      - generic [ref=f5e135]:
+        - generic [ref=f5e136]: Non-Surgical Treatment
+        - heading "A minute with the doctor you'll actually be seeing" [level=2] [ref=f5e138]
+        - list [ref=f5e139]:
+          - listitem [ref=f5e140]:
+            - paragraph [ref=f5e143]: 5.0 stars, 250+ reviews
+          - listitem [ref=f5e144]:
+            - paragraph [ref=f5e147]: Free covered parking off MoPac
+          - listitem [ref=f5e148]:
+            - paragraph [ref=f5e151]: In-network with BCBS, UHC, Aetna and more
+        - generic [ref=f5e154]:
+          - button "Book Your Visit" [ref=f5e156] [cursor=pointer]
+          - generic [ref=f5e159]:
+            - generic [aria-hidden] [ref=f5e160]: Book Your Visit
+            - generic [aria-hidden] [ref=f5e161]: Book Your Visit
+    - generic [ref=f5e166]:
+      - img "Chiropractic care at West End Chiropractic" [ref=f5e169]
+      - generic [ref=f5e170]:
+        - heading [level=2] [ref=f5e193]:
+          - text: Pain that won't let up
+          - strong [ref=f5e194]: wears you down
+        - generic [ref=f5e195]:
+          - paragraph [ref=f5e196]:
+            - text: When your back locks up during a meeting, or your neck stiffens at your desk, or a headache turns a Wednesday into a lost day, it's not just discomfort.
+            - strong [ref=f5e197]: It's your work, your workouts, your time with family. All of it takes a hit.
+          - paragraph [ref=f5e198]: Most people push through it. They stretch. They pop ibuprofen. They tell themselves it will pass. Sometimes it does. Sometimes it doesn't.
+          - paragraph [ref=f5e199]: If pain has been showing up more often, lasting longer, or getting worse, that's a signal. Something structural is going on and it's time to find out what.
+        - generic [ref=f5e202]:
+          - button "Book Your Visit" [ref=f5e204] [cursor=pointer]
+          - generic [ref=f5e207]:
+            - generic [aria-hidden] [ref=f5e208]: Book Your Visit
+            - generic [aria-hidden] [ref=f5e209]: Book Your Visit
+    - generic [ref=f5e213]:
+      - generic [ref=f5e215]:
+        - heading "What are you dealing with?" [level=2] [ref=f5e217]
+        - paragraph [ref=f5e219]: Find your symptom below and we'll show you how we treat it. Not sure which one fits? Just call us.
+      - list [ref=f5e220]:
+        - listitem [ref=f5e221]:
+          - list [ref=f5e222]:
+            - listitem [ref=f5e223]:
+              - generic [ref=f5e224]:
+                - paragraph [ref=f5e225]: Headaches
+                - button "Headaches" [ref=f5e232] [cursor=pointer]
+            - listitem [ref=f5e233]:
+              - generic [ref=f5e234]:
+                - paragraph [ref=f5e235]: Migraines
+                - button "Migraines" [ref=f5e242] [cursor=pointer]
+            - listitem [ref=f5e243]:
+              - generic [ref=f5e244]:
+                - paragraph [ref=f5e245]: Neck pain
+                - button "Neck pain" [ref=f5e252] [cursor=pointer]
+            - listitem [ref=f5e253]:
+              - generic [ref=f5e254]:
+                - paragraph [ref=f5e255]: Stiff neck
+                - button "Stiff neck" [ref=f5e262] [cursor=pointer]
+        - listitem [ref=f5e263]:
+          - generic [ref=f5e264]:
+            - paragraph [ref=f5e265]: Whiplash
+            - button "Whiplash" [ref=f5e272] [cursor=pointer]
+        - listitem [ref=f5e273]:
+          - generic [ref=f5e274]:
+            - paragraph [ref=f5e275]: Tension headaches
+            - button "Tension headaches" [ref=f5e282] [cursor=pointer]
+        - listitem [ref=f5e283]:
+          - generic [ref=f5e284]:
+            - paragraph [ref=f5e285]: Tech neck (from desk work)
+            - button "Tech neck (from desk work)" [ref=f5e292] [cursor=pointer]
+        - listitem [ref=f5e293]:
+          - generic [ref=f5e294]:
+            - paragraph [ref=f5e295]: Post-surgery back or neck pain
+            - button "Post-surgery back or neck pain" [ref=f5e302] [cursor=pointer]
+        - listitem [ref=f5e303]:
+          - generic [ref=f5e304]:
+            - paragraph [ref=f5e305]: Poor posture
+            - button "Poor posture" [ref=f5e312] [cursor=pointer]
+        - listitem [ref=f5e313]:
+          - generic [ref=f5e314]:
+            - paragraph [ref=f5e315]: Car accident injuries
+            - button "Car accident injuries" [ref=f5e322] [cursor=pointer]
+        - listitem [ref=f5e323]:
+          - generic [ref=f5e324]:
+            - paragraph [ref=f5e325]: Workout or gym injuries
+            - button "Workout or gym injuries" [ref=f5e332] [cursor=pointer]
+        - listitem [ref=f5e333]:
+          - generic [ref=f5e334]:
+            - paragraph [ref=f5e335]: Lower back pain
+            - button "Lower back pain" [ref=f5e342] [cursor=pointer]
+        - listitem [ref=f5e343]:
+          - generic [ref=f5e344]:
+            - paragraph [ref=f5e345]: Herniated disc
+            - button "Herniated disc" [ref=f5e352] [cursor=pointer]
+        - listitem [ref=f5e353]:
+          - generic [ref=f5e354]:
+            - paragraph [ref=f5e355]: Bulging disc
+            - button "Bulging disc" [ref=f5e362] [cursor=pointer]
+        - listitem [ref=f5e363]:
+          - generic [ref=f5e364]:
+            - paragraph [ref=f5e365]: Slipped disc
+            - button "Slipped disc" [ref=f5e372] [cursor=pointer]
+        - listitem [ref=f5e373]:
+          - generic [ref=f5e374]:
+            - paragraph [ref=f5e375]: Pinched nerve
+            - button "Pinched nerve" [ref=f5e382] [cursor=pointer]
+        - listitem [ref=f5e383]:
+          - generic [ref=f5e384]:
+            - paragraph [ref=f5e385]: Sciatica
+            - button "Sciatica" [ref=f5e392] [cursor=pointer]
+        - listitem [ref=f5e393]:
+          - generic [ref=f5e394]:
+            - paragraph [ref=f5e395]: Hip pain
+            - button "Hip pain" [ref=f5e402] [cursor=pointer]
+        - listitem [ref=f5e403]:
+          - generic [ref=f5e404]:
+            - paragraph [ref=f5e405]: Sciatic nerve pain
+            - button "Sciatic nerve pain" [ref=f5e412] [cursor=pointer]
+        - listitem [ref=f5e413]:
+          - generic [ref=f5e414]:
+            - paragraph [ref=f5e415]: Muscle spasms in the lower back
+            - button "Muscle spasms in the lower back" [ref=f5e422] [cursor=pointer]
+        - listitem [ref=f5e423]:
+          - generic [ref=f5e424]:
+            - paragraph [ref=f5e425]: Chronic pain from sitting all day
+            - button "Chronic pain from sitting all day" [ref=f5e432] [cursor=pointer]
+        - listitem [ref=f5e433]:
+          - generic [ref=f5e434]:
+            - paragraph [ref=f5e435]: Numbness in the legs or feet
+            - button "Numbness in the legs or feet" [ref=f5e442] [cursor=pointer]
+        - listitem [ref=f5e443]:
+          - generic [ref=f5e444]:
+            - paragraph [ref=f5e445]: Tingling down the leg
+            - button "Tingling down the leg" [ref=f5e452] [cursor=pointer]
+        - listitem [ref=f5e453]:
+          - generic [ref=f5e454]:
+            - paragraph [ref=f5e455]: Pregnancy back pain
+            - button "Pregnancy back pain" [ref=f5e462] [cursor=pointer]
+        - listitem [ref=f5e463]:
+          - generic [ref=f5e464]:
+            - paragraph [ref=f5e465]: Prenatal aches and pains
+            - button "Prenatal aches and pains" [ref=f5e472] [cursor=pointer]
+        - listitem [ref=f5e473]:
+          - generic [ref=f5e474]:
+            - paragraph [ref=f5e475]: Shoulder pain
+            - button "Shoulder pain" [ref=f5e482] [cursor=pointer]
+        - listitem [ref=f5e483]:
+          - generic [ref=f5e484]:
+            - paragraph [ref=f5e485]: Tension between the shoulder blades
+            - button "Tension between the shoulder blades" [ref=f5e492] [cursor=pointer]
+        - listitem [ref=f5e493]:
+          - generic [ref=f5e494]:
+            - paragraph [ref=f5e495]: Numbness or tingling in the arms or hands
+            - button "Numbness or tingling in the arms or hands" [ref=f5e502] [cursor=pointer]
+        - listitem [ref=f5e503]:
+          - generic [ref=f5e504]:
+            - paragraph [ref=f5e505]: Weakness in the arms
+            - button "Weakness in the arms" [ref=f5e512] [cursor=pointer]
+    - generic [ref=f5e517]:
+      - generic [ref=f5e518]:
+        - generic [ref=f5e519]:
+          - img "Dr. Casey Morgan, chiropractor" [ref=f5e523]
+          - list [ref=f5e524]:
+            - listitem [ref=f5e525]
+            - listitem [ref=f5e526]
+        - generic [ref=f5e527]:
+          - heading [level=2] [ref=f5e529]:
+            - strong [ref=f5e530]: Casey Morgan D.C.
+            - text: Second-generation Austin chiropractor
+          - generic [ref=f5e531]:
+            - paragraph [ref=f5e532]: Dr. Morgan grew up noticing two things. Other kids were always going to the doctor and he never was. And his dad loved going to work every single day. At sixteen he decided he'd be a chiropractor too.
+            - paragraph [ref=f5e533]: Parker University graduate. Board Certified by the NBCE. Second generation. Adjusting patients in downtown Austin since 2016.
+            - paragraph [ref=f5e534]: His approach is simple. Find the actual cause. Fix it. Then keep it from coming back.
+            - paragraph [ref=f5e535]:
+              - strong [ref=f5e536]: If you've been to a chiropractor who just cracked you and sent you out, this will feel different.
+          - generic [ref=f5e537]:
+            - button "Read Casey's full story" [ref=f5e539] [cursor=pointer]
+            - generic [ref=f5e547]:
+              - generic [aria-hidden] [ref=f5e548]: Read Casey's full story
+              - generic [aria-hidden] [ref=f5e549]: Read Casey's full story
+      - generic [ref=f5e551]:
+        - heading "The people who make the visit easy" [level=2] [ref=f5e553]
+        - list [ref=f5e554]:
+          - listitem [ref=f5e555]:
+            - img "Tai Lee, patient avatar" [ref=f5e557]
+            - generic [ref=f5e558]:
+              - heading "Tai Le" [level=4] [ref=f5e559]
+              - paragraph [ref=f5e560]: Chiropractic Assistant
+              - paragraph [ref=f5e562]: With West End since 2017, which makes him the person here longest besides Casey. UT grad in kinesiology, plays tennis, and good odds he's the one who answers when you call.
+          - listitem [ref=f5e563]:
+            - img "Gabriella, patient avatar" [ref=f5e565]
+            - generic [ref=f5e566]:
+              - heading "Gabriella \"Gabby\" Menendez" [level=4] [ref=f5e567]
+              - paragraph [ref=f5e568]: Chiropractic Assistant
+              - paragraph [ref=f5e570]: "Came to Austin from New Orleans at the end of 2025, already a chiropractic assistant. Most people relax before they even sit down. Outside work: books, movies, and capybaras."
+        - generic [ref=f5e571]:
+          - button "Meet the full team" [ref=f5e573] [cursor=pointer]
+          - generic [ref=f5e581]:
+            - generic [aria-hidden] [ref=f5e582]: Meet the full team
+            - generic [aria-hidden] [ref=f5e583]: Meet the full team
+    - generic [ref=f5e587]:
+      - generic [ref=f5e588]:
+        - heading [level=2] [ref=f5e590]:
+          - strong [ref=f5e591]: How it works
+        - list [ref=f5e592]:
+          - listitem [ref=f5e593]:
+            - generic [ref=f5e594]: "1"
+            - generic [ref=f5e595]:
+              - heading "Book your visit" [level=3] [ref=f5e596]
+              - paragraph [ref=f5e597]: Book online or give us a call. Send us your insurance info and we’ll look into your coverage before your visit. Same-day appointments are usually available.
+          - listitem [ref=f5e598]:
+            - generic [ref=f5e599]: "2"
+            - generic [ref=f5e600]:
+              - heading "Get a evaluation" [level=3] [ref=f5e601]
+              - paragraph [ref=f5e602]: Your first visit includes an exam, any necessary digital X-rays, and your first adjustment. Dr. Morgan takes time to actually understand what's going on before recommending anything.
+          - listitem [ref=f5e603]:
+            - generic [ref=f5e604]: "3"
+            - generic [ref=f5e605]:
+              - heading "Get a plan" [level=3] [ref=f5e606]
+              - paragraph [ref=f5e607]: A few days later, Dr. Morgan walks you through what he found, what he recommends, and what it costs. Then you decide.
+      - img "West End Chiropractic treatment process" [ref=f5e610]
+    - generic [ref=f5e613]:
+      - generic [ref=f5e615]:
+        - heading "New patient? Here is your first visit." [level=2] [ref=f5e617]
+        - paragraph [ref=f5e619]: Your exam, a consultation, and any necessary digital X-rays.
+      - generic [ref=f5e621]:
+        - generic [ref=f5e622]:
+          - heading "Full history and exam" [level=3] [ref=f5e627]
+          - paragraph [ref=f5e629]: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod.
+        - generic [ref=f5e630]:
+          - heading "Digital X-rays" [level=3] [ref=f5e635]
+          - paragraph [ref=f5e637]: Any imaging you need happens in-office. No referral, no separate bill.
+        - generic [ref=f5e638]:
+          - heading "Dr. Morgan reviews your case personally" [level=3] [ref=f5e643]
+          - paragraph [ref=f5e645]: Not a tech, not an assistant. Dr. Morgan reads your X-rays and makes the call.
+        - generic [ref=f5e646]:
+          - heading "Honest recommendation" [level=3] [ref=f5e651]
+          - paragraph [ref=f5e653]: If decompression fits, you get the plan and pricing. If not, we say so.
+      - generic [ref=f5e657]:
+        - generic [ref=f5e659]:
+          - generic [ref=f5e660]:
+            - button "Book Your Visit" [ref=f5e662] [cursor=pointer]
+            - generic [ref=f5e665]:
+              - generic [aria-hidden] [ref=f5e666]: Book Your Visit
+              - generic [aria-hidden] [ref=f5e667]: Book Your Visit
+          - generic [ref=f5e669]:
+            - link "Call (512) 472-1116" [ref=f5e671] [cursor=pointer]:
+              - /url: tel:512-472-1116
+            - generic [ref=f5e681]:
+              - generic [aria-hidden] [ref=f5e682]: Call (512) 472-1116
+              - generic [aria-hidden] [ref=f5e683]: Call (512) 472-1116
+        - paragraph [ref=f5e685]: Paying yourself? Call us or ask when you book and we'll tell you the cost up front.
+    - generic [ref=f5e688]:
+      - heading [level=2] [ref=f5e692]:
+        - text: Common
+        - strong [ref=f5e693]: Questions
+      - list [ref=f5e696]:
+        - listitem [ref=f5e697]:
+          - listitem [ref=f5e698]:
+            - heading [level=3] [ref=f5e700]:
+              - button "How much does it cost to be a new patient?" [ref=f5e701] [cursor=pointer]
+        - listitem [ref=f5e706]:
+          - listitem [ref=f5e707]:
+            - heading [level=3] [ref=f5e709]:
+              - button "Do I need a referral to book?" [ref=f5e710] [cursor=pointer]
+        - listitem [ref=f5e715]:
+          - listitem [ref=f5e716]:
+            - heading [level=3] [ref=f5e718]:
+              - button "What insurance do you take?" [ref=f5e719] [cursor=pointer]
+        - listitem [ref=f5e724]:
+          - listitem [ref=f5e725]:
+            - heading [level=3] [ref=f5e727]:
+              - button "Do I need X-rays?" [ref=f5e728] [cursor=pointer]
+        - listitem [ref=f5e733]:
+          - listitem [ref=f5e734]:
+            - heading [level=3] [ref=f5e736]:
+              - button "What if I'm nervous about being adjusted?" [ref=f5e737] [cursor=pointer]
+        - listitem [ref=f5e742]:
+          - listitem [ref=f5e743]:
+            - heading [level=3] [ref=f5e745]:
+              - button "How many visits will I need?" [ref=f5e746] [cursor=pointer]
+        - listitem [ref=f5e751]:
+          - listitem [ref=f5e752]:
+            - heading [level=3] [ref=f5e754]:
+              - button "Do I have to keep coming forever?" [ref=f5e755] [cursor=pointer]
+        - listitem [ref=f5e760]:
+          - listitem [ref=f5e761]:
+            - heading [level=3] [ref=f5e763]:
+              - button "How long does a visit take?" [ref=f5e764] [cursor=pointer]
+    - generic [ref=f5e772]:
+      - generic [ref=f5e774]:
+        - heading "Find out what is actually causing it" [level=2] [ref=f5e776]
+        - paragraph [ref=f5e778]: Book your first visit. A full exam, any necessary digital X-rays, and a real answer about what's going on.
+        - generic [ref=f5e779]:
+          - generic [ref=f5e780]:
+            - button "Book Your Visit" [ref=f5e782] [cursor=pointer]
+            - generic [ref=f5e785]:
+              - generic [aria-hidden] [ref=f5e786]: Book Your Visit
+              - generic [aria-hidden] [ref=f5e787]: Book Your Visit
+          - generic [ref=f5e789]:
+            - link "Call (512) 472-1116" [ref=f5e791] [cursor=pointer]:
+              - /url: tel:512-472-1116
+            - generic [ref=f5e801]:
+              - generic [aria-hidden] [ref=f5e802]: Call (512) 472-1116
+              - generic [aria-hidden] [ref=f5e803]: Call (512) 472-1116
+      - paragraph [ref=f5e805]: 1611 W. 5th St., just off MoPac. Free covered garage parking. Monday through Thursday.
+  - contentinfo [ref=f5e806]:
+    - heading "Footer" [level=2] [ref=f5e807]
+    - generic [ref=f5e808]:
+      - generic [ref=f5e809]:
+        - generic [ref=f5e810]:
+          - heading "REAL CHIROPRACTIC CARE IN DOWNTOWN AUSTIN" [level=3] [ref=f5e811]:
+            - generic [ref=f5e812]: REAL CHIROPRACTIC CARE
+            - generic [ref=f5e813]: IN DOWNTOWN AUSTIN
+          - paragraph [ref=f5e814]: Doctor-led chiropractic care in Austin's West End since 1994. Adjustments, spinal decompression, digital X-rays, pregnancy care, and auto injury treatment, with free parking off MoPac.
+          - generic [ref=f5e815]:
+            - heading "Location" [level=4] [ref=f5e816]
+            - link [ref=f5e817] [cursor=pointer]:
+              - /url: https://maps.app.goo.gl/ZC1JabG8Tdrwaj4T6
+              - paragraph [ref=f5e820]: 1611 W. 5th St., STE 110, Austin, TX 78703
+        - generic [ref=f5e821]:
+          - generic [ref=f5e822]:
+            - heading "Navigation" [level=3] [ref=f5e823]
+            - list [ref=f5e824]:
+              - listitem [ref=f5e825]:
+                - link "Home" [ref=f5e826] [cursor=pointer]:
+                  - /url: "#"
+              - listitem [ref=f5e828]:
+                - link "About" [ref=f5e829] [cursor=pointer]:
+                  - /url: "#"
+              - listitem [ref=f5e831]:
+                - link "Services" [ref=f5e832] [cursor=pointer]:
+                  - /url: "#"
+              - listitem [ref=f5e834]:
+                - link "Insurance & Billing" [ref=f5e835] [cursor=pointer]:
+                  - /url: "#"
+              - listitem [ref=f5e837]:
+                - link "New Patients" [ref=f5e838] [cursor=pointer]:
+                  - /url: "#"
+              - listitem [ref=f5e840]:
+                - link "Schedule Appointment" [ref=f5e841] [cursor=pointer]:
+                  - /url: "#"
+          - generic [ref=f5e843]:
+            - heading "Conditions" [level=3] [ref=f5e844]
+            - list [ref=f5e845]:
+              - listitem [ref=f5e846]:
+                - link "Auto Accident" [ref=f5e847] [cursor=pointer]:
+                  - /url: "#"
+              - listitem [ref=f5e849]:
+                - link "Lower Back Pain" [ref=f5e850] [cursor=pointer]:
+                  - /url: "#"
+              - listitem [ref=f5e852]:
+                - link "Neck Pain" [ref=f5e853] [cursor=pointer]:
+                  - /url: "#"
+              - listitem [ref=f5e855]:
+                - link "Headaches" [ref=f5e856] [cursor=pointer]:
+                  - /url: "#"
+              - listitem [ref=f5e858]:
+                - link "Pregnancy Care" [ref=f5e859] [cursor=pointer]:
+                  - /url: "#"
+          - generic [ref=f5e861]:
+            - heading "Locations" [level=3] [ref=f5e862]
+            - list [ref=f5e863]:
+              - listitem [ref=f5e864]:
+                - link "Clarksville" [ref=f5e865] [cursor=pointer]:
+                  - /url: "#"
+              - listitem [ref=f5e867]:
+                - link "Downtown Austin" [ref=f5e868] [cursor=pointer]:
+                  - /url: "#"
+              - listitem [ref=f5e870]:
+                - link "West Austin" [ref=f5e871] [cursor=pointer]:
+                  - /url: "#"
+              - listitem [ref=f5e873]:
+                - link "Rosedale" [ref=f5e874] [cursor=pointer]:
+                  - /url: "#"
+          - generic [ref=f5e876]:
+            - heading "Working Hours" [level=3] [ref=f5e877]
+            - list [ref=f5e878]:
+              - paragraph [ref=f5e879]: Monday – Thursday
+              - list [ref=f5e880]:
+                - listitem [ref=f5e881]:
+                  - paragraph [ref=f5e882]: 8 AM – 1 PM
+                - listitem [ref=f5e883]: 8 AM – 1 PM
+              - paragraph [ref=f5e885]: Friday to Sunday
+              - list [ref=f5e886]:
+                - listitem [ref=f5e887]: Closed
+      - generic [ref=f5e888]:
+        - link "Go to the homepage" [ref=f5e889] [cursor=pointer]:
+          - /url: /
+        - list [ref=f5e912]:
+          - listitem [ref=f5e913]:
+            - heading "Email us" [level=4] [ref=f5e914]
+            - link [ref=f5e915] [cursor=pointer]:
+              - /url: "#"
+              - paragraph [ref=f5e916]: contact@austin-chiropractor.com
+          - listitem [ref=f5e917]:
+            - heading "Phone" [level=4] [ref=f5e918]
+            - link [ref=f5e919] [cursor=pointer]:
+              - /url: "#"
+              - paragraph [ref=f5e920]: (512) 472-1116
+          - listitem [ref=f5e921]:
+            - heading "Follow us" [level=4] [ref=f5e922]
+            - list [ref=f5e923]:
+              - listitem [ref=f5e924]:
+                - link "Instagram" [ref=f5e925] [cursor=pointer]:
+                  - /url: "#"
+              - listitem [ref=f5e931]:
+                - link "Linkedin" [ref=f5e932] [cursor=pointer]:
+                  - /url: "#"
+              - listitem [ref=f5e938]:
+                - link "Twitter" [ref=f5e939] [cursor=pointer]:
+                  - /url: "#"
+              - listitem [ref=f5e945]:
+                - link "Facebook" [ref=f5e946] [cursor=pointer]:
+                  - /url: "#"
+      - generic [ref=f5e952]:
+        - generic [ref=f5e953]: © 2026 West End Chiropractic
+        - list [ref=f5e954]:
+          - listitem [ref=f5e955]:
+            - link "Casey Morgan, D.C. · Texas Chiropractic License No. 12254" [ref=f5e956] [cursor=pointer]:
+              - /url: "#"
+    - paragraph [ref=f5e961]:
+      - strong [ref=f5e962]: WEST END CHIROPRACTIC
+      - text: does not accept Medicaid. HMO patients require a referral. CIGNA is out-of-network only.

@@ -1,0 +1,630 @@
+- generic [ref=f10e2]:
+  - generic:
+    - link "Skip to main content" [ref=f10e3] [cursor=pointer]:
+      - /url: "#main"
+    - region "Announcement" [ref=f10e5]:
+      - generic [ref=f10e6]:
+        - paragraph [ref=f10e9]: Open today until 5:00 PM
+        - list [ref=f10e10]:
+          - listitem [ref=f10e11]:
+            - link [ref=f10e12] [cursor=pointer]:
+              - /url: https://maps.app.goo.gl/ZC1JabG8Tdrwaj4T6
+              - paragraph [ref=f10e15]: 1611 W. 5th St., STE 110, Austin, TX 78703
+          - listitem [ref=f10e16]:
+            - link [ref=f10e17] [cursor=pointer]:
+              - /url: tel:(512)472-1116
+              - paragraph [ref=f10e21]: (512) 472-1116
+    - banner:
+      - generic [ref=f10e22]:
+        - link "Home Page" [ref=f10e23] [cursor=pointer]:
+          - /url: /
+        - navigation "Main" [ref=f10e46]:
+          - list [ref=f10e47]:
+            - listitem [ref=f10e48]:
+              - link "About" [ref=f10e49] [cursor=pointer]:
+                - /url: "#"
+            - listitem [ref=f10e51]:
+              - button "Services" [ref=f10e53] [cursor=pointer]
+            - listitem [ref=f10e60]:
+              - button "Conditions" [ref=f10e62] [cursor=pointer]
+            - listitem [ref=f10e69]:
+              - link "New Patients" [ref=f10e70] [cursor=pointer]:
+                - /url: "#"
+            - listitem [ref=f10e72]:
+              - link "Insurance & Billing" [ref=f10e73] [cursor=pointer]:
+                - /url: "#"
+          - list [ref=f10e75]:
+            - listitem [ref=f10e76]:
+              - generic [ref=f10e77]:
+                - button "Book Your Visit" [ref=f10e79] [cursor=pointer]
+                - generic [ref=f10e82]:
+                  - generic [aria-hidden] [ref=f10e83]: Book Your Visit
+                  - generic [aria-hidden] [ref=f10e84]: Book Your Visit
+  - main [ref=f10e85]:
+    - generic [ref=f10e89]:
+      - generic [ref=f10e91]:
+        - list [ref=f10e107]:
+          - listitem [ref=f10e108]:
+            - paragraph [ref=f10e109]: 5.0 stars, 250+ Google reviews
+        - button [ref=f10e111] [cursor=pointer]
+      - heading [level=2] [ref=f10e113]:
+        - strong [ref=f10e114]: Car Accident
+        - text: Chiropractor in Downtown Austin
+      - paragraph [ref=f10e116]: Same-day appointments after a wreck. We handle PIP, letters of protection, and third-party claims, so most patients pay nothing out of pocket while treatment is happening.
+      - generic [ref=f10e118]:
+        - generic [ref=f10e119]:
+          - button "Book Your Visit" [ref=f10e121] [cursor=pointer]
+          - generic [ref=f10e124]:
+            - generic [aria-hidden] [ref=f10e125]: Book Your Visit
+            - generic [aria-hidden] [ref=f10e126]: Book Your Visit
+        - generic [ref=f10e128]:
+          - link "Call (512) 472-1116" [ref=f10e130] [cursor=pointer]:
+            - /url: tel:512-472-1116
+          - generic [ref=f10e140]:
+            - generic [aria-hidden] [ref=f10e141]: Call (512) 472-1116
+            - generic [aria-hidden] [ref=f10e142]: Call (512) 472-1116
+      - list [ref=f10e144]:
+        - listitem [ref=f10e145]:
+          - paragraph [ref=f10e148]: In and out in minutes, not rushed
+        - listitem [ref=f10e149]:
+          - paragraph [ref=f10e152]: Digital X-rays on site
+        - listitem [ref=f10e153]:
+          - paragraph [ref=f10e156]: Same-day appointments available
+    - generic [ref=f10e163]:
+      - heading "You were in a wreck and you're not sure if you're hurt" [level=2] [ref=f10e186]
+      - generic [ref=f10e187]:
+        - paragraph [ref=f10e188]: Maybe you walked away and felt fine. Maybe your neck got stiff the next morning. Maybe it's been four days and your headaches haven't stopped.
+        - paragraph [ref=f10e189]: Crash injuries are strange that way. Adrenaline covers a lot in the first 24 hours, and some of the worst ones show up days later, after the insurance adjuster has already called and asked how you're feeling.
+        - paragraph [ref=f10e190]:
+          - strong [ref=f10e191]: Getting checked early does two things. It tells you whether something's actually wrong, and it puts your injuries on record from the beginning.
+      - generic [ref=f10e193]:
+        - heading "We treat auto accident injuries only" [level=3] [ref=f10e194]
+        - paragraph [ref=f10e196]: No slip and fall, no workers comp. Auto is what we know and it's what we're set up for.
+      - generic [ref=f10e199]:
+        - button "Book Your Visit" [ref=f10e201] [cursor=pointer]
+        - generic [ref=f10e204]:
+          - generic [aria-hidden] [ref=f10e205]: Book Your Visit
+          - generic [aria-hidden] [ref=f10e206]: Book Your Visit
+    - generic [ref=f10e215]:
+      - heading "Whiplash is not a diagnosis. It's a description." [level=2] [ref=f10e238]
+      - generic [ref=f10e239]:
+        - paragraph [ref=f10e240]: "\"Whiplash\" just means your head moved faster than your neck was ready for. What that actually did to you varies enormously, which is why the exam matters more here than almost anywhere else."
+        - paragraph [ref=f10e241]: With a crash patient, Dr. Morgan is looking for more than a stiff neck. He checks how your neck moves in every direction, where it hurts and where it doesn’t, and whether there’s any numbness, tingling, or headaches that point to a nerve being involved. He also asks about the crash itself, because the direction of the hit tells him where to look.
+        - paragraph [ref=f10e242]: On the X-ray, a healthy neck has a gentle curve. After a crash, that curve often straightens out, the head shifts forward, and the joints stop moving together the way they should. Those findings turn “my neck is sore” into a documented injury.
+      - generic [ref=f10e244]:
+        - heading "Imaging happens on site, the same day" [level=3] [ref=f10e245]
+        - paragraph [ref=f10e247]: "Dr. Morgan takes digital X-rays when the exam calls for them, reads them himself, and shows them to you right then. For a crash case that matters twice over: you find out what's wrong, and it's documented from day one."
+    - generic [ref=f10e250]:
+      - generic [ref=f10e252]:
+        - generic [ref=f10e253]: What we do about it
+        - heading [level=2] [ref=f10e255]:
+          - strong [ref=f10e256]: Find it, fix it, document it properly
+      - list [ref=f10e258]:
+        - generic [ref=f10e259]:
+          - img "Chiropractic treatment process, step 1" [ref=f10e261]
+          - generic [ref=f10e262]:
+            - heading "Find it" [level=3] [ref=f10e268]
+            - paragraph [ref=f10e269]: Full history and exam, focused on how the crash actually happened. Which direction, were you braced, headrest position, where you felt it first. Any necessary digital X-rays, taken on site
+        - generic [ref=f10e271]:
+          - img "Chiropractic treatment process, step 2" [ref=f10e273]
+          - generic [ref=f10e274]:
+            - heading "Fix it" [level=3] [ref=f10e280]
+            - paragraph [ref=f10e281]: Adjustments, and spinal decompression where imaging supports it. Auto injury plans typically run longer than a standard care plan because crash injuries involve soft tissue that heals on its own timeline.
+        - generic [ref=f10e282]:
+          - img "Chiropractic treatment process, step 3" [ref=f10e284]
+          - generic [ref=f10e285]:
+            - heading "Document it" [level=3] [ref=f10e291]
+            - paragraph [ref=f10e292]: Every visit is recorded properly. If your case involves an insurer or an attorney, the paperwork holds up.
+      - generic [ref=f10e297]:
+        - generic [ref=f10e298]:
+          - button "Get Seen Today" [ref=f10e300] [cursor=pointer]
+          - generic [ref=f10e303]:
+            - generic [aria-hidden] [ref=f10e304]: Get Seen Today
+            - generic [aria-hidden] [ref=f10e305]: Get Seen Today
+        - generic [ref=f10e307]:
+          - link "Call (512) 472-1116" [ref=f10e309] [cursor=pointer]:
+            - /url: tel:512-472-1116
+          - generic [ref=f10e319]:
+            - generic [aria-hidden] [ref=f10e320]: Call (512) 472-1116
+            - generic [aria-hidden] [ref=f10e321]: Call (512) 472-1116
+    - generic [ref=f10e324]:
+      - generic [ref=f10e325]:
+        - heading "The longer you wait, the harder this gets" [level=2] [ref=f10e348]
+        - generic [ref=f10e349]:
+          - paragraph [ref=f10e350]: Two reasons, and only one of them is medical.
+          - paragraph [ref=f10e351]: Dr. Morgan sees crash patients same-day when he can. One recent patient wrecked his car in the evening, booked that night, and was in the office the next morning
+      - generic [ref=f10e352]:
+        - generic [ref=f10e354]:
+          - generic [ref=f10e355]: Medically
+          - paragraph [ref=f10e357]: Soft tissue injuries that get treated early tend to resolve more cleanly than the ones that get ignored for six weeks. Scar tissue forms. Compensation patterns set in. You start moving differently without noticing.
+        - generic [ref=f10e359]:
+          - generic [ref=f10e360]: Practically
+          - paragraph [ref=f10e362]: A gap between your crash and your first medical visit is the first thing an insurance adjuster will point to. Not because you're lying, but because a delay is easy to use against you.
+    - generic [ref=f10e365]:
+      - generic [ref=f10e367]:
+        - heading "You almost certainly aren't paying for this yourself" [level=2] [ref=f10e369]
+        - paragraph [ref=f10e371]: This is the part that stops most people from getting checked, and it usually shouldn't.
+      - generic [ref=f10e373]:
+        - generic [ref=f10e374]:
+          - listitem [ref=f10e375]:
+            - generic [ref=f10e380]:
+              - heading "PIP (Personal Injury Protection)" [level=4] [ref=f10e381]
+              - paragraph [ref=f10e383]: is part of most Texas auto policies unless you specifically declined it in writing. It covers medical care after a crash regardless of who caused it. It's your own coverage.
+          - listitem [ref=f10e384]:
+            - generic [ref=f10e389]:
+              - heading "Letter of Protection (LOP)" [level=4] [ref=f10e390]
+              - paragraph [ref=f10e392]: means treatment now, payment later out of the settlement. No money up front.
+          - listitem [ref=f10e393]:
+            - generic [ref=f10e398]:
+              - heading "Third-party claims" [level=4] [ref=f10e399]
+              - paragraph [ref=f10e401]: bill the at-fault driver's insurance directly.
+        - paragraph [ref=f10e403]: We handle all three in house. Tell us what you have and we'll tell you what it covers before you're treated.
+      - generic [ref=f10e407]:
+        - generic [ref=f10e408]:
+          - button "Book Your Visit" [ref=f10e410] [cursor=pointer]
+          - generic [ref=f10e413]:
+            - generic [aria-hidden] [ref=f10e414]: Book Your Visit
+            - generic [aria-hidden] [ref=f10e415]: Book Your Visit
+        - generic [ref=f10e417]:
+          - link "Call (512) 472-1116" [ref=f10e419] [cursor=pointer]:
+            - /url: tel:512-472-1116
+          - generic [ref=f10e429]:
+            - generic [aria-hidden] [ref=f10e430]: Call (512) 472-1116
+            - generic [aria-hidden] [ref=f10e431]: Call (512) 472-1116
+      - generic [ref=f10e433]:
+        - list [ref=f10e434]:
+          - listitem:
+            - img "BlueCross BlueShield logo"
+          - listitem:
+            - img "UnitedHealthcare logo"
+          - listitem:
+            - img "Aetna logo"
+          - listitem:
+            - img "Humana logo"
+          - listitem:
+            - img "Ambetter Health logo"
+          - listitem:
+            - img "Ascension SmartHealth logo"
+          - listitem:
+            - img "WebTPA, a GuideWell Company logo"
+          - listitem:
+            - img "Curative logo"
+          - listitem:
+            - img "Surest logo"
+          - listitem:
+            - img "UMR logo"
+          - listitem:
+            - img "Medicare.gov logo"
+          - listitem:
+            - img "Meritain Health, an Aetna company logo"
+        - list [ref=f10e435]:
+          - listitem:
+            - img "BlueCross BlueShield logo"
+          - listitem:
+            - img "UnitedHealthcare logo"
+          - listitem:
+            - img "Aetna logo"
+          - listitem:
+            - img "Humana logo"
+          - listitem:
+            - img "Ambetter Health logo"
+          - listitem:
+            - img "Ascension SmartHealth logo"
+          - listitem:
+            - img "WebTPA, a GuideWell Company logo"
+          - listitem:
+            - img "Curative logo"
+          - listitem:
+            - img "Surest logo"
+          - listitem:
+            - img "UMR logo"
+          - listitem:
+            - img "Medicare.gov logo"
+          - listitem:
+            - img "Meritain Health, an Aetna company logo"
+        - list [ref=f10e436]:
+          - listitem:
+            - img "BlueCross BlueShield logo"
+          - listitem:
+            - img "UnitedHealthcare logo"
+          - listitem:
+            - img "Aetna logo"
+          - listitem:
+            - img "Humana logo"
+          - listitem:
+            - img "Ambetter Health logo"
+          - listitem:
+            - img "Ascension SmartHealth logo"
+          - listitem:
+            - img "WebTPA, a GuideWell Company logo"
+          - listitem:
+            - img "Curative logo"
+          - listitem:
+            - img "Surest logo"
+          - listitem:
+            - img "UMR logo"
+          - listitem:
+            - img "Medicare.gov logo"
+          - listitem:
+            - img "Meritain Health, an Aetna company logo"
+        - list [ref=f10e437]:
+          - listitem:
+            - img "BlueCross BlueShield logo"
+          - listitem:
+            - img "UnitedHealthcare logo"
+          - listitem:
+            - img "Aetna logo"
+          - listitem:
+            - img "Humana logo"
+          - listitem:
+            - img "Ambetter Health logo"
+          - listitem:
+            - img "Ascension SmartHealth logo"
+          - listitem:
+            - img "WebTPA, a GuideWell Company logo"
+          - listitem:
+            - img "Curative logo"
+          - listitem:
+            - img "Surest logo"
+          - listitem:
+            - img "UMR logo"
+          - listitem:
+            - img "Medicare.gov logo"
+          - listitem:
+            - img "Meritain Health, an Aetna company logo"
+    - generic [ref=f10e441]:
+      - heading [level=2] [ref=f10e445]:
+        - text: Patients who came in hurting.
+        - strong [ref=f10e446]: Now they don't
+      - generic [ref=f10e448]:
+        - list [ref=f10e450]:
+          - listitem [ref=f10e451]:
+            - generic [ref=f10e454]:
+              - generic [ref=f10e455]:
+                - img "Lauren Huynh" [ref=f10e457]
+                - generic [ref=f10e458]:
+                  - heading "Lauren Huynh" [level=3] [ref=f10e459]
+                  - paragraph [ref=f10e468]: Google Review
+              - paragraph [ref=f10e470]: Casey is very thorough, knowledgeable, and friendly. I have been going to his practice for several months now he's helped out a lot with my back pains. I would definitely recommend his practice to anyone that needs an adjustment!
+          - listitem [ref=f10e472]:
+            - generic [ref=f10e475]:
+              - generic [ref=f10e476]:
+                - img "Jim McMullan" [ref=f10e478]
+                - generic [ref=f10e479]:
+                  - heading "Jim McMullan" [level=3] [ref=f10e480]
+                  - paragraph [ref=f10e489]: Google Review
+              - paragraph [ref=f10e491]: Dr. Morgan has been a great help. I am now pain-free again. A true professional who knows how to treat chiropractic issues. Helpful, friendly staff as well.
+          - listitem [ref=f10e493]:
+            - generic [ref=f10e496]:
+              - generic [ref=f10e497]:
+                - img "Molly Sibley" [ref=f10e499]
+                - generic [ref=f10e500]:
+                  - heading "Molly Sibley" [level=3] [ref=f10e501]
+                  - paragraph [ref=f10e510]: Google Review
+              - generic [ref=f10e511]:
+                - paragraph [ref=f10e512]: Over the course of just 3 months, Dr. Morgan has significantly decreased my lower back pain. Between chiropractic care and stretches, my back spasms rarely occur and what used to take a week or two to recover from can now be resolved within about a day.
+                - paragraph [ref=f10e513]: I really appreciate the personalized approach, attention to long-term healing, and consistent support throughout the process. Highly recommend to anyone dealing with chronic back pain or muscle spasms!
+          - listitem [ref=f10e515]:
+            - generic [ref=f10e518]:
+              - generic [ref=f10e519]:
+                - img "Eliana Elizalde" [ref=f10e521]
+                - generic [ref=f10e522]:
+                  - heading "Eliana Elizalde" [level=3] [ref=f10e523]
+                  - paragraph [ref=f10e532]: Google Review
+              - paragraph [ref=f10e534]: Everyone is so great here! I had a wonderful experience each time! :)
+          - listitem [ref=f10e536]:
+            - generic [ref=f10e539]:
+              - generic [ref=f10e540]:
+                - img "Erika Brummel" [ref=f10e542]
+                - generic [ref=f10e543]:
+                  - heading "Erika Brummel" [level=3] [ref=f10e544]
+                  - paragraph [ref=f10e553]: Google Review
+              - paragraph [ref=f10e555]: Best chiropratic expereince I have ever had. Ive seen multiple chiropractors and have not had any relief. Coming to Dr.Morgan has changed all of that. I am finally feeling better and my back is doing great. I highly highly recommend!!!!!!
+          - listitem [ref=f10e557]:
+            - generic [ref=f10e560]:
+              - generic [ref=f10e561]:
+                - img "Jeff Julia" [ref=f10e563]
+                - generic [ref=f10e564]:
+                  - heading "Jeff Julia" [level=3] [ref=f10e565]
+                  - paragraph [ref=f10e574]: Google Review
+              - generic [ref=f10e575]:
+                - paragraph [ref=f10e576]: I can’t believe I haven’t left a review yet. I’ve trusted Dr Morgan for many years now. He has helped naturally transform my posture and body movements. I feel like a well oiled machine!
+                - paragraph [ref=f10e577]: Thanks to Casey and his staff!
+                - paragraph [ref=f10e578]: He can be trusted even when you’re in a lot of pain, like my girl friend who had debilitating neck pain.
+                - paragraph [ref=f10e579]: The X-rays analysis to identify what’s really going on and the level of care he gives to you, makes Casey someone I recommend to people often!
+        - list [ref=f10e582]:
+          - listitem [ref=f10e583]:
+            - generic [ref=f10e586]:
+              - generic [ref=f10e587]:
+                - img "Lauren Huynh" [ref=f10e589]
+                - generic [ref=f10e590]:
+                  - heading "Lauren Huynh" [level=3] [ref=f10e591]
+                  - paragraph [ref=f10e600]: Google Review
+              - paragraph [ref=f10e602]: Casey is very thorough, knowledgeable, and friendly. I have been going to his practice for several months now he's helped out a lot with my back pains. I would definitely recommend his practice to anyone that needs an adjustment!
+          - listitem [ref=f10e604]:
+            - generic [ref=f10e607]:
+              - generic [ref=f10e608]:
+                - img "Jim McMullan" [ref=f10e610]
+                - generic [ref=f10e611]:
+                  - heading "Jim McMullan" [level=3] [ref=f10e612]
+                  - paragraph [ref=f10e621]: Google Review
+              - paragraph [ref=f10e623]: Dr. Morgan has been a great help. I am now pain-free again. A true professional who knows how to treat chiropractic issues. Helpful, friendly staff as well.
+          - listitem [ref=f10e625]:
+            - generic [ref=f10e628]:
+              - generic [ref=f10e629]:
+                - img "Molly Sibley" [ref=f10e631]
+                - generic [ref=f10e632]:
+                  - heading "Molly Sibley" [level=3] [ref=f10e633]
+                  - paragraph [ref=f10e642]: Google Review
+              - generic [ref=f10e643]:
+                - paragraph [ref=f10e644]: Over the course of just 3 months, Dr. Morgan has significantly decreased my lower back pain. Between chiropractic care and stretches, my back spasms rarely occur and what used to take a week or two to recover from can now be resolved within about a day.
+                - paragraph [ref=f10e645]: I really appreciate the personalized approach, attention to long-term healing, and consistent support throughout the process. Highly recommend to anyone dealing with chronic back pain or muscle spasms!
+          - listitem [ref=f10e647]:
+            - generic [ref=f10e650]:
+              - generic [ref=f10e651]:
+                - img "Eliana Elizalde" [ref=f10e653]
+                - generic [ref=f10e654]:
+                  - heading "Eliana Elizalde" [level=3] [ref=f10e655]
+                  - paragraph [ref=f10e664]: Google Review
+              - paragraph [ref=f10e666]: Everyone is so great here! I had a wonderful experience each time! :)
+          - listitem [ref=f10e668]:
+            - generic [ref=f10e671]:
+              - generic [ref=f10e672]:
+                - img "Erika Brummel" [ref=f10e674]
+                - generic [ref=f10e675]:
+                  - heading "Erika Brummel" [level=3] [ref=f10e676]
+                  - paragraph [ref=f10e685]: Google Review
+              - paragraph [ref=f10e687]: Best chiropratic expereince I have ever had. Ive seen multiple chiropractors and have not had any relief. Coming to Dr.Morgan has changed all of that. I am finally feeling better and my back is doing great. I highly highly recommend!!!!!!
+          - listitem [ref=f10e689]:
+            - generic [ref=f10e692]:
+              - generic [ref=f10e693]:
+                - img "Jeff Julia" [ref=f10e695]
+                - generic [ref=f10e696]:
+                  - heading "Jeff Julia" [level=3] [ref=f10e697]
+                  - paragraph [ref=f10e706]: Google Review
+              - generic [ref=f10e707]:
+                - paragraph [ref=f10e708]: I can’t believe I haven’t left a review yet. I’ve trusted Dr Morgan for many years now. He has helped naturally transform my posture and body movements. I feel like a well oiled machine!
+                - paragraph [ref=f10e709]: Thanks to Casey and his staff!
+                - paragraph [ref=f10e710]: He can be trusted even when you’re in a lot of pain, like my girl friend who had debilitating neck pain.
+                - paragraph [ref=f10e711]: The X-rays analysis to identify what’s really going on and the level of care he gives to you, makes Casey someone I recommend to people often!
+      - generic [ref=f10e714]:
+        - generic [ref=f10e716]:
+          - generic [ref=f10e717]:
+            - button "Book Your Visit" [ref=f10e719] [cursor=pointer]
+            - generic [ref=f10e722]:
+              - generic [aria-hidden] [ref=f10e723]: Book Your Visit
+              - generic [aria-hidden] [ref=f10e724]: Book Your Visit
+          - generic [ref=f10e725]:
+            - button "See More Google reviews" [ref=f10e727] [cursor=pointer]
+            - generic [ref=f10e736]:
+              - generic [aria-hidden] [ref=f10e737]: See More Google reviews
+              - generic [aria-hidden] [ref=f10e738]: See More Google reviews
+        - generic [ref=f10e740]:
+          - list [ref=f10e756]:
+            - listitem [ref=f10e757]:
+              - paragraph [ref=f10e758]: 5.0 stars, 250+ Google reviews
+          - button [ref=f10e760] [cursor=pointer]
+    - generic [ref=f10e763]:
+      - generic [ref=f10e766]:
+        - heading "More on car accident injuries" [level=2] [ref=f10e768]
+        - paragraph [ref=f10e770]:
+          - strong [ref=f10e771]: Four guides for the days and weeks after a crash.
+      - generic [ref=f10e772]:
+        - generic [ref=f10e774]:
+          - generic [ref=f10e776]:
+            - generic [ref=f10e781]:
+              - heading "Car accident injury symptoms" [level=3] [ref=f10e782]
+              - paragraph [ref=f10e784]: what to watch for in the days after a crash
+            - generic [ref=f10e793]:
+              - generic [aria-hidden] [ref=f10e794]: Learn More
+              - generic [aria-hidden] [ref=f10e795]: Learn More
+          - button "Learn More" [ref=f10e797] [cursor=pointer]
+        - generic [ref=f10e799]:
+          - generic [ref=f10e801]:
+            - generic [ref=f10e807]:
+              - heading "What doctor to see after a car accident" [level=3] [ref=f10e808]
+              - paragraph [ref=f10e810]: who handles what, and in what order
+            - generic [ref=f10e819]:
+              - generic [aria-hidden] [ref=f10e820]: Learn More
+              - generic [aria-hidden] [ref=f10e821]: Learn More
+          - button "Learn More" [ref=f10e823] [cursor=pointer]
+        - generic [ref=f10e825]:
+          - generic [ref=f10e827]:
+            - generic [ref=f10e833]:
+              - heading "Car accident insurance options" [level=3] [ref=f10e834]
+              - paragraph [ref=f10e836]: PIP, LOP, and third-party explained
+            - generic [ref=f10e845]:
+              - generic [aria-hidden] [ref=f10e846]: Learn More
+              - generic [aria-hidden] [ref=f10e847]: Learn More
+          - button "Learn More" [ref=f10e849] [cursor=pointer]
+        - generic [ref=f10e851]:
+          - generic [ref=f10e853]:
+            - generic [ref=f10e859]:
+              - heading "Why see a chiropractor after an accident" [level=3] [ref=f10e860]
+              - paragraph [ref=f10e862]: what we actually treat and what we don't
+            - generic [ref=f10e871]:
+              - generic [aria-hidden] [ref=f10e872]: Learn More
+              - generic [aria-hidden] [ref=f10e873]: Learn More
+          - button "Learn More" [ref=f10e875] [cursor=pointer]
+    - generic [ref=f10e880]:
+      - heading "Nothing, in most cases" [level=2] [ref=f10e903]
+      - generic [ref=f10e904]:
+        - paragraph [ref=f10e905]: If you have PIP, a letter of protection, or a third-party claim, your treatment is covered and you pay nothing at the time of service.
+        - paragraph [ref=f10e906]: If none of those apply, we'll tell you that up front and walk you through what care would cost before anything starts.
+      - generic [ref=f10e909]:
+        - button "Book Your Visit" [ref=f10e911] [cursor=pointer]
+        - generic [ref=f10e914]:
+          - generic [aria-hidden] [ref=f10e915]: Book Your Visit
+          - generic [aria-hidden] [ref=f10e916]: Book Your Visit
+    - generic [ref=f10e922]:
+      - heading [level=2] [ref=f10e926]:
+        - text: Common
+        - strong [ref=f10e927]: Questions
+      - list [ref=f10e930]:
+        - listitem [ref=f10e931]:
+          - listitem [ref=f10e932]:
+            - heading [level=3] [ref=f10e934]:
+              - button "I felt fine after the accident. Do I still need to get checked?" [ref=f10e935] [cursor=pointer]
+        - listitem [ref=f10e940]:
+          - listitem [ref=f10e941]:
+            - heading [level=3] [ref=f10e943]:
+              - button "Will this cost me anything?" [ref=f10e944] [cursor=pointer]
+        - listitem [ref=f10e949]:
+          - listitem [ref=f10e950]:
+            - heading [level=3] [ref=f10e952]:
+              - button "Is PIP my own coverage or the other driver's?" [ref=f10e953] [cursor=pointer]
+        - listitem [ref=f10e958]:
+          - listitem [ref=f10e959]:
+            - heading [level=3] [ref=f10e961]:
+              - button "Do I need an attorney first?" [ref=f10e962] [cursor=pointer]
+        - listitem [ref=f10e967]:
+          - listitem [ref=f10e968]:
+            - heading [level=3] [ref=f10e970]:
+              - button "How soon can I be seen?" [ref=f10e971] [cursor=pointer]
+        - listitem [ref=f10e976]:
+          - listitem [ref=f10e977]:
+            - heading [level=3] [ref=f10e979]:
+              - button "How long will treatment take?" [ref=f10e980] [cursor=pointer]
+        - listitem [ref=f10e985]:
+          - listitem [ref=f10e986]:
+            - heading [level=3] [ref=f10e988]:
+              - button "Will I need an MRI?" [ref=f10e989] [cursor=pointer]
+        - listitem [ref=f10e994]:
+          - listitem [ref=f10e995]:
+            - heading [level=3] [ref=f10e997]:
+              - button "What if my accident was months ago?" [ref=f10e998] [cursor=pointer]
+    - generic [ref=f10e1006]:
+      - generic [ref=f10e1008]:
+        - heading "Get checked before it becomes a bigger problem" [level=2] [ref=f10e1010]
+        - paragraph [ref=f10e1012]: Same-day appointments available. Bring your insurance information if you have it, and we’ll handle the rest.
+        - generic [ref=f10e1013]:
+          - generic [ref=f10e1014]:
+            - button "Get Seen Today" [ref=f10e1016] [cursor=pointer]
+            - generic [ref=f10e1019]:
+              - generic [aria-hidden] [ref=f10e1020]: Get Seen Today
+              - generic [aria-hidden] [ref=f10e1021]: Get Seen Today
+          - generic [ref=f10e1023]:
+            - link "Call (512) 472-1116" [ref=f10e1025] [cursor=pointer]:
+              - /url: tel:512-472-1116
+            - generic [ref=f10e1035]:
+              - generic [aria-hidden] [ref=f10e1036]: Call (512) 472-1116
+              - generic [aria-hidden] [ref=f10e1037]: Call (512) 472-1116
+      - paragraph [ref=f10e1039]: 1611 W. 5th St., just off MoPac. Free covered garage parking. Monday through Thursday.
+  - contentinfo [ref=f10e1040]:
+    - heading "Footer" [level=2] [ref=f10e1041]
+    - generic [ref=f10e1042]:
+      - generic [ref=f10e1043]:
+        - generic [ref=f10e1044]:
+          - heading "REAL CHIROPRACTIC CARE IN DOWNTOWN AUSTIN" [level=3] [ref=f10e1045]:
+            - generic [ref=f10e1046]: REAL CHIROPRACTIC CARE
+            - generic [ref=f10e1047]: IN DOWNTOWN AUSTIN
+          - paragraph [ref=f10e1048]: Doctor-led chiropractic care in Austin's West End since 1994. Adjustments, spinal decompression, digital X-rays, pregnancy care, and auto injury treatment, with free parking off MoPac.
+          - generic [ref=f10e1049]:
+            - heading "Location" [level=4] [ref=f10e1050]
+            - link [ref=f10e1051] [cursor=pointer]:
+              - /url: https://maps.app.goo.gl/ZC1JabG8Tdrwaj4T6
+              - paragraph [ref=f10e1054]: 1611 W. 5th St., STE 110, Austin, TX 78703
+        - generic [ref=f10e1055]:
+          - generic [ref=f10e1056]:
+            - heading "Navigation" [level=3] [ref=f10e1057]
+            - list [ref=f10e1058]:
+              - listitem [ref=f10e1059]:
+                - link "Home" [ref=f10e1060] [cursor=pointer]:
+                  - /url: "#"
+              - listitem [ref=f10e1062]:
+                - link "About" [ref=f10e1063] [cursor=pointer]:
+                  - /url: "#"
+              - listitem [ref=f10e1065]:
+                - link "Services" [ref=f10e1066] [cursor=pointer]:
+                  - /url: "#"
+              - listitem [ref=f10e1068]:
+                - link "Insurance & Billing" [ref=f10e1069] [cursor=pointer]:
+                  - /url: "#"
+              - listitem [ref=f10e1071]:
+                - link "New Patients" [ref=f10e1072] [cursor=pointer]:
+                  - /url: "#"
+              - listitem [ref=f10e1074]:
+                - link "Schedule Appointment" [ref=f10e1075] [cursor=pointer]:
+                  - /url: "#"
+          - generic [ref=f10e1077]:
+            - heading "Conditions" [level=3] [ref=f10e1078]
+            - list [ref=f10e1079]:
+              - listitem [ref=f10e1080]:
+                - link "Auto Accident" [ref=f10e1081] [cursor=pointer]:
+                  - /url: "#"
+              - listitem [ref=f10e1083]:
+                - link "Lower Back Pain" [ref=f10e1084] [cursor=pointer]:
+                  - /url: "#"
+              - listitem [ref=f10e1086]:
+                - link "Neck Pain" [ref=f10e1087] [cursor=pointer]:
+                  - /url: "#"
+              - listitem [ref=f10e1089]:
+                - link "Headaches" [ref=f10e1090] [cursor=pointer]:
+                  - /url: "#"
+              - listitem [ref=f10e1092]:
+                - link "Pregnancy Care" [ref=f10e1093] [cursor=pointer]:
+                  - /url: "#"
+          - generic [ref=f10e1095]:
+            - heading "Locations" [level=3] [ref=f10e1096]
+            - list [ref=f10e1097]:
+              - listitem [ref=f10e1098]:
+                - link "Clarksville" [ref=f10e1099] [cursor=pointer]:
+                  - /url: "#"
+              - listitem [ref=f10e1101]:
+                - link "Downtown Austin" [ref=f10e1102] [cursor=pointer]:
+                  - /url: "#"
+              - listitem [ref=f10e1104]:
+                - link "West Austin" [ref=f10e1105] [cursor=pointer]:
+                  - /url: "#"
+              - listitem [ref=f10e1107]:
+                - link "Rosedale" [ref=f10e1108] [cursor=pointer]:
+                  - /url: "#"
+          - generic [ref=f10e1110]:
+            - heading "Working Hours" [level=3] [ref=f10e1111]
+            - list [ref=f10e1112]:
+              - paragraph [ref=f10e1113]: Monday – Thursday
+              - list [ref=f10e1114]:
+                - listitem [ref=f10e1115]:
+                  - paragraph [ref=f10e1116]: 8 AM – 1 PM
+                - listitem [ref=f10e1117]: 8 AM – 1 PM
+              - paragraph [ref=f10e1119]: Friday to Sunday
+              - list [ref=f10e1120]:
+                - listitem [ref=f10e1121]: Closed
+      - generic [ref=f10e1122]:
+        - link "Go to the homepage" [ref=f10e1123] [cursor=pointer]:
+          - /url: /
+        - list [ref=f10e1146]:
+          - listitem [ref=f10e1147]:
+            - heading "Email us" [level=4] [ref=f10e1148]
+            - link [ref=f10e1149] [cursor=pointer]:
+              - /url: "#"
+              - paragraph [ref=f10e1150]: contact@austin-chiropractor.com
+          - listitem [ref=f10e1151]:
+            - heading "Phone" [level=4] [ref=f10e1152]
+            - link [ref=f10e1153] [cursor=pointer]:
+              - /url: "#"
+              - paragraph [ref=f10e1154]: (512) 472-1116
+          - listitem [ref=f10e1155]:
+            - heading "Follow us" [level=4] [ref=f10e1156]
+            - list [ref=f10e1157]:
+              - listitem [ref=f10e1158]:
+                - link "Instagram" [ref=f10e1159] [cursor=pointer]:
+                  - /url: "#"
+              - listitem [ref=f10e1165]:
+                - link "Linkedin" [ref=f10e1166] [cursor=pointer]:
+                  - /url: "#"
+              - listitem [ref=f10e1172]:
+                - link "Twitter" [ref=f10e1173] [cursor=pointer]:
+                  - /url: "#"
+              - listitem [ref=f10e1179]:
+                - link "Facebook" [ref=f10e1180] [cursor=pointer]:
+                  - /url: "#"
+      - generic [ref=f10e1186]:
+        - generic [ref=f10e1187]: © 2026 West End Chiropractic
+        - list [ref=f10e1188]:
+          - listitem [ref=f10e1189]:
+            - link "Casey Morgan, D.C. · Texas Chiropractic License No. 12254" [ref=f10e1190] [cursor=pointer]:
+              - /url: "#"
+    - paragraph [ref=f10e1195]:
+      - strong [ref=f10e1196]: WEST END CHIROPRACTIC
+      - text: does not accept Medicaid. HMO patients require a referral. CIGNA is out-of-network only.

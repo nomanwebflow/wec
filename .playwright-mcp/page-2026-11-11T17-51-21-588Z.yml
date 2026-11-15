@@ -1,0 +1,347 @@
+- generic [ref=e2]:
+  - generic:
+    - link "Skip to main content" [ref=e3] [cursor=pointer]:
+      - /url: "#main"
+    - region "Announcement" [ref=e5]:
+      - paragraph [ref=e9]: Open today until 5:00 PM
+    - banner:
+      - generic [ref=e10]:
+        - link "Home Page" [ref=e11] [cursor=pointer]:
+          - /url: /
+        - generic [ref=e34]:
+          - generic [ref=e35]:
+            - link:
+              - /url: "#"
+          - button "menu" [ref=e36] [cursor=pointer]
+  - generic [ref=e40]:
+    - generic [ref=e41]:
+      - generic [ref=e44]:
+        - generic [ref=e46]:
+          - list [ref=e62]:
+            - listitem [ref=e63]:
+              - paragraph [ref=e64]: 5.0 stars, 250+ Google reviews
+          - button [ref=e66] [cursor=pointer]
+        - heading [level=2] [ref=e68]:
+          - text: Herniated and
+          - strong [ref=e69]: Bulging Disc Treatment
+          - text: in Downtown Austin
+        - paragraph [ref=e72]: Herniated, bulging, or "slipped," it's a disc problem. Casey Morgan D.C. finds out what's actually going on before recommending anything.
+        - generic [ref=e74]:
+          - generic [ref=e75]:
+            - button "Book Your Visit" [ref=e77] [cursor=pointer]
+            - generic [ref=e80]:
+              - generic [aria-hidden] [ref=e81]: Book Your Visit
+              - generic [aria-hidden] [ref=e82]: Book Your Visit
+          - generic [ref=e83]:
+            - link "Call (512) 472-1116" [ref=e85] [cursor=pointer]:
+              - /url: tel:512-472-1116
+            - generic [ref=e95]:
+              - generic [aria-hidden] [ref=e96]: Call (512) 472-1116
+              - generic [aria-hidden] [ref=e97]: Call (512) 472-1116
+        - list [ref=e99]:
+          - listitem [ref=e100]:
+            - paragraph [ref=e103]: In and out in minutes, not rushed
+          - listitem [ref=e104]:
+            - paragraph [ref=e107]: Digital X-rays on site
+          - listitem [ref=e108]:
+            - paragraph [ref=e111]: Same-day appointments available
+      - img "Services page hero background" [ref=e114]
+    - generic [ref=e118]:
+      - generic [ref=e119]:
+        - heading "Most of the low back pain we see comes from two places" [level=2] [ref=e142]
+        - generic [ref=e143]:
+          - paragraph [ref=e144]: You pushed too hard in the gym, and you've been pushing too hard for a while. Or you spent a weekend on the yard and something let go on Sunday night.
+          - paragraph [ref=e145]: It's rarely one moment. It's usually months or years of the same thing, and then one ordinary movement is the one your back finally objects to. Tying a shoe. Lifting a bag out of the trunk.
+          - paragraph [ref=e146]:
+            - emphasis [ref=e147]: If that sounds familiar, you're the person this page is for.
+        - generic [ref=e150]:
+          - button "Book Your Visit" [ref=e152] [cursor=pointer]
+          - generic [ref=e155]:
+            - generic [aria-hidden] [ref=e156]: Book Your Visit
+            - generic [aria-hidden] [ref=e157]: Book Your Visit
+      - generic [ref=e158]:
+        - img "Lower back pain treatment illustration" [ref=e160]
+        - img "Lower back pain treatment illustration" [ref=e162]
+    - generic [ref=e165]:
+      - img "Lower back pain treatment illustration" [ref=e167]
+      - generic [ref=e168]:
+        - heading "Pain is the symptom. It is not the problem." [level=2] [ref=e191]
+        - generic [ref=e192]:
+          - paragraph [ref=e193]: By the time your back hurts enough to look up a chiropractor, the thing causing it has usually been building for a while.
+          - paragraph [ref=e194]: Most commonly we find disc space that has narrowed, degeneration that has started to set in, or a joint that stopped moving the way it should and made everything around it work harder to compensate.
+          - paragraph [ref=e195]:
+            - emphasis [ref=e196]: You cannot stretch your way out of a structural problem. That is why the stretching stopped working.
+          - paragraph [ref=e197]: "Low back problems are usually chronic, so the goal is a new baseline: get you out of pain, then slow the wear down from there."
+        - generic [ref=e199]:
+          - heading "This is why we image before we treat." [level=3] [ref=e200]
+          - paragraph [ref=e202]: Dr. Morgan takes digital X-rays on site when your exam calls for it, reads them himself, and shows them to you the moment they come up. No separate imaging appointment. No waiting a week to find out what is going on.
+    - generic [ref=e204]:
+      - generic [ref=e206]:
+        - generic [ref=e207]: What we do about it
+        - heading [level=2] [ref=e209]:
+          - strong [ref=e210]: Find it, fix it, keep it from coming back
+      - list [ref=e212]:
+        - generic [ref=e213]:
+          - img "Chiropractic treatment process, step 1" [ref=e215]
+          - generic [ref=e216]:
+            - heading "Find it" [level=3] [ref=e222]
+            - paragraph [ref=e223]: A full history and a real exam. Digital X-rays if your exam calls for them. Dr. Morgan reads them himself and walks you through what he sees.
+        - generic [ref=e225]:
+          - img "Chiropractic treatment process, step 2" [ref=e227]
+          - generic [ref=e228]:
+            - heading "Find it" [level=3] [ref=e234]
+            - paragraph [ref=e235]: A full history and a real exam. Digital X-rays if your exam calls for them. Dr. Morgan reads them himself and walks you through what he sees.
+        - generic [ref=e237]:
+          - img "Chiropractic treatment process, step 3" [ref=e239]
+          - generic [ref=e240]:
+            - heading "Find it" [level=3] [ref=e246]
+            - paragraph [ref=e247]: A full history and a real exam. Digital X-rays if your exam calls for them. Dr. Morgan reads them himself and walks you through what he sees.
+      - generic [ref=e250]:
+        - paragraph [ref=e252]: Dr. Morgan does not run a shockwave machine or a laser room. He does adjustments and decompression, and he does a lot of them. If you have been somewhere that ran you through four modalities and never told you what was wrong, this will feel different.
+        - generic [ref=e254]:
+          - generic [ref=e255]:
+            - button "Book Your Visit" [ref=e257] [cursor=pointer]
+            - generic [ref=e260]:
+              - generic [aria-hidden] [ref=e261]: Book Your Visit
+              - generic [aria-hidden] [ref=e262]: Book Your Visit
+          - generic [ref=e263]:
+            - button "Verify My Insurance" [ref=e265] [cursor=pointer]
+            - generic [ref=e274]:
+              - generic [aria-hidden] [ref=e275]: Verify My Insurance
+              - generic [aria-hidden] [ref=e276]: Verify My Insurance
+    - generic [ref=e281]:
+      - heading [level=2] [ref=e283]:
+        - strong [ref=e284]: Your first visit, start to finish
+      - list [ref=e285]:
+        - listitem [ref=e286]:
+          - generic [ref=e287]: "1"
+          - generic [ref=e288]:
+            - heading "We find out what is actually happening" [level=3] [ref=e289]
+            - paragraph [ref=e290]: Full history and exam. What hurts, what you have already tried, what you want to get back to doing. Any necessary digital X-rays, taken on site.
+        - listitem [ref=e291]:
+          - generic [ref=e292]: "2"
+          - generic [ref=e293]:
+            - heading "Dr. Morgan shows you the imaging, same day" [level=3] [ref=e294]
+            - paragraph [ref=e295]: He marks it up and walks you through it right there. You will see what he sees. Most patients get their first adjustment the same visit.
+        - listitem [ref=e296]:
+          - generic [ref=e297]: "3"
+          - generic [ref=e298]:
+            - heading "You come back for the full report" [level=3] [ref=e299]
+            - paragraph [ref=e300]: Within a few days, Dr. Morgan lays out what he found and exactly what he recommends. What it will take, how long, and what it costs. Then you decide.
+      - paragraph [ref=e302]: First visit runs about 30 minutes. After that, most visits take a few minutes. Dr. Morgan built the practice around working people.
+    - generic [ref=e305]:
+      - generic [ref=e306]:
+        - heading "How long until this actually feels better" [level=2] [ref=e329]
+        - generic [ref=e330]:
+          - paragraph [ref=e331]: Most people want a number before they start. Dr. Morgan will give you one, just not before he has examined you and looked at your imaging. He will not guess.
+          - paragraph [ref=e332]: "What he can tell you up front is how it usually goes, including the part most offices skip: the first two weeks are uneven."
+        - paragraph [ref=e336]: If you are only trying to get out of pain, a shorter plan can do that. If you want it to stay fixed, it takes about 90 days. Dr. Morgan will give you both options and let you pick.
+      - generic [ref=e337]:
+        - generic [ref=e339]:
+          - generic [ref=e340]: WEEKS 1 TO 2
+          - paragraph [ref=e342]: Inconsistent, and that's normal. You'll have a good day and think it's fixed, then a bad one and think it's not working. Dr. Morgan warns you about this on day one. Real change usually starts around the end of week two, and better sleep is often the first thing people notice.
+        - generic [ref=e344]:
+          - generic [ref=e345]: WEEKS 3 TO 12
+          - paragraph [ref=e347]: The bulk of the plan. A typical plan is about 24 visits over 90 days, two to three times a week at the start, then less often as you improve. Some people need fewer. Dr. Morgan checks your progress along the way.
+        - generic [ref=e349]:
+          - generic [ref=e350]: AFTER YOUR PLAN
+          - paragraph [ref=e352]: Most patients move to maintenance, about once every two weeks. Some stop entirely. Dr. Morgan will tell you when you're there.
+    - generic [ref=e354]:
+      - heading "Patients who came in with this" [level=2] [ref=e358]
+      - list [ref=e360]:
+        - listitem [ref=e361]:
+          - generic [ref=e364]:
+            - generic [ref=e365]:
+              - img "Lauren Huynh" [ref=e367]
+              - generic [ref=e368]:
+                - heading "Lauren Huynh" [level=3] [ref=e369]
+                - paragraph [ref=e378]: Google Review
+            - paragraph [ref=e380]: Casey is very thorough, knowledgeable, and friendly. I have been going to his practice for several months now he's helped out a lot with my back pains. I would definitely recommend his practice to anyone that needs an adjustment!
+        - listitem [ref=e382]:
+          - generic [ref=e385]:
+            - generic [ref=e386]:
+              - img "Jim McMullan" [ref=e388]
+              - generic [ref=e389]:
+                - heading "Jim McMullan" [level=3] [ref=e390]
+                - paragraph [ref=e399]: Google Review
+            - paragraph [ref=e401]: Dr. Morgan has been a great help. I am now pain-free again. A true professional who knows how to treat chiropractic issues. Helpful, friendly staff as well.
+        - listitem [ref=e403]:
+          - generic [ref=e406]:
+            - generic [ref=e407]:
+              - img "Molly Sibley" [ref=e409]
+              - generic [ref=e410]:
+                - heading "Molly Sibley" [level=3] [ref=e411]
+                - paragraph [ref=e420]: Google Review
+            - generic [ref=e421]:
+              - paragraph [ref=e422]: Over the course of just 3 months, Dr. Morgan has significantly decreased my lower back pain. Between chiropractic care and stretches, my back spasms rarely occur and what used to take a week or two to recover from can now be resolved within about a day.
+              - paragraph [ref=e423]: I really appreciate the personalized approach, attention to long-term healing, and consistent support throughout the process. Highly recommend to anyone dealing with chronic back pain or muscle spasms!
+        - listitem [ref=e425]:
+          - generic [ref=e428]:
+            - generic [ref=e429]:
+              - img "Eliana Elizalde" [ref=e431]
+              - generic [ref=e432]:
+                - heading "Eliana Elizalde" [level=3] [ref=e433]
+                - paragraph [ref=e442]: Google Review
+            - paragraph [ref=e444]: Everyone is so great here! I had a wonderful experience each time! :)
+        - listitem [ref=e446]:
+          - generic [ref=e449]:
+            - generic [ref=e450]:
+              - img "Erika Brummel" [ref=e452]
+              - generic [ref=e453]:
+                - heading "Erika Brummel" [level=3] [ref=e454]
+                - paragraph [ref=e463]: Google Review
+            - paragraph [ref=e465]: Best chiropratic expereince I have ever had. Ive seen multiple chiropractors and have not had any relief. Coming to Dr.Morgan has changed all of that. I am finally feeling better and my back is doing great. I highly highly recommend!!!!!!
+        - listitem [ref=e467]:
+          - generic [ref=e470]:
+            - generic [ref=e471]:
+              - img "Jeff Julia" [ref=e473]
+              - generic [ref=e474]:
+                - heading "Jeff Julia" [level=3] [ref=e475]
+                - paragraph [ref=e484]: Google Review
+            - generic [ref=e485]:
+              - paragraph [ref=e486]: I can’t believe I haven’t left a review yet. I’ve trusted Dr Morgan for many years now. He has helped naturally transform my posture and body movements. I feel like a well oiled machine!
+              - paragraph [ref=e487]: Thanks to Casey and his staff!
+              - paragraph [ref=e488]: He can be trusted even when you’re in a lot of pain, like my girl friend who had debilitating neck pain.
+              - paragraph [ref=e489]: The X-rays analysis to identify what’s really going on and the level of care he gives to you, makes Casey someone I recommend to people often!
+      - generic [ref=e492]:
+        - generic [ref=e494]:
+          - generic [ref=e495]:
+            - button "Book Your Visit" [ref=e497] [cursor=pointer]
+            - generic [ref=e500]:
+              - generic [aria-hidden] [ref=e501]: Book Your Visit
+              - generic [aria-hidden] [ref=e502]: Book Your Visit
+          - generic [ref=e503]:
+            - button "See More Google reviews" [ref=e505] [cursor=pointer]
+            - generic [ref=e514]:
+              - generic [aria-hidden] [ref=e515]: See More Google reviews
+              - generic [aria-hidden] [ref=e516]: See More Google reviews
+        - generic [ref=e518]:
+          - list [ref=e534]:
+            - listitem [ref=e535]:
+              - paragraph [ref=e536]: 5.0 stars, 250+ Google reviews
+          - button [ref=e538] [cursor=pointer]
+    - generic [ref=e541]:
+      - generic [ref=e544]:
+        - heading "Low back pain has company" [level=2] [ref=e546]
+        - paragraph [ref=e548]: Low back problems rarely stay in the low back. If any of these sound like you, they are often the same underlying issue.
+      - generic [ref=e549]:
+        - generic [ref=e551]:
+          - generic [ref=e553]:
+            - generic [ref=e559]:
+              - heading "Sciatica" [level=3] [ref=e560]
+              - paragraph [ref=e562]: Shooting pain, numbness, or tingling down the leg. Usually a disc pressing on a nerve.
+            - generic [ref=e571]:
+              - generic [aria-hidden] [ref=e572]: Learn More
+              - generic [aria-hidden] [ref=e573]: Learn More
+          - button "Learn More" [ref=e575] [cursor=pointer]
+        - generic [ref=e577]:
+          - generic [ref=e579]:
+            - generic [ref=e585]:
+              - heading "Hip Pain" [level=3] [ref=e586]
+              - paragraph [ref=e588]: A lot of patients point at their hip when the problem is actually the lower back.
+            - generic [ref=e597]:
+              - generic [aria-hidden] [ref=e598]: Learn More
+              - generic [aria-hidden] [ref=e599]: Learn More
+          - button "Learn More" [ref=e601] [cursor=pointer]
+        - generic [ref=e603]:
+          - generic [ref=e605]:
+            - generic [ref=e611]:
+              - heading "Herniated or Bulging Disc" [level=3] [ref=e612]
+              - paragraph [ref=e614]: The structural problem underneath a lot of low back pain and sciatica.
+            - generic [ref=e623]:
+              - generic [aria-hidden] [ref=e624]: Learn More
+              - generic [aria-hidden] [ref=e625]: Learn More
+          - button "Learn More" [ref=e627] [cursor=pointer]
+    - generic [ref=e630]:
+      - heading "What this costs" [level=2] [ref=e634]
+      - generic [ref=e635]:
+        - generic [ref=e636]:
+          - heading "YOUR FIRST VISIT" [level=3] [ref=e637]
+          - heading "This Covers" [level=4] [ref=e639]
+          - list [ref=e640]:
+            - listitem [ref=e641]:
+              - generic [ref=e646]:
+                - heading "This Covers" [level=5] [ref=e647]
+                - paragraph [ref=e648]: We ask what hurts, what you have already tried, and what you want back.
+            - listitem [ref=e649]:
+              - generic [ref=e654]:
+                - heading "Digital X-rays" [level=5] [ref=e655]
+                - paragraph [ref=e656]: Any necessary imaging happens in-office. No trip to an imaging center, no separate bill.
+            - listitem [ref=e657]:
+              - generic [ref=e662]:
+                - heading "Dr. Morgan reviews your case personally" [level=5] [ref=e663]
+                - paragraph [ref=e664]: Dr. Morgan reads your X-rays and makes the call himself.
+            - listitem [ref=e665]:
+              - generic [ref=e670]:
+                - heading "Honest recommendation" [level=5] [ref=e671]
+                - paragraph [ref=e672]: If you need care, you get the plan and the price before you commit. If you don't, we say so.
+          - paragraph [ref=e674]: Paying yourself? Call us or ask when you book and we'll tell you the cost up front.
+        - img "Patient on their first visit to West End Chiropractic" [ref=e676]
+      - paragraph [ref=e680]:
+        - strong [ref=e681]: Using insurance?
+        - text: West End is in-network with BCBS, UnitedHealthcare, UMR, Surest, Aetna, Meritain, Humana, Ambetter, Ascension SmartHealth, Curative, WebTPA, and Medicare. Send us your insurance info when you book and we’ll look into your coverage before your first visit, so we have a good idea of what your plan covers by the time you walk in. We are not a Medicaid provider.
+      - list [ref=e683]:
+        - listitem [ref=e684]:
+          - img "BlueCross BlueShield logo"
+        - listitem [ref=e685]:
+          - img "UnitedHealthcare logo"
+        - listitem [ref=e686]:
+          - img "Aetna logo"
+        - listitem [ref=e687]:
+          - img "Humana logo"
+        - listitem [ref=e688]:
+          - img "Ambetter Health logo"
+        - listitem [ref=e689]:
+          - img "Ascension SmartHealth logo"
+        - listitem [ref=e690]:
+          - img "WebTPA, a GuideWell Company logo"
+        - listitem [ref=e691]:
+          - img "Curative logo"
+        - listitem [ref=e692]:
+          - img "Surest logo"
+        - listitem [ref=e693]:
+          - img "UMR logo"
+        - listitem [ref=e694]:
+          - img "Medicare.gov logo"
+        - listitem [ref=e695]:
+          - img "Meritain Health, an Aetna company logo"
+      - generic [ref=e699]:
+        - generic [ref=e700]:
+          - button "Book Your Visit" [ref=e702] [cursor=pointer]
+          - generic [ref=e705]:
+            - generic [aria-hidden] [ref=e706]: Book Your Visit
+            - generic [aria-hidden] [ref=e707]: Book Your Visit
+        - generic [ref=e708]:
+          - button "See More Google reviews" [ref=e710] [cursor=pointer]
+          - generic [ref=e719]:
+            - generic [aria-hidden] [ref=e720]: See More Google reviews
+            - generic [aria-hidden] [ref=e721]: See More Google reviews
+    - generic [ref=e724]:
+      - heading [level=2] [ref=e728]:
+        - text: Common
+        - strong [ref=e729]: Questions
+      - list [ref=e732]:
+        - listitem [ref=e733]:
+          - listitem [ref=e734]:
+            - heading [level=3] [ref=e736]:
+              - button "This is some text inside of a div block." [ref=e737] [cursor=pointer]
+        - listitem [ref=e744]:
+          - listitem [ref=e745]:
+            - heading [level=3] [ref=e747]:
+              - button "This is some text inside of a div block." [ref=e748] [cursor=pointer]
+        - listitem [ref=e755]:
+          - listitem [ref=e756]:
+            - heading [level=3] [ref=e758]:
+              - button "This is some text inside of a div block." [ref=e759] [cursor=pointer]
+        - listitem [ref=e766]:
+          - listitem [ref=e767]:
+            - heading [level=3] [ref=e769]:
+              - button "This is some text inside of a div block." [ref=e770] [cursor=pointer]
+        - listitem [ref=e777]:
+          - listitem [ref=e778]:
+            - heading [level=3] [ref=e780]:
+              - button "This is some text inside of a div block." [ref=e781] [cursor=pointer]
+        - listitem [ref=e788]:
+          - listitem [ref=e789]:
+            - heading [level=3] [ref=e791]:
+              - button "This is some text inside of a div block." [ref=e792] [cursor=pointer]
