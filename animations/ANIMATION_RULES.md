@@ -92,10 +92,14 @@ Shared by both hero sections (`hero-main`, `services-hero`).
   const isMobile = heroRoot.getBoundingClientRect().width < 64 * rootFontSize;
   ```
 - The image settles in from a slight zoom (`scale: 1.08 → 1` desktop,
-  `0.92 → 1` mobile) with `autoAlpha`. The dark overlay (`.hero_bg_overlay`)
-  is **never animated in GSAP** — its gradient and opacity are fully
-  CSS-driven and must stay that way (explicit instruction: do not animate
-  the overlay in GSAP).
+  `0.92 → 1` mobile) with `autoAlpha`. **Any `_bg_overlay` element
+  (`.hero_bg_overlay`, `.cta_bg_overlay`, and any future one) is never
+  animated in GSAP** — its gradient and opacity are fully CSS-driven and
+  must stay that way (explicit instruction: do not animate the overlay in
+  GSAP). This applies everywhere a bg-image + overlay pair shows up, not
+  just the hero — `animateHeroBackdrop` only ever touches the `_bg_image`
+  element it's passed, and new sections must keep that boundary: select and
+  animate the image, never reach for its sibling overlay.
 - A clip-path top-to-bottom wipe was tried for the hero backdrop reveal and
   rejected (style didn't land) — stick with the zoom/autoAlpha settle for
   hero backgrounds specifically. Clip-path wipes are reserved for the

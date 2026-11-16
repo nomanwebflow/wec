@@ -2,14 +2,171 @@ if (typeof gsap === "undefined") {
     document.documentElement.classList.add("gsap-not-found");
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    if (typeof gsap === "undefined") return;
+function runWhenReady(fn) {
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", fn, { once: true });
+    } else {
+        fn();
+    }
+}
+
+function runWhenLoaded(fn) {
+    if (document.readyState === "complete") {
+        fn();
+    } else {
+        window.addEventListener("load", fn, { once: true });
+    }
+}
+
+runWhenReady(() => {
+    if (typeof gsap === "undefined" || typeof ScrollTrigger === "undefined") {
+        document.documentElement.classList.add("gsap-not-found");
+        return;
+    }
     gsap.registerPlugin(ScrollTrigger);
+
+    // Track every pending reveal check so any ScrollTrigger.refresh() or late
+    // scroll restoration can immediately settle sections/cards that landed at
+    // or above their trigger line without waiting for a scroll event.
+    const pendingReveals = [];
+
+    // Each check returns true once settled so flush can drop it — keeps the
+    // indefinite low-rate poll cheap instead of walking every section forever.
+    function flushPendingReveals() {
+        for (let i = pendingReveals.length - 1; i >= 0; i -= 1) {
+            if (pendingReveals[i]()) pendingReveals.splice(i, 1);
+        }
+    }
+
+    // ScrollTrigger's own onEnter only fires on a continuous scroll that
+    // actually crosses a trigger's start line on a tracked frame. A fast or
+    // instant jump (scrollTo, an anchor link, keyboard End, programmatic
+    // restore) can land past a section's start and end with the native
+    // "scroll" event never firing at all, so onEnter never runs and a
+    // once-only reveal never happens — confirmed in testing, where neither
+    // "scroll" nor requestAnimationFrame fired reliably in a backgrounded
+    // automation tab even though document.hidden reported false. setInterval
+    // keeps running regardless of that throttling, so the fallback poll uses
+    // it instead of rAF: it re-checks every pending section's own rect-based
+    // checkPosition on a short interval for the first few seconds after load
+    // (when a jump is most likely — an anchor link or scroll restoration
+    // lands immediately), then keeps polling at a much lower rate
+    // indefinitely as a final safety net, since the array is tiny and each
+    // check is just a couple of getBoundingClientRect reads.
+    window.addEventListener("scroll", flushPendingReveals, { passive: true });
+
+    // Nothing ever removes a settled section's check from pendingReveals —
+    // each one is a cheap no-op once settled (it returns immediately), so
+    // there's no need to track or short-circuit on an empty array here.
+    const pollStart = Date.now();
+    let pollTimer = setInterval(() => {
+        flushPendingReveals();
+        if (!pendingReveals.length || Date.now() - pollStart >= 3000) {
+            clearInterval(pollTimer);
+            pollTimer = pendingReveals.length ? setInterval(flushPendingReveals, 750) : null;
+        }
+    }, 150);
+
+    function revealSectionOnScroll(sectionRoot, tl, start = "top 80%") {
+        let settled = false;
+        let trigger = null;
+        let checkCount = 0;
+
+        const settle = (skipToEnd) => {
+            if (settled) return;
+            settled = true;
+
+            if (skipToEnd) {
+                tl.progress(1);
+            } else {
+                // .play() alone only schedules the next GSAP ticker tick; force
+                // one synchronous render now so the visibility/set state lands
+                // immediately rather than waiting on the next rAF-driven tick.
+                tl.progress(0).play();
+                gsap.ticker.tick();
+            }
+
+            if (trigger) {
+                const st = trigger;
+                trigger = null;
+                // Defer kill so we never mutate ScrollTrigger's internal array
+                // while ScrollTrigger.refresh() is iterating over it.
+                gsap.delayedCall(0, () => st.kill());
+            }
+        };
+
+        const checkPosition = () => {
+            if (settled) return true;
+            checkCount += 1;
+            const rect = sectionRoot.getBoundingClientRect();
+            const vh = window.innerHeight || document.documentElement.clientHeight;
+
+            // "Already scrolled completely past" only means something once the
+            // page's own layout has settled. On the very first check — called
+            // synchronously while ScrollTrigger.create() is still running at
+            // DOMContentLoaded — every section above this one may still be its
+            // pre-image collapsed height, so a low section like a closing CTA
+            // can measure as rect.bottom <= 0 against a page that LOOKS short
+            // but isn't really. Treating that as "scrolled past" here would
+            // permanently settle (and kill the trigger for) a section nobody
+            // has scrolled past yet, leaving it stuck hidden forever once
+            // real layout kicks in. So the bottom<=0 fast-path only applies
+            // from the second check onward (a real refresh/resize/scroll
+            // event), never the first.
+            if (checkCount > 1 && rect.bottom <= 0) {
+                settle(true);
+                return true;
+            }
+
+            if (rect.top <= vh * 0.8) {
+                settle(false);
+            }
+            return settled;
+        };
+
+        // Do not pass `once: true` here: GSAP 3.15 can recursively refresh and
+        // self-kill earlier `once: true` triggers during subsequent trigger
+        // creation, shrinking its internal array mid-loop and throwing
+        // "Cannot read properties of undefined (reading 'end')".
+        const st = ScrollTrigger.create({
+            trigger: sectionRoot,
+            start,
+            onEnter: () => {
+                const rect = sectionRoot.getBoundingClientRect();
+                settle(rect.bottom <= 0);
+            },
+            onEnterBack: () => settle(false),
+            onRefresh: checkPosition
+        });
+        trigger = st;
+
+        // If onRefresh already settled this trigger synchronously during
+        // ScrollTrigger.create(), `trigger` was still null inside settle();
+        // schedule cleanup now.
+        if (settled) {
+            trigger = null;
+            gsap.delayedCall(0, () => st.kill());
+        } else {
+            pendingReveals.push(checkPosition);
+            checkPosition();
+        }
+    }
 
     function splitHeadingIntoWords(heroRoot, headingSelector) {
         const heading = heroRoot.querySelector(headingSelector);
-        const h2 = heading && heading.querySelector("h1, h2, h3, p");
-        if (!h2 || h2.dataset.split) return heroRoot.querySelectorAll(".word-inner");
+        // Usually the selector resolves to a wrapper div containing the real
+        // h1-h3/p; some headings (a plain div carrying heading text directly,
+        // an h3 with no wrapper, or a styled div with no heading tag at all)
+        // ARE the text element themselves, so fall back to the matched
+        // element itself when it has no such child.
+        const h2 = heading && (heading.matches("h1, h2, h3, p") ? heading : heading.querySelector("h1, h2, h3, p") || heading);
+        // Scoped to this heading's own subtree, not the whole heroRoot — a
+        // section can split more than one heading (e.g. the main title plus
+        // two smaller ones), and they all share the .word-inner class, so a
+        // heroRoot-wide query would return every split heading's words
+        // pooled together instead of just this call's own.
+        if (!h2) return [];
+        if (h2.dataset.split) return h2.querySelectorAll(".word-inner");
 
         // Screen readers get the original text via aria-label; the split
         // markup that builds the word-mask animation is hidden from them so
@@ -49,15 +206,16 @@ document.addEventListener("DOMContentLoaded", () => {
             textNode.parentNode.replaceChild(frag, textNode);
         });
         h2.dataset.split = "true";
-        return heroRoot.querySelectorAll(".word-inner");
+        return h2.querySelectorAll(".word-inner");
     }
 
-    function animateHeroBackdrop(tl, heroRoot) {
+    function animateHeroBackdrop(tl, heroRoot, bgImageClass) {
+        bgImageClass = bgImageClass || "hero_bg_image";
         // DOM order of the mobile/desktop bg images isn't fixed — the CSS picks
-        // which one is on screen per breakpoint via data-hero-image, so animate
+        // which one is on screen per breakpoint via a data attribute, so animate
         // whichever one is actually visible, never a fixed DOM position.
-        const topImage = [...heroRoot.querySelectorAll(".hero_bg_image")].find(
-            (img) => getComputedStyle(img).display !== "none"
+        const topImage = [...heroRoot.querySelectorAll("." + bgImageClass)].find(
+            (img) => img.tagName === "IMG" && getComputedStyle(img).display !== "none"
         );
         if (!topImage) return;
 
@@ -77,23 +235,23 @@ document.addEventListener("DOMContentLoaded", () => {
     (function initHeroMain() {
         const heroRoot = document.querySelector('[data-animation-trigger="hero-main"]');
         if (!heroRoot) return;
-        gsap.set(heroRoot, { visibility: "visible" });
 
         const tag = heroRoot.querySelector(".tag_wrap");
         const copy = heroRoot.querySelector(".u-text.u-rich-text");
-        const buttons = heroRoot.querySelectorAll(".u-button-wrapper .u-display-contents > *");
+        const buttons = heroRoot.querySelectorAll(".u-button-wrapper .button_main_wrap");
         const divider = heroRoot.querySelector(".hero_main_divider");
         const badge = heroRoot.querySelector(".reviews-badge_outer");
         const features = heroRoot.querySelectorAll(".features_item");
         const words = splitHeadingIntoWords(heroRoot, ".hero_main_content .u-heading");
 
-        const tl = gsap.timeline({
-            scrollTrigger: { trigger: heroRoot, start: "top 80%", once: true }
-        });
+        const tl = gsap.timeline({ paused: true });
 
         animateHeroBackdrop(tl, heroRoot);
 
-        tl.set(words, { yPercent: 115, rotate: 3 }, 0)
+        // Set visibility in the same tick as every hidden start state, so the
+        // section never becomes visible before its animation is ready to run.
+        tl.set(heroRoot, { visibility: "visible" }, 0)
+            .set(words, { yPercent: 115, rotate: 3 }, 0)
             .set(tag, { opacity: 0, x: -8 }, 0)
             .set(copy, { opacity: 0, y: 14 }, 0)
             .set(buttons, { opacity: 0, y: 10 }, 0)
@@ -112,29 +270,29 @@ document.addEventListener("DOMContentLoaded", () => {
             .to(divider, { scaleX: 1, duration: 0.5, ease: "power3.inOut" }, 1.15)
             .to(badge, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 1.3)
             .to(features, { opacity: 1, y: 0, duration: 0.45, stagger: 0.08, ease: "power2.out" }, 1.4);
+
+        revealSectionOnScroll(heroRoot, tl);
     })();
 
     // --- Services/condition page hero: badge -> headline -> copy -> buttons -> divider -> features ---
     (function initHeroServices() {
         const heroRoot = document.querySelector('[data-animation-trigger="services-hero"]');
         if (!heroRoot) return;
-        gsap.set(heroRoot, { visibility: "visible" });
 
         const layout = heroRoot.querySelector(".services_hero_layout");
         const badge = heroRoot.querySelector(".reviews-badge_outer");
         const copy = heroRoot.querySelector(".u-text.u-rich-text");
-        const buttons = heroRoot.querySelectorAll(".u-button-wrapper .u-display-contents > *");
+        const buttons = heroRoot.querySelectorAll(".u-button-wrapper .button_main_wrap");
         const divider = heroRoot.querySelector(".services_hero_divder");
         const features = heroRoot.querySelectorAll(".features_item");
         const words = splitHeadingIntoWords(layout, ".u-heading");
 
-        const tl = gsap.timeline({
-            scrollTrigger: { trigger: heroRoot, start: "top 80%", once: true }
-        });
+        const tl = gsap.timeline({ paused: true });
 
         animateHeroBackdrop(tl, heroRoot);
 
-        tl.set(badge, { opacity: 0, y: 10 }, 0)
+        tl.set(heroRoot, { visibility: "visible" }, 0)
+            .set(badge, { opacity: 0, y: 10 }, 0)
             .set(words, { yPercent: 115, rotate: 3 }, 0)
             .set(copy, { opacity: 0, y: 14 }, 0)
             .set(buttons, { opacity: 0, y: 10 }, 0)
@@ -151,28 +309,27 @@ document.addEventListener("DOMContentLoaded", () => {
             // Divider draws open left-to-right, then the features row drops in after it.
             .to(divider, { scaleX: 1, duration: 0.5, ease: "power3.inOut" }, 1.2)
             .to(features, { opacity: 1, y: 0, duration: 0.45, stagger: 0.08, ease: "power2.out" }, 1.35);
+
+        revealSectionOnScroll(heroRoot, tl);
     })();
 
     // --- Scroll-reveal content + image gallery section: icon -> headline -> copy -> button -> images ---
     (function initGallerySection() {
         const sections = document.querySelectorAll('[data-animation-trigger="gallery"]');
         sections.forEach((sectionRoot) => {
-            gsap.set(sectionRoot, { visibility: "visible" });
-
             const icon = sectionRoot.querySelector(".heading_icon");
             const copy = sectionRoot.querySelector(".u-text.u-rich-text");
-            const buttons = sectionRoot.querySelectorAll(".u-button-wrapper .u-display-contents > *");
+            const buttons = sectionRoot.querySelectorAll(".u-button-wrapper .button_main_wrap");
             const largeImage = sectionRoot.querySelector(".services_who_visual_wrap.is-large");
             const smallImage = sectionRoot.querySelector(".services_who_visual_wrap.is-small");
             const largeImg = largeImage && largeImage.querySelector("img");
             const smallImg = smallImage && smallImage.querySelector("img");
             const words = splitHeadingIntoWords(sectionRoot, ".heading_wrap .u-heading");
 
-            const tl = gsap.timeline({
-                scrollTrigger: { trigger: sectionRoot, start: "top 80%", once: true }
-            });
+            const tl = gsap.timeline({ paused: true });
 
-            tl.set(icon, { autoAlpha: 0, scaleY: 0, transformOrigin: "top center" }, 0)
+            tl.set(sectionRoot, { visibility: "visible" }, 0)
+                .set(icon, { autoAlpha: 0, scaleY: 0, transformOrigin: "top center" }, 0)
                 .set(words, { yPercent: 115, rotate: 3 }, 0)
                 .set(copy, { opacity: 0, y: 14 }, 0)
                 .set(buttons, { opacity: 0, y: 10 }, 0)
@@ -201,6 +358,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 // Small frame wipes open right-to-left, offset later so the two don't land together.
                 .to(smallImage, { clipPath: "inset(0px 0px 0px 0% round 16px)", duration: 1, ease: "power4.inOut" }, 0.5)
                 .to(smallImg, { scale: 1, xPercent: 0, duration: 1.2, ease: "power3.out" }, 0.5);
+
+            revealSectionOnScroll(sectionRoot, tl);
         });
     })();
 
@@ -208,8 +367,6 @@ document.addEventListener("DOMContentLoaded", () => {
     (function initCausesSection() {
         const sections = document.querySelectorAll('[data-animation-trigger="causes"]');
         sections.forEach((sectionRoot) => {
-            gsap.set(sectionRoot, { visibility: "visible" });
-
             const icon = sectionRoot.querySelector(".heading_icon");
             const copy = sectionRoot.querySelector(".u-text.u-rich-text");
             const callout = sectionRoot.querySelector(".services_causes_content > div:last-child");
@@ -217,11 +374,10 @@ document.addEventListener("DOMContentLoaded", () => {
             const img = imageWrap && imageWrap.querySelector("img");
             const words = splitHeadingIntoWords(sectionRoot, ".heading_wrap .u-heading");
 
-            const tl = gsap.timeline({
-                scrollTrigger: { trigger: sectionRoot, start: "top 80%", once: true }
-            });
+            const tl = gsap.timeline({ paused: true });
 
-            tl.set(icon, { autoAlpha: 0, scaleY: 0, transformOrigin: "top center" }, 0)
+            tl.set(sectionRoot, { visibility: "visible" }, 0)
+                .set(icon, { autoAlpha: 0, scaleY: 0, transformOrigin: "top center" }, 0)
                 .set(words, { yPercent: 115, rotate: 3 }, 0)
                 .set(copy, { opacity: 0, y: 14 }, 0)
                 .set(callout, { opacity: 0, y: 14 }, 0)
@@ -241,6 +397,573 @@ document.addEventListener("DOMContentLoaded", () => {
                 // Paced to land alongside the text sequence instead of finishing early.
                 .to(imageWrap, { clipPath: "inset(0px 0% 0px 0px round 16px)", duration: 1.2, ease: "power4.inOut" }, 0.2)
                 .to(img, { scale: 1, xPercent: 0, duration: 1.4, ease: "power3.out" }, 0.2);
+
+            revealSectionOnScroll(sectionRoot, tl);
         });
     })();
+
+    // --- Scroll-reveal process tabs section: tag -> headline -> cards -> closing copy/button ---
+    (function initProcessSection() {
+        const sections = document.querySelectorAll('[data-animation-trigger="process"]');
+        sections.forEach((sectionRoot) => {
+            const tag = sectionRoot.querySelector(".tag_wrap");
+            const tabsWrap = sectionRoot.querySelector(".process_tabs_wrap");
+            const cards = sectionRoot.querySelectorAll(".process_tabs_card_wrap");
+            // Animate the inner content block for the y-rise, never the card wrap
+            // itself: a transform on .process_tabs_card_wrap makes it the CSS
+            // containing block for its absolutely-positioned .process_tabs_card_image,
+            // which is meant to position against .process_tabs_wrap instead — adding
+            // any transform here (even an identity one left behind by GSAP) collapses
+            // that image's width to 0 and hides it entirely.
+            const cardContents = sectionRoot.querySelectorAll(".process_tabs_card_content");
+            const closingCopy = sectionRoot.querySelector(".u-text.u-rich-text");
+            const closingButtons = sectionRoot.querySelectorAll(".u-button-wrapper .button_main_wrap");
+            const words = splitHeadingIntoWords(sectionRoot, ".services_process_contain .u-heading");
+
+            const tl = gsap.timeline({ paused: true });
+
+            tl.set(sectionRoot, { visibility: "visible" }, 0)
+                .set(tag, { opacity: 0, x: -8 }, 0)
+                .set(words, { yPercent: 115, rotate: 3 }, 0)
+                // Opacity only here too — same containing-block trap as the
+                // individual card wraps below: a transform on .process_tabs_wrap
+                // would break the absolutely-positioned card images inside it.
+                .set(tabsWrap, { opacity: 0 }, 0)
+                .set(cards, { opacity: 0 }, 0)
+                .set(cardContents, { y: 20 }, 0)
+                .set(closingButtons, { opacity: 0, y: 10 }, 0)
+                // Eyebrow tag leads, same as every other section's opener.
+                .to(tag, { opacity: 1, x: 0, duration: 0.45, ease: "power2.out" }, 0)
+                // Headline rises word by word out of its mask, slight tilt settling to level.
+                .to(words, { yPercent: 0, rotate: 0, duration: 0.9, stagger: 0.04, ease: "power4.out" }, 0.15)
+                // The whole tabs block fades in first, then the three cards rise
+                // in sequence inside it — this stands in for the tab-cycle that
+                // otherwise runs on this same card set above 53em. Opacity only
+                // on both the outer wrap and each card wrap (see notes above);
+                // the rise motion lives on the content block inside each card.
+                .to(tabsWrap, { opacity: 1, duration: 0.7, ease: "power2.out" }, 0.45)
+                .to(cards, { opacity: 1, duration: 0.55, stagger: 0.12, ease: "power3.out" }, 0.55)
+                .to(cardContents, { y: 0, duration: 0.55, stagger: 0.12, ease: "power3.out" }, 0.55)
+                // Button lands with a touch of anticipation, no cartoon bounce.
+                .to(closingButtons, { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: "back.out(1.4)" }, 1.2);
+
+            if (closingCopy) {
+                tl.set(closingCopy, { opacity: 0, y: 14 }, 0)
+                    // Closing paragraph settles in slower and plainer — secondary, not a feature.
+                    .to(closingCopy, { opacity: 1, y: 0, duration: 0.6, ease: "power1.out" }, 1.05);
+            }
+
+            revealSectionOnScroll(sectionRoot, tl);
+        });
+    })();
+
+    // --- Dark bg-image section: backdrop settle -> headline -> numbered steps -> closing copy ---
+    (function initFirstVisitSection() {
+        const sections = document.querySelectorAll('[data-animation-trigger="first-visit"]');
+        sections.forEach((sectionRoot) => {
+            const steps = sectionRoot.querySelectorAll(".steps_list_item");
+            const closingCopy = sectionRoot.querySelector(".u-text.u-rich-text");
+            // Pass the heading's own wrapper, not .how_content — that block also
+            // contains the steps list's own h3 titles, and querySelector would grab
+            // whichever h-tag comes first in the DOM, which is fragile here.
+            const words = splitHeadingIntoWords(sectionRoot, ".how_content > .u-heading");
+
+            const tl = gsap.timeline({ paused: true });
+
+            // Reuses the hero's backdrop treatment: whichever bg image variant
+            // is actually visible settles in from a slight zoom.
+            animateHeroBackdrop(tl, sectionRoot);
+
+            tl.set(sectionRoot, { visibility: "visible" }, 0)
+                .set(words, { yPercent: 115, rotate: 3 }, 0)
+                .set(steps, { opacity: 0, y: 16 }, 0)
+                .set(closingCopy, { opacity: 0, y: 14 }, 0)
+                // Headline rises word by word out of its mask — no eyebrow tag in this layout.
+                .to(words, { yPercent: 0, rotate: 0, duration: 0.9, stagger: 0.04, ease: "power4.out" }, 0.3)
+                // The three numbered steps rise in sequence.
+                .to(steps, { opacity: 1, y: 0, duration: 0.55, stagger: 0.12, ease: "power3.out" }, 0.7)
+                // Closing paragraph settles in slower and plainer — secondary, not a feature.
+                .to(closingCopy, { opacity: 1, y: 0, duration: 0.6, ease: "power1.out" }, 1.25);
+
+            revealSectionOnScroll(sectionRoot, tl);
+        });
+    })();
+
+    // --- Icon/heading/copy/callout + timeline card list (causes-style content, no image wipe) ---
+    (function initTimelineSection() {
+        const sections = document.querySelectorAll('[data-animation-trigger="timeline"]');
+        sections.forEach((sectionRoot) => {
+            const icon = sectionRoot.querySelector(".heading_icon");
+            const copy = sectionRoot.querySelector(".u-text.u-rich-text");
+            const callout = sectionRoot.querySelector(".services_timeline_content > .card_quote_wrap");
+            const listWrap = sectionRoot.querySelector(".services_timeline_list_list");
+            const timelineCards = sectionRoot.querySelectorAll(".card_timeline_wrap");
+            const words = splitHeadingIntoWords(sectionRoot, ".heading_wrap .u-heading");
+
+            const tl = gsap.timeline({ paused: true });
+
+            tl.set(sectionRoot, { visibility: "visible" }, 0)
+                .set(icon, { autoAlpha: 0, scaleY: 0, transformOrigin: "top center" }, 0)
+                .set(words, { yPercent: 115, rotate: 3 }, 0)
+                .set(copy, { opacity: 0, y: 14 }, 0)
+                // "round 16px" keeps the list's own corner radius intact mid-wipe
+                // instead of squaring it off while the clip shape animates.
+                .set(listWrap, { clipPath: "inset(0px 0px 100% 0px round 16px)" }, 0)
+                .set(timelineCards, { opacity: 0, y: 20 }, 0)
+                // The spine icon draws open first, in place of the eyebrow tag used elsewhere.
+                .to(icon, { autoAlpha: 1, scaleY: 1, duration: 0.6, ease: "power3.out" }, 0)
+                // Headline rises word by word out of its mask, slight tilt settling to level.
+                .to(words, { yPercent: 0, rotate: 0, duration: 0.9, stagger: 0.04, ease: "power4.out" }, 0.2)
+                // Paragraph settles in slower and plainer — it's secondary, not a feature.
+                .to(copy, { opacity: 1, y: 0, duration: 0.6, ease: "power1.out" }, 0.6)
+                // The list wipes open top-to-bottom first, then the cards inside
+                // it rise in sequence once the wipe has mostly cleared them.
+                .to(listWrap, { clipPath: "inset(0px 0px 0% 0px round 16px)", duration: 0.9, ease: "power4.inOut" }, 0.2)
+                .to(timelineCards, { opacity: 1, y: 0, duration: 0.55, stagger: 0.12, ease: "power3.out" }, 0.65);
+
+            if (callout) {
+                tl.set(callout, { opacity: 0, y: 14 }, 0)
+                    // The callout box lands after the paragraph, quiet and without anticipation.
+                    .to(callout, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }, 0.78);
+            }
+
+            revealSectionOnScroll(sectionRoot, tl);
+        });
+    })();
+
+    // --- Centered heading + review cards + closing button/badge ---
+    (function initReviewSection() {
+        const sections = document.querySelectorAll('[data-animation-trigger="review"]');
+        sections.forEach((sectionRoot) => {
+            const closingButtons = sectionRoot.querySelectorAll(".u-button-wrapper .button_main_wrap");
+            const closingBadge = sectionRoot.querySelector(".reviews-badge_outer");
+            const words = splitHeadingIntoWords(sectionRoot, ".reviews_contain .u-heading");
+
+            const tl = gsap.timeline({ paused: true });
+
+            tl.set(sectionRoot, { visibility: "visible" }, 0)
+                .set(words, { yPercent: 115, rotate: 3 }, 0)
+                .set(closingButtons, { opacity: 0, y: 10 }, 0)
+                .set(closingBadge, { opacity: 0, y: 10 }, 0)
+                // Headline rises word by word out of its mask — centered, no eyebrow tag here.
+                .to(words, { yPercent: 0, rotate: 0, duration: 0.9, stagger: 0.04, ease: "power4.out" }, 0)
+                // Button and trailing rating badge land last, button with a touch of anticipation.
+                .to(closingButtons, { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: "back.out(1.4)" }, 0.85)
+                .to(closingBadge, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 1.0);
+
+            revealSectionOnScroll(sectionRoot, tl);
+
+            // The review cards are CMS-rendered (Webflow's .w-dyn-list). On some
+            // loads they aren't in the DOM yet at DOMContentLoaded, so querying
+            // them here can grab an empty list and silently wire nothing. Poll
+            // briefly until they exist, then set up the batch reveal.
+            let attempts = 0;
+            const trySetupCards = () => {
+                const reviewItems = [...sectionRoot.querySelectorAll(".reviews_list_item")];
+                if (!reviewItems.length) {
+                    attempts += 1;
+                    if (attempts < 120) requestAnimationFrame(trySetupCards);
+                    return;
+                }
+
+                const revealedCards = new WeakSet();
+                let batchTriggers = [];
+
+                const revealCards = (items, immediate) => {
+                    const pending = items.filter((item) => !revealedCards.has(item));
+                    if (!pending.length) return;
+                    pending.forEach((item) => revealedCards.add(item));
+
+                    if (immediate) {
+                        gsap.set(pending, { opacity: 1, y: 0 });
+                    } else {
+                        gsap.to(pending, {
+                            opacity: 1,
+                            y: 0,
+                            duration: 0.55,
+                            stagger: 0.1,
+                            ease: "power3.out",
+                            overwrite: "auto"
+                        });
+                    }
+
+                    if (batchTriggers.length && reviewItems.every((item) => revealedCards.has(item))) {
+                        const triggersToKill = batchTriggers;
+                        batchTriggers = [];
+                        gsap.delayedCall(0, () => triggersToKill.forEach((st) => st.kill()));
+                    }
+                };
+
+                const checkCards = () => {
+                    const vh = window.innerHeight || document.documentElement.clientHeight;
+                    const passed = [];
+                    const visible = [];
+                    for (let i = 0; i < reviewItems.length; i += 1) {
+                        const item = reviewItems[i];
+                        if (revealedCards.has(item)) continue;
+                        const rect = item.getBoundingClientRect();
+                        if (rect.bottom <= 0) {
+                            passed.push(item);
+                        } else if (rect.top <= vh * 0.85) {
+                            visible.push(item);
+                        }
+                    }
+                    if (passed.length) revealCards(passed, true);
+                    if (visible.length) revealCards(visible, false);
+                    return reviewItems.every((item) => revealedCards.has(item));
+                };
+
+                // Only hide cards that are not already scrolled past above the viewport.
+                const cardsToWatch = [];
+                reviewItems.forEach((item) => {
+                    const rect = item.getBoundingClientRect();
+                    if (rect.bottom <= 0) {
+                        revealedCards.add(item);
+                    } else {
+                        cardsToWatch.push(item);
+                    }
+                });
+
+                if (cardsToWatch.length) {
+                    gsap.set(cardsToWatch, { opacity: 0, y: 20 });
+                    // Omit `once: true` to avoid GSAP 3.15's recursive Te.refresh
+                    // self-kill array mutation bug; revealCards deduplicates and
+                    // cleans up triggers once all cards are shown.
+                    batchTriggers = ScrollTrigger.batch(cardsToWatch, {
+                        start: "top 85%",
+                        onEnter: (batch) => {
+                            const passed = [];
+                            const visible = [];
+                            batch.forEach((el) => {
+                                if (el.getBoundingClientRect().bottom <= 0) passed.push(el);
+                                else visible.push(el);
+                            });
+                            if (passed.length) revealCards(passed, true);
+                            if (visible.length) revealCards(visible, false);
+                        },
+                        onEnterBack: (batch) => revealCards(batch, false)
+                    });
+                    pendingReveals.push(checkCards);
+                    checkCards();
+                }
+
+                // If cards arrived asynchronously after initial setup, refresh
+                // downstream triggers against the final grid height.
+                if (attempts > 0) scheduleRefresh();
+            };
+            trySetupCards();
+        });
+    })();
+
+    // --- Dark card group (cost cards): header then cards staggered ---
+    (function initCardGroupSection() {
+        const sections = document.querySelectorAll('[data-animation-trigger="card-group"]');
+        sections.forEach((sectionRoot) => {
+            const headerWords = splitHeadingIntoWords(sectionRoot, ".card-group_header .u-heading");
+            const headerCopy = sectionRoot.querySelector(".card-group_header .u-text.u-rich-text");
+            const cards = sectionRoot.querySelectorAll(".card_primary_wrap");
+
+            const tl = gsap.timeline({ paused: true });
+
+            tl.set(sectionRoot, { visibility: "visible" }, 0)
+                .set(headerWords, { yPercent: 115, rotate: 3 }, 0)
+                .set(headerCopy, { opacity: 0, y: 14 }, 0)
+                .set(cards, { opacity: 0, y: 20 }, 0)
+                // Headline rises word by word out of its mask.
+                .to(headerWords, { yPercent: 0, rotate: 0, duration: 0.9, stagger: 0.04, ease: "power4.out" }, 0)
+                // Paragraph settles in slower and plainer — it's secondary, not a feature.
+                .to(headerCopy, { opacity: 1, y: 0, duration: 0.6, ease: "power1.out" }, 0.4)
+                // The pricing/cost cards rise in sequence, slower and more spaced
+                // out than the usual card stagger so each one reads individually.
+                .to(cards, { opacity: 1, y: 0, duration: 0.85, stagger: 0.2, ease: "power3.out" }, 0.6);
+
+            revealSectionOnScroll(sectionRoot, tl);
+        });
+    })();
+
+    // --- Final CTA: hero-pattern backdrop -> headline -> copy -> buttons -> closing address line ---
+    (function initCtaSection() {
+        const sections = document.querySelectorAll('[data-animation-trigger="cta"]');
+        sections.forEach((sectionRoot) => {
+            const copy = sectionRoot.querySelector(".u-text.u-rich-text.u-color-faded");
+            const buttons = sectionRoot.querySelectorAll(".u-button-wrapper .button_main_wrap");
+            const closingLine = sectionRoot.querySelector(".cta_contain > .u-text.u-rich-text");
+            const words = splitHeadingIntoWords(sectionRoot, ".cta_contain .u-heading");
+
+            const tl = gsap.timeline({ paused: true });
+
+            // Same bg-image treatment as the hero, scoped to this section's own
+            // mobile/desktop image pair class.
+            animateHeroBackdrop(tl, sectionRoot, "cta_bg_image");
+
+            tl.set(sectionRoot, { visibility: "visible" }, 0)
+                .set(words, { yPercent: 115, rotate: 3 }, 0)
+                .set(copy, { opacity: 0, y: 14 }, 0)
+                .set(buttons, { opacity: 0, y: 10 }, 0)
+                .set(closingLine, { opacity: 0, y: 10 }, 0)
+                // Headline rises word by word out of its mask — no eyebrow tag in this layout.
+                .to(words, { yPercent: 0, rotate: 0, duration: 0.9, stagger: 0.04, ease: "power4.out" }, 0.3)
+                // Paragraph settles in slower and plainer — it's secondary, not a feature.
+                .to(copy, { opacity: 1, y: 0, duration: 0.6, ease: "power1.out" }, 0.7)
+                // Buttons land with a touch of anticipation, no cartoon bounce.
+                .to(buttons, { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: "back.out(1.4)" }, 0.85)
+                // The closing address/hours line settles in last, quiet.
+                .to(closingLine, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 1.0);
+
+            revealSectionOnScroll(sectionRoot, tl);
+        });
+    })();
+
+    // --- Cost section: heading -> covered-items list -> image -> closing text -> logo marquee -> buttons ---
+    (function initCostSection() {
+        const sections = document.querySelectorAll('[data-animation-trigger="cost"]');
+        sections.forEach((sectionRoot) => {
+            const dividers = sectionRoot.querySelectorAll(".services_cost_divider");
+            const listItems = sectionRoot.querySelectorAll(".services_cost_list_item");
+            const closingText = sectionRoot.querySelector(".services_cost_text");
+            const imageWrap = sectionRoot.querySelector(".services_cost_visual_wrap");
+            const img = imageWrap && imageWrap.querySelector("img");
+            const belowText = sectionRoot.querySelector(".u-order-last-medium .u-text.u-rich-text");
+            const logoWrap = sectionRoot.querySelector(".insurance_logo_wrap");
+            const buttons = sectionRoot.querySelectorAll(".u-button-wrapper .button_main_wrap");
+            const words = splitHeadingIntoWords(sectionRoot, ".u-container > .u-content-wrapper .u-heading");
+            // "YOUR FIRST VISIT" (a plain styled div) and "This Covers" (an
+            // unwrapped h3) above the covered-items list.
+            const visitWords = splitHeadingIntoWords(sectionRoot, ".services_cost_content > .u-text-style-h3");
+            const coversWords = splitHeadingIntoWords(sectionRoot, ".services_cost_content > h3.u-text-style-large");
+
+            const tl = gsap.timeline({ paused: true });
+
+            tl.set(sectionRoot, { visibility: "visible" }, 0)
+                .set(words, { yPercent: 115, rotate: 3 }, 0)
+                .set(listItems, { opacity: 0, y: 16 }, 0)
+                .set(closingText, { opacity: 0, y: 10 }, 0)
+                // This wrap has no border-radius (checked via getComputedStyle,
+                // unlike the gallery/causes image wraps) — plain square clip.
+                .set(imageWrap, { clipPath: "inset(0px 100% 0px 0px)" }, 0)
+                .set(img, { scale: 1.15, xPercent: 6 }, 0)
+                .set(logoWrap, { opacity: 0, y: 14 }, 0)
+                .set(buttons, { opacity: 0, y: 10 }, 0)
+                // Headline rises word by word out of its mask.
+                .to(words, { yPercent: 0, rotate: 0, duration: 0.9, stagger: 0.04, ease: "power4.out" }, 0)
+                // The covered-items list rises in sequence.
+                .to(listItems, { opacity: 1, y: 0, duration: 0.5, stagger: 0.1, ease: "power3.out" }, 0.45)
+                // Closing cost line settles in quiet.
+                .to(closingText, { opacity: 1, y: 0, duration: 0.5, ease: "power1.out" }, 1.05)
+                // The image wipes open left-to-right alongside the text column's reveal.
+                .to(imageWrap, { clipPath: "inset(0px 0% 0px 0px)", duration: 1.1, ease: "power4.inOut" }, 0.2)
+                .to(img, { scale: 1, xPercent: 0, duration: 1.3, ease: "power3.out" }, 0.2)
+                // The insurance logo marquee, then buttons.
+                .to(logoWrap, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 1.4)
+                .to(buttons, { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: "back.out(1.4)" }, 1.6);
+
+            if (visitWords.length) {
+                tl.set(visitWords, { yPercent: 115, rotate: 3 }, 0)
+                    // "Your First Visit" rises right after — small word-mask reveal.
+                    .to(visitWords, { yPercent: 0, rotate: 0, duration: 0.7, stagger: 0.03, ease: "power4.out" }, 0.15);
+            }
+            if (coversWords.length) {
+                tl.set(coversWords, { yPercent: 115, rotate: 3 }, 0)
+                    .to(coversWords, { yPercent: 0, rotate: 0, duration: 0.7, stagger: 0.03, ease: "power4.out" }, 0.35);
+            }
+            if (dividers.length) {
+                tl.set(dividers, { scaleX: 0, transformOrigin: "left center" }, 0);
+                // The top divider draws open first, framing "Your First Visit" / "This Covers".
+                if (dividers[0]) tl.to(dividers[0], { scaleX: 1, duration: 0.5, ease: "power3.inOut" }, 0.3);
+                if (dividers[1]) tl.to(dividers[1], { scaleX: 1, duration: 0.5, ease: "power3.inOut" }, 0.9);
+            }
+            if (belowText) {
+                tl.set(belowText, { opacity: 0, y: 14 }, 0)
+                    .to(belowText, { opacity: 1, y: 0, duration: 0.6, ease: "power1.out" }, 1.2);
+            }
+
+            revealSectionOnScroll(sectionRoot, tl);
+        });
+    })();
+
+    // --- FAQ section: heading -> accordion items staggered ---
+    (function initFaqSection() {
+        const sections = document.querySelectorAll('[data-animation-trigger="faqs"]');
+        sections.forEach((sectionRoot) => {
+            const words = splitHeadingIntoWords(sectionRoot, ".faq_contain > .u-content-wrapper .u-heading");
+
+            const tl = gsap.timeline({ paused: true });
+
+            tl.set(sectionRoot, { visibility: "visible" }, 0)
+                .set(words, { yPercent: 115, rotate: 3 }, 0)
+                // Headline rises word by word out of its mask.
+                .to(words, { yPercent: 0, rotate: 0, duration: 0.9, stagger: 0.04, ease: "power4.out" }, 0);
+
+            const wireItems = (items) => {
+                tl.set(items, { opacity: 0, y: 16 }, 0)
+                    // Stagger items right behind the heading so no cards sit
+                    // invisible inside the lower viewport when the section lands.
+                    .to(items, { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: "power3.out" }, 0.25);
+            };
+
+            const initialItems = sectionRoot.querySelectorAll(".accordion_item");
+            if (initialItems.length) {
+                wireItems(initialItems);
+                revealSectionOnScroll(sectionRoot, tl);
+                return;
+            }
+
+            revealSectionOnScroll(sectionRoot, tl);
+
+            // Fallback if CMS accordion items hydrate after DOMContentLoaded.
+            let attempts = 0;
+            const trySetupAccordion = () => {
+                const items = sectionRoot.querySelectorAll(".accordion_item");
+                if (!items.length) {
+                    attempts += 1;
+                    if (attempts < 120) requestAnimationFrame(trySetupAccordion);
+                    return;
+                }
+
+                if (tl.progress() === 1) {
+                    scheduleRefresh();
+                    return;
+                }
+
+                if (tl.isActive()) {
+                    gsap.fromTo(
+                        items,
+                        { opacity: 0, y: 16 },
+                        { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: "power3.out" }
+                    );
+                } else {
+                    wireItems(items);
+                }
+                scheduleRefresh();
+            };
+            requestAnimationFrame(trySetupAccordion);
+        });
+    })();
+
+    // --- Who-single (Auto Accident variant): icon -> headline -> copy -> callout -> button -> image ---
+    (function initWhoSingleSection() {
+        const sections = document.querySelectorAll('[data-animation-trigger="who-single"]');
+        sections.forEach((sectionRoot) => {
+            const icon = sectionRoot.querySelector(".heading_icon");
+            const copy = sectionRoot.querySelector(".services_who_content .u-text.u-rich-text");
+            const callout = sectionRoot.querySelector(".services_who_content .card_quote_wrap");
+            const buttons = sectionRoot.querySelectorAll(".u-button-wrapper .button_main_wrap");
+            const imageWrap = sectionRoot.querySelector(".services_who_visual_wrap");
+            const img = imageWrap && imageWrap.querySelector("img");
+            const words = splitHeadingIntoWords(sectionRoot, ".heading_wrap .u-heading");
+
+            const tl = gsap.timeline({ paused: true });
+
+            tl.set(sectionRoot, { visibility: "visible" }, 0)
+                .set(icon, { autoAlpha: 0, scaleY: 0, transformOrigin: "top center" }, 0)
+                .set(words, { yPercent: 115, rotate: 3 }, 0)
+                .set(copy, { opacity: 0, y: 14 }, 0)
+                .set(callout, { opacity: 0, y: 14 }, 0)
+                .set(buttons, { opacity: 0, y: 10 }, 0)
+                // "round 16px" keeps the image wrap's own corner radius intact
+                // mid-wipe instead of squaring it off while the clip animates.
+                .set(imageWrap, { clipPath: "inset(0px 100% 0px 0px round 16px)" }, 0)
+                .set(img, { scale: 1.15, xPercent: 6 }, 0)
+                // The spine icon draws open first, in place of the eyebrow tag used elsewhere.
+                .to(icon, { autoAlpha: 1, scaleY: 1, duration: 0.6, ease: "power3.out" }, 0)
+                // Headline rises word by word out of its mask, slight tilt settling to level.
+                .to(words, { yPercent: 0, rotate: 0, duration: 0.9, stagger: 0.04, ease: "power4.out" }, 0.2)
+                // Paragraph settles in slower and plainer — it's secondary, not a feature.
+                .to(copy, { opacity: 1, y: 0, duration: 0.6, ease: "power1.out" }, 0.6)
+                // The callout box lands after the paragraph, quiet and without anticipation.
+                .to(callout, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }, 0.78)
+                // Button lands with a touch of anticipation, no cartoon bounce.
+                .to(buttons, { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: "back.out(1.4)" }, 0.95)
+                // The image wipes open left-to-right alongside the text column's reveal.
+                .to(imageWrap, { clipPath: "inset(0px 0% 0px 0px round 16px)", duration: 1.2, ease: "power4.inOut" }, 0.2)
+                .to(img, { scale: 1, xPercent: 0, duration: 1.4, ease: "power3.out" }, 0.2);
+
+            revealSectionOnScroll(sectionRoot, tl);
+        });
+    })();
+
+    // --- Split section (image left, icon/heading/copy/callout right — causes mirrored) ---
+    (function initSplitSection() {
+        const sections = document.querySelectorAll('[data-animation-trigger="split"]');
+        sections.forEach((sectionRoot) => {
+            const icon = sectionRoot.querySelector(".heading_icon");
+            const copy = sectionRoot.querySelector(".split_content .u-text.u-rich-text");
+            const callout = sectionRoot.querySelector(".split_content .card_quote_wrap");
+            const imageWrap = sectionRoot.querySelector(".split_visual_wrap .u-image-wrapper");
+            const img = imageWrap && imageWrap.querySelector("img");
+            const words = splitHeadingIntoWords(sectionRoot, ".split_content .heading_wrap .u-heading");
+
+            // This section's "Position Desktop" setting can put the image on
+            // either side, so detect which one is actually true at runtime
+            // (rect comparison, not a class/order check — Webflow can flip
+            // this via DOM order, grid placement, or flex order depending on
+            // the breakpoint) rather than assuming a fixed layout. The wipe
+            // should always uncover from the content's side toward the image's
+            // own outer edge, never a mirrored copy of the causes/gallery wipe.
+            const imageOnLeft =
+                sectionRoot.querySelector(".split_visual_wrap").getBoundingClientRect().left <
+                sectionRoot.querySelector(".split_content").getBoundingClientRect().left;
+            const closedClip = imageOnLeft
+                ? "inset(0px 0px 0px 100% round 16px)"
+                : "inset(0px 100% 0px 0px round 16px)";
+            const openClip = imageOnLeft
+                ? "inset(0px 0px 0px 0% round 16px)"
+                : "inset(0px 0% 0px 0px round 16px)";
+            const imgStartXPercent = imageOnLeft ? -6 : 6;
+
+            const tl = gsap.timeline({ paused: true });
+
+            tl.set(sectionRoot, { visibility: "visible" }, 0)
+                .set(icon, { autoAlpha: 0, scaleY: 0, transformOrigin: "top center" }, 0)
+                .set(words, { yPercent: 115, rotate: 3 }, 0)
+                .set(copy, { opacity: 0, y: 14 }, 0)
+                .set(imageWrap, { clipPath: closedClip }, 0)
+                .set(img, { scale: 1.15, xPercent: imgStartXPercent }, 0)
+                .to(icon, { autoAlpha: 1, scaleY: 1, duration: 0.6, ease: "power3.out" }, 0)
+                .to(words, { yPercent: 0, rotate: 0, duration: 0.9, stagger: 0.04, ease: "power4.out" }, 0.2)
+                .to(copy, { opacity: 1, y: 0, duration: 0.6, ease: "power1.out" }, 0.6)
+                .to(imageWrap, { clipPath: openClip, duration: 1.2, ease: "power4.inOut" }, 0.2)
+                .to(img, { scale: 1, xPercent: 0, duration: 1.4, ease: "power3.out" }, 0.2);
+
+            if (callout) {
+                tl.set(callout, { opacity: 0, y: 14 }, 0)
+                    .to(callout, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }, 0.78);
+            }
+
+            revealSectionOnScroll(sectionRoot, tl);
+        });
+    })();
+
+    // Keep ScrollTrigger positions accurate across images, async webfont swaps,
+    // CMS hydration, lazy image loads, and browser scroll-restoration.
+    let refreshRaf = 0;
+    function scheduleRefresh() {
+        if (refreshRaf) return;
+        refreshRaf = requestAnimationFrame(() => {
+            refreshRaf = 0;
+            ScrollTrigger.refresh();
+            flushPendingReveals();
+        });
+    }
+
+    runWhenLoaded(() => {
+        ScrollTrigger.refresh();
+        flushPendingReveals();
+    });
+
+    if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(scheduleRefresh);
+    }
+
+    if (typeof ResizeObserver !== "undefined" && document.body) {
+        let lastHeight = document.body.scrollHeight;
+        const bodyObserver = new ResizeObserver(() => {
+            const nextHeight = document.body.scrollHeight;
+            if (nextHeight !== lastHeight) {
+                lastHeight = nextHeight;
+                scheduleRefresh();
+            }
+        });
+        bodyObserver.observe(document.body);
+    }
 });
