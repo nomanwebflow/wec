@@ -942,22 +942,28 @@ runWhenReady(() => {
 
         const visual = sectionRoot.querySelector(".intro_visual_wrap");
         const img = visual && visual.querySelector("img");
+        const tag = sectionRoot.querySelector(".tag_wrap");
         const words = splitHeadingIntoWords(sectionRoot, ".u-heading");
-        const copy = sectionRoot.querySelector(".u-text.u-rich-text");
+        const listItems = sectionRoot.querySelectorAll(".intro_list_item");
+        const button = sectionRoot.querySelector(".button_main_wrap");
 
         const tl = gsap.timeline({ paused: true });
 
         tl.set(sectionRoot, { visibility: "visible" }, 0)
             .set(visual, { clipPath: "inset(0px 0px 0px 100% round 16px)" }, 0)
             .set(img, { scale: 1.15, xPercent: -6 }, 0)
+            .set(tag, { opacity: 0, y: 10 }, 0)
             .set(words, { yPercent: 115, rotate: 3 }, 0)
-            .set(copy, { opacity: 0, y: 14 }, 0)
+            .set(listItems, { opacity: 0, y: 14 }, 0)
+            .set(button, { opacity: 0, y: 10 }, 0)
             // Video thumbnail wipes open right-to-left, since it's the left
             // column here (mirror of the gallery/causes wipe direction).
             .to(visual, { clipPath: "inset(0px 0px 0px 0% round 16px)", duration: 1.2, ease: "power4.inOut" }, 0)
             .to(img, { scale: 1, xPercent: 0, duration: 1.4, ease: "power3.out" }, 0)
+            .to(tag, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 0)
             .to(words, { yPercent: 0, rotate: 0, duration: 0.9, stagger: 0.04, ease: "power4.out" }, 0.2)
-            .to(copy, { opacity: 1, y: 0, duration: 0.6, ease: "power1.out" }, 0.6);
+            .to(listItems, { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: "power3.out" }, 0.6)
+            .to(button, { opacity: 1, y: 0, duration: 0.5, ease: "back.out(1.4)" }, 0.9);
 
         // Sits directly below a full-viewport hero — trigger as soon as it
         // starts entering the viewport (not the usual "top 80%") so it never
@@ -997,8 +1003,15 @@ runWhenReady(() => {
         const sliderWrap = sectionRoot.querySelector(".team_slider_element");
         const sliderImg = sectionRoot.querySelector(".team_slider_item img");
         const words = splitHeadingIntoWords(sectionRoot, ".team_visual_content .u-heading");
-        const copy = sectionRoot.querySelector(".u-text.u-rich-text");
-        const buttons = sectionRoot.querySelectorAll(".button_main_wrap");
+        const copy = sectionRoot.querySelector(".team_visual_content .u-text.u-rich-text");
+        const bioButton = sectionRoot.querySelector(".team_visual_content .button_main_wrap");
+
+        // Bottom block ("The people who make the visit easy") is a separate
+        // heading/card grid below the bio slider, not part of it — needs its
+        // own word-split and its own reveal beats.
+        const bottomWords = splitHeadingIntoWords(sectionRoot, ".team_bottom .u-heading");
+        const cards = sectionRoot.querySelectorAll(".team_card_wrap");
+        const teamButton = sectionRoot.querySelector(".team_bottom > .button_main_wrap");
 
         const tl = gsap.timeline({ paused: true });
 
@@ -1007,7 +1020,10 @@ runWhenReady(() => {
             .set(sliderImg, { scale: 1.1 }, 0)
             .set(words, { yPercent: 115, rotate: 3 }, 0)
             .set(copy, { opacity: 0, y: 14 }, 0)
-            .set(buttons, { opacity: 0, y: 10 }, 0)
+            .set(bioButton, { opacity: 0, y: 10 }, 0)
+            .set(bottomWords, { yPercent: 115, rotate: 3 }, 0)
+            .set(cards, { opacity: 0, y: 14 }, 0)
+            .set(teamButton, { opacity: 0, y: 10 }, 0)
             // Fade only on the slider wrap (its own swiper library manages
             // transforms on slides internally — animating anything but
             // opacity/scale on the outer wrap risks fighting swiper's layout).
@@ -1015,7 +1031,10 @@ runWhenReady(() => {
             .to(sliderImg, { scale: 1, duration: 1.3, ease: "power3.out" }, 0)
             .to(words, { yPercent: 0, rotate: 0, duration: 0.9, stagger: 0.04, ease: "power4.out" }, 0.25)
             .to(copy, { opacity: 1, y: 0, duration: 0.6, ease: "power1.out" }, 0.65)
-            .to(buttons, { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: "back.out(1.4)" }, 0.95);
+            .to(bioButton, { opacity: 1, y: 0, duration: 0.5, ease: "back.out(1.4)" }, 0.95)
+            .to(bottomWords, { yPercent: 0, rotate: 0, duration: 0.9, stagger: 0.04, ease: "power4.out" }, 1.1)
+            .to(cards, { opacity: 1, y: 0, duration: 0.5, stagger: 0.1, ease: "power3.out" }, 1.45)
+            .to(teamButton, { opacity: 1, y: 0, duration: 0.5, ease: "back.out(1.4)" }, 1.75);
 
         revealSectionOnScroll(sectionRoot, tl);
     })();
