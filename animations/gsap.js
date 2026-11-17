@@ -459,7 +459,7 @@ runWhenReady(() => {
 
     // --- Dark bg-image section: backdrop settle -> headline -> numbered steps -> closing copy ---
     (function initFirstVisitSection() {
-        const sections = document.querySelectorAll('[data-animation-trigger="first-visit"], .how_wrap');
+        const sections = document.querySelectorAll('[data-animation-trigger="first-visit"]');
         sections.forEach((sectionRoot) => {
             const steps = sectionRoot.querySelectorAll(".steps_list_item");
             const closingCopy = sectionRoot.querySelector(".u-text.u-rich-text");
@@ -937,7 +937,7 @@ runWhenReady(() => {
 
     // --- Intro (conditions video teaser): visual wipe + headline/copy ---
     (function initIntroSection() {
-        const sectionRoot = document.querySelector(".intro_wrap");
+        const sectionRoot = document.querySelector('[data-animation-trigger="intro"]');
         if (!sectionRoot) return;
 
         const visual = sectionRoot.querySelector(".intro_visual_wrap");
@@ -964,7 +964,7 @@ runWhenReady(() => {
 
     // --- Conditions grid: headline/copy -> symptom tiles staggered in a wave ---
     (function initConditionsSection() {
-        const sectionRoot = document.querySelector(".conditions_wrap");
+        const sectionRoot = document.querySelector('[data-animation-trigger="conditions"]');
         if (!sectionRoot) return;
 
         const words = splitHeadingIntoWords(sectionRoot, ".u-heading");
@@ -988,7 +988,7 @@ runWhenReady(() => {
 
     // --- Team/bio section: slider visual settle -> headline/copy -> button ---
     (function initTeamSection() {
-        const sectionRoot = document.querySelector(".team_wrap");
+        const sectionRoot = document.querySelector('[data-animation-trigger="team"]');
         if (!sectionRoot) return;
 
         const sliderWrap = sectionRoot.querySelector(".team_slider_element");
@@ -1019,7 +1019,7 @@ runWhenReady(() => {
 
     // --- New-patient first-visit grid: headline/copy -> icon items staggered ---
     (function initNewPatientSection() {
-        const sectionRoot = document.querySelector(".new_wrap");
+        const sectionRoot = document.querySelector('[data-animation-trigger="new-patient"]');
         if (!sectionRoot) return;
 
         const words = splitHeadingIntoWords(sectionRoot, ".u-heading");
@@ -1041,7 +1041,7 @@ runWhenReady(() => {
 
     // --- Auto accident callout card: gradient card settles -> headline/copy -> button ---
     (function initAccidentSection() {
-        const sectionRoot = document.querySelector(".accident_wrap");
+        const sectionRoot = document.querySelector('[data-animation-trigger="accident"]');
         if (!sectionRoot) return;
 
         const card = sectionRoot.querySelector(".accident_layout");
@@ -1074,7 +1074,7 @@ runWhenReady(() => {
 
     // --- Insurance section: icon/title/copy -> logo wall staggered in a wave ---
     (function initInsuranceSection() {
-        const sectionRoot = document.querySelector(".insuranse_wrap");
+        const sectionRoot = document.querySelector('[data-animation-trigger="insurance"]');
         if (!sectionRoot) return;
 
         const icon = sectionRoot.querySelector(".icon_wrap");
@@ -1100,7 +1100,7 @@ runWhenReady(() => {
 
     // --- Contact/map section: icon -> headline/copy -> map frame -> contact rows ---
     (function initContactSection() {
-        const sectionRoot = document.querySelector(".contact_wrap");
+        const sectionRoot = document.querySelector('[data-animation-trigger="contact"]');
         if (!sectionRoot) return;
 
         const icon = sectionRoot.querySelector(".heading_icon");
