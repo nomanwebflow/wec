@@ -934,6 +934,40 @@ runWhenReady(() => {
         });
     })();
 
+    // --- Footer: about block -> nav columns (staggered) -> wordmark settles last ---
+    (function initFooterSection() {
+        const sectionRoot = document.querySelector(".footer_wrap");
+        if (!sectionRoot) return;
+
+        const about = sectionRoot.querySelector(".footer_about_wrap");
+        // Each nav column (Navigation / Conditions / Locations / Working Hours)
+        // plus the contact/hours block sits as a direct child of footer_row
+        // alongside .footer_about_wrap — grab every sibling column generically
+        // instead of hardcoding four separate selectors that break if Webflow
+        // reorders or renames one of them.
+        const columns = [...sectionRoot.querySelectorAll(".footer_row > *")].filter((el) => el !== about);
+        const wordmark = sectionRoot.querySelector(".footer_logo, .footer_brand, [class*='logo']");
+
+        const tl = gsap.timeline({ paused: true });
+
+        tl.set(sectionRoot, { visibility: "visible" }, 0)
+            .set(about, { opacity: 0, y: 20 }, 0)
+            .set(columns, { opacity: 0, y: 20 }, 0)
+            // About block and nav columns rise together, offset slightly so it
+            // reads as one wave sweeping left to right across the row.
+            .to(about, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 0)
+            .to(columns, { opacity: 1, y: 0, duration: 0.6, stagger: 0.08, ease: "power2.out" }, 0.1);
+
+        if (wordmark) {
+            tl.set(wordmark, { opacity: 0, y: 12 }, 0)
+                // The big wordmark gets its own quiet moment after the columns
+                // land, instead of appearing flat with everything else.
+                .to(wordmark, { opacity: 1, y: 0, duration: 0.7, ease: "power2.out" }, 0.5);
+        }
+
+        revealSectionOnScroll(sectionRoot, tl, "top 90%");
+    })();
+
     // Keep ScrollTrigger positions accurate across images, async webfont swaps,
     // CMS hydration, lazy image loads, and browser scroll-restoration.
     let refreshRaf = 0;
