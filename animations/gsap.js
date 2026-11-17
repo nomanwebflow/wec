@@ -241,7 +241,7 @@ runWhenReady(() => {
         const buttons = heroRoot.querySelectorAll(".u-button-wrapper .button_main_wrap");
         const divider = heroRoot.querySelector(".hero_main_divider");
         const badge = heroRoot.querySelector(".reviews-badge_outer");
-        const features = heroRoot.querySelectorAll(".features_item");
+        const features = heroRoot.querySelectorAll(".icon-label_wrap");
         const words = splitHeadingIntoWords(heroRoot, ".hero_main_content .u-heading");
 
         const tl = gsap.timeline({ paused: true });
@@ -284,7 +284,7 @@ runWhenReady(() => {
         const copy = heroRoot.querySelector(".u-text.u-rich-text");
         const buttons = heroRoot.querySelectorAll(".u-button-wrapper .button_main_wrap");
         const divider = heroRoot.querySelector(".services_hero_divder");
-        const features = heroRoot.querySelectorAll(".features_item");
+        const features = heroRoot.querySelectorAll(".icon-label_wrap");
         const words = splitHeadingIntoWords(layout, ".u-heading");
 
         const tl = gsap.timeline({ paused: true });
