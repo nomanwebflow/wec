@@ -995,7 +995,7 @@ runWhenReady(() => {
         const sliderImg = sectionRoot.querySelector(".team_slider_item img");
         const words = splitHeadingIntoWords(sectionRoot, ".team_visual_content .u-heading");
         const copy = sectionRoot.querySelector(".u-text.u-rich-text");
-        const buttons = sectionRoot.querySelectorAll(".u-button-wrapper .button_main_wrap");
+        const buttons = sectionRoot.querySelectorAll(".button_main_wrap");
 
         const tl = gsap.timeline({ paused: true });
 
@@ -1049,7 +1049,7 @@ runWhenReady(() => {
         const img = visual && visual.querySelector("img");
         const words = splitHeadingIntoWords(sectionRoot, ".u-heading");
         const copy = sectionRoot.querySelector(".u-text.u-rich-text");
-        const buttons = sectionRoot.querySelectorAll(".u-button-wrapper .button_main_wrap");
+        const buttons = sectionRoot.querySelectorAll(".button_main_wrap");
 
         const tl = gsap.timeline({ paused: true });
 
