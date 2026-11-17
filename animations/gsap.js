@@ -459,7 +459,7 @@ runWhenReady(() => {
 
     // --- Dark bg-image section: backdrop settle -> headline -> numbered steps -> closing copy ---
     (function initFirstVisitSection() {
-        const sections = document.querySelectorAll('[data-animation-trigger="first-visit"]');
+        const sections = document.querySelectorAll('[data-animation-trigger="first-visit"], .how_wrap');
         sections.forEach((sectionRoot) => {
             const steps = sectionRoot.querySelectorAll(".steps_list_item");
             const closingCopy = sectionRoot.querySelector(".u-text.u-rich-text");
@@ -471,8 +471,9 @@ runWhenReady(() => {
             const tl = gsap.timeline({ paused: true });
 
             // Reuses the hero's backdrop treatment: whichever bg image variant
-            // is actually visible settles in from a slight zoom.
-            animateHeroBackdrop(tl, sectionRoot);
+            // is actually visible settles in from a slight zoom. This section's
+            // bg image class is "how_bg_image", not the hero's default.
+            animateHeroBackdrop(tl, sectionRoot, "how_bg_image");
 
             tl.set(sectionRoot, { visibility: "visible" }, 0)
                 .set(words, { yPercent: 115, rotate: 3 }, 0)
@@ -932,6 +933,203 @@ runWhenReady(() => {
 
             revealSectionOnScroll(sectionRoot, tl);
         });
+    })();
+
+    // --- Intro (conditions video teaser): visual wipe + headline/copy ---
+    (function initIntroSection() {
+        const sectionRoot = document.querySelector(".intro_wrap");
+        if (!sectionRoot) return;
+
+        const visual = sectionRoot.querySelector(".intro_visual_wrap");
+        const img = visual && visual.querySelector("img");
+        const words = splitHeadingIntoWords(sectionRoot, ".u-heading");
+        const copy = sectionRoot.querySelector(".u-text.u-rich-text");
+
+        const tl = gsap.timeline({ paused: true });
+
+        tl.set(sectionRoot, { visibility: "visible" }, 0)
+            .set(visual, { clipPath: "inset(0px 0px 0px 100% round 16px)" }, 0)
+            .set(img, { scale: 1.15, xPercent: -6 }, 0)
+            .set(words, { yPercent: 115, rotate: 3 }, 0)
+            .set(copy, { opacity: 0, y: 14 }, 0)
+            // Video thumbnail wipes open right-to-left, since it's the left
+            // column here (mirror of the gallery/causes wipe direction).
+            .to(visual, { clipPath: "inset(0px 0px 0px 0% round 16px)", duration: 1.2, ease: "power4.inOut" }, 0)
+            .to(img, { scale: 1, xPercent: 0, duration: 1.4, ease: "power3.out" }, 0)
+            .to(words, { yPercent: 0, rotate: 0, duration: 0.9, stagger: 0.04, ease: "power4.out" }, 0.2)
+            .to(copy, { opacity: 1, y: 0, duration: 0.6, ease: "power1.out" }, 0.6);
+
+        revealSectionOnScroll(sectionRoot, tl);
+    })();
+
+    // --- Conditions grid: headline/copy -> symptom tiles staggered in a wave ---
+    (function initConditionsSection() {
+        const sectionRoot = document.querySelector(".conditions_wrap");
+        if (!sectionRoot) return;
+
+        const words = splitHeadingIntoWords(sectionRoot, ".u-heading");
+        const copy = sectionRoot.querySelector(".u-text.u-rich-text");
+        const items = sectionRoot.querySelectorAll(".conditions_list_item");
+
+        const tl = gsap.timeline({ paused: true });
+
+        tl.set(sectionRoot, { visibility: "visible" }, 0)
+            .set(words, { yPercent: 115, rotate: 3 }, 0)
+            .set(copy, { opacity: 0, y: 14 }, 0)
+            .set(items, { opacity: 0, y: 14 }, 0)
+            .to(words, { yPercent: 0, rotate: 0, duration: 0.9, stagger: 0.04, ease: "power4.out" }, 0)
+            .to(copy, { opacity: 1, y: 0, duration: 0.6, ease: "power1.out" }, 0.35)
+            // 29 tiles — a tight stagger (0.025s) keeps the wave fast and
+            // cheap rather than visibly crawling across a grid this size.
+            .to(items, { opacity: 1, y: 0, duration: 0.45, stagger: 0.025, ease: "power3.out" }, 0.55);
+
+        revealSectionOnScroll(sectionRoot, tl);
+    })();
+
+    // --- Team/bio section: slider visual settle -> headline/copy -> button ---
+    (function initTeamSection() {
+        const sectionRoot = document.querySelector(".team_wrap");
+        if (!sectionRoot) return;
+
+        const sliderWrap = sectionRoot.querySelector(".team_slider_element");
+        const sliderImg = sectionRoot.querySelector(".team_slider_item img");
+        const words = splitHeadingIntoWords(sectionRoot, ".team_visual_content .u-heading");
+        const copy = sectionRoot.querySelector(".u-text.u-rich-text");
+        const buttons = sectionRoot.querySelectorAll(".u-button-wrapper .button_main_wrap");
+
+        const tl = gsap.timeline({ paused: true });
+
+        tl.set(sectionRoot, { visibility: "visible" }, 0)
+            .set(sliderWrap, { opacity: 0 }, 0)
+            .set(sliderImg, { scale: 1.1 }, 0)
+            .set(words, { yPercent: 115, rotate: 3 }, 0)
+            .set(copy, { opacity: 0, y: 14 }, 0)
+            .set(buttons, { opacity: 0, y: 10 }, 0)
+            // Fade only on the slider wrap (its own swiper library manages
+            // transforms on slides internally — animating anything but
+            // opacity/scale on the outer wrap risks fighting swiper's layout).
+            .to(sliderWrap, { opacity: 1, duration: 0.7, ease: "power2.out" }, 0)
+            .to(sliderImg, { scale: 1, duration: 1.3, ease: "power3.out" }, 0)
+            .to(words, { yPercent: 0, rotate: 0, duration: 0.9, stagger: 0.04, ease: "power4.out" }, 0.25)
+            .to(copy, { opacity: 1, y: 0, duration: 0.6, ease: "power1.out" }, 0.65)
+            .to(buttons, { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: "back.out(1.4)" }, 0.95);
+
+        revealSectionOnScroll(sectionRoot, tl);
+    })();
+
+    // --- New-patient first-visit grid: headline/copy -> icon items staggered ---
+    (function initNewPatientSection() {
+        const sectionRoot = document.querySelector(".new_wrap");
+        if (!sectionRoot) return;
+
+        const words = splitHeadingIntoWords(sectionRoot, ".u-heading");
+        const copy = sectionRoot.querySelector(".u-text.u-rich-text");
+        const items = sectionRoot.querySelectorAll(".new_grid_item");
+
+        const tl = gsap.timeline({ paused: true });
+
+        tl.set(sectionRoot, { visibility: "visible" }, 0)
+            .set(words, { yPercent: 115, rotate: 3 }, 0)
+            .set(copy, { opacity: 0, y: 14 }, 0)
+            .set(items, { opacity: 0, y: 16 }, 0)
+            .to(words, { yPercent: 0, rotate: 0, duration: 0.9, stagger: 0.04, ease: "power4.out" }, 0)
+            .to(copy, { opacity: 1, y: 0, duration: 0.6, ease: "power1.out" }, 0.35)
+            .to(items, { opacity: 1, y: 0, duration: 0.55, stagger: 0.1, ease: "power3.out" }, 0.55);
+
+        revealSectionOnScroll(sectionRoot, tl);
+    })();
+
+    // --- Auto accident callout card: gradient card settles -> headline/copy -> button ---
+    (function initAccidentSection() {
+        const sectionRoot = document.querySelector(".accident_wrap");
+        if (!sectionRoot) return;
+
+        const card = sectionRoot.querySelector(".accident_layout");
+        const visual = sectionRoot.querySelector(".accident_visual_wrap");
+        const img = visual && visual.querySelector("img");
+        const words = splitHeadingIntoWords(sectionRoot, ".u-heading");
+        const copy = sectionRoot.querySelector(".u-text.u-rich-text");
+        const buttons = sectionRoot.querySelectorAll(".u-button-wrapper .button_main_wrap");
+
+        const tl = gsap.timeline({ paused: true });
+
+        tl.set(sectionRoot, { visibility: "visible" }, 0)
+            .set(card, { opacity: 0, y: 20 }, 0)
+            .set(visual, { clipPath: "inset(0px 100% 0px 0px round 16px)" }, 0)
+            .set(img, { scale: 1.15, xPercent: 6 }, 0)
+            .set(words, { yPercent: 115, rotate: 3 }, 0)
+            .set(copy, { opacity: 0, y: 14 }, 0)
+            .set(buttons, { opacity: 0, y: 10 }, 0)
+            // Card settles in as one plate first — it's a single contained
+            // unit on the gradient background, not a text-then-image reveal.
+            .to(card, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 0)
+            .to(visual, { clipPath: "inset(0px 0% 0px 0px round 16px)", duration: 1.1, ease: "power4.inOut" }, 0.1)
+            .to(img, { scale: 1, xPercent: 0, duration: 1.3, ease: "power3.out" }, 0.1)
+            .to(words, { yPercent: 0, rotate: 0, duration: 0.9, stagger: 0.04, ease: "power4.out" }, 0.3)
+            .to(copy, { opacity: 1, y: 0, duration: 0.6, ease: "power1.out" }, 0.65)
+            .to(buttons, { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: "back.out(1.4)" }, 0.9);
+
+        revealSectionOnScroll(sectionRoot, tl);
+    })();
+
+    // --- Insurance section: icon/title/copy -> logo wall staggered in a wave ---
+    (function initInsuranceSection() {
+        const sectionRoot = document.querySelector(".insuranse_wrap");
+        if (!sectionRoot) return;
+
+        const icon = sectionRoot.querySelector(".icon_wrap");
+        const title = sectionRoot.querySelector(".insuranse_title");
+        const copy = sectionRoot.querySelector(".u-text.u-rich-text");
+        const logos = sectionRoot.querySelectorAll(".insurance_logo_item");
+
+        const tl = gsap.timeline({ paused: true });
+
+        tl.set(sectionRoot, { visibility: "visible" }, 0)
+            .set(icon, { opacity: 0, y: 10 }, 0)
+            .set(title, { opacity: 0, y: 14 }, 0)
+            .set(copy, { opacity: 0, y: 14 }, 0)
+            .set(logos, { opacity: 0, y: 12 }, 0)
+            .to(icon, { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" }, 0)
+            .to(title, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 0.15)
+            .to(copy, { opacity: 1, y: 0, duration: 0.6, ease: "power1.out" }, 0.4)
+            // A dozen-plus logos — tight stagger keeps the wave fast and cheap.
+            .to(logos, { opacity: 1, y: 0, duration: 0.4, stagger: 0.03, ease: "power3.out" }, 0.65);
+
+        revealSectionOnScroll(sectionRoot, tl);
+    })();
+
+    // --- Contact/map section: icon -> headline/copy -> map frame -> contact rows ---
+    (function initContactSection() {
+        const sectionRoot = document.querySelector(".contact_wrap");
+        if (!sectionRoot) return;
+
+        const icon = sectionRoot.querySelector(".heading_icon");
+        const words = splitHeadingIntoWords(sectionRoot, ".heading_wrap .u-heading");
+        const copy = sectionRoot.querySelector(".u-text.u-rich-text");
+        const mapWrap = sectionRoot.querySelector(".contact_map_wrap");
+        const rows = sectionRoot.querySelectorAll(".contact_map_content > div, .contact_map_content > a");
+
+        const tl = gsap.timeline({ paused: true });
+
+        tl.set(sectionRoot, { visibility: "visible" }, 0)
+            .set(icon, { autoAlpha: 0, scaleY: 0, transformOrigin: "top center" }, 0)
+            .set(words, { yPercent: 115, rotate: 3 }, 0)
+            .set(copy, { opacity: 0, y: 14 }, 0)
+            .set(mapWrap, { opacity: 0, y: 16 }, 0)
+            // The spine icon draws open first, same as every other section using it.
+            .to(icon, { autoAlpha: 1, scaleY: 1, duration: 0.6, ease: "power3.out" }, 0)
+            .to(words, { yPercent: 0, rotate: 0, duration: 0.9, stagger: 0.04, ease: "power4.out" }, 0.2)
+            .to(copy, { opacity: 1, y: 0, duration: 0.6, ease: "power1.out" }, 0.6)
+            // Map settles in as a plain fade — a wipe/clip reveal on an
+            // embedded Google Map risks clipping its own internal tiles mid-load.
+            .to(mapWrap, { opacity: 1, y: 0, duration: 0.7, ease: "power2.out" }, 0.4);
+
+        if (rows.length) {
+            tl.set(rows, { opacity: 0, y: 10 }, 0)
+                .to(rows, { opacity: 1, y: 0, duration: 0.45, stagger: 0.08, ease: "power2.out" }, 0.85);
+        }
+
+        revealSectionOnScroll(sectionRoot, tl);
     })();
 
     // --- Footer: about block -> nav columns (staggered) -> wordmark settles last ---
