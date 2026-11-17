@@ -478,13 +478,18 @@ runWhenReady(() => {
             tl.set(sectionRoot, { visibility: "visible" }, 0)
                 .set(words, { yPercent: 115, rotate: 3 }, 0)
                 .set(steps, { opacity: 0, y: 16 }, 0)
-                .set(closingCopy, { opacity: 0, y: 14 }, 0)
                 // Headline rises word by word out of its mask — no eyebrow tag in this layout.
                 .to(words, { yPercent: 0, rotate: 0, duration: 0.9, stagger: 0.04, ease: "power4.out" }, 0.3)
                 // The three numbered steps rise in sequence.
-                .to(steps, { opacity: 1, y: 0, duration: 0.55, stagger: 0.12, ease: "power3.out" }, 0.7)
-                // Closing paragraph settles in slower and plainer — secondary, not a feature.
-                .to(closingCopy, { opacity: 1, y: 0, duration: 0.6, ease: "power1.out" }, 1.25);
+                .to(steps, { opacity: 1, y: 0, duration: 0.55, stagger: 0.12, ease: "power3.out" }, 0.7);
+
+            // Not every usage of this layout has a trailing paragraph below
+            // the steps (e.g. the homepage's how_wrap doesn't).
+            if (closingCopy) {
+                tl.set(closingCopy, { opacity: 0, y: 14 }, 0)
+                    // Closing paragraph settles in slower and plainer — secondary, not a feature.
+                    .to(closingCopy, { opacity: 1, y: 0, duration: 0.6, ease: "power1.out" }, 1.25);
+            }
 
             revealSectionOnScroll(sectionRoot, tl);
         });
