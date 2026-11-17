@@ -959,7 +959,10 @@ runWhenReady(() => {
             .to(words, { yPercent: 0, rotate: 0, duration: 0.9, stagger: 0.04, ease: "power4.out" }, 0.2)
             .to(copy, { opacity: 1, y: 0, duration: 0.6, ease: "power1.out" }, 0.6);
 
-        revealSectionOnScroll(sectionRoot, tl);
+        // Sits directly below a full-viewport hero — trigger as soon as it
+        // starts entering the viewport (not the usual "top 80%") so it never
+        // leaves a blank gap while the hero is still fully in view.
+        revealSectionOnScroll(sectionRoot, tl, "top 100%");
     })();
 
     // --- Conditions grid: headline/copy -> symptom tiles staggered in a wave ---
