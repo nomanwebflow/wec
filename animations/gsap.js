@@ -540,7 +540,7 @@ runWhenReady(() => {
                 // time (when the scroll trigger actually fires), not when
                 // this timeline is first built — so the mobile/desktop
                 // breakpoint check reflects the real viewport at play time.
-                .set(listWrap, { clipPath: () => roundedClipTimeline("0px 0px 100% 0px") }, 0)
+                .set(listWrap, { clipPath: () => roundedClipTimeline("0% 0% 100% 0%") }, 0)
                 .set(timelineCards, { opacity: 0, y: 20 }, 0)
                 // The spine icon draws open first, in place of the eyebrow tag used elsewhere.
                 .to(icon, { autoAlpha: 1, scaleY: 1, duration: 0.6, ease: "power3.out" }, 0)
@@ -550,7 +550,7 @@ runWhenReady(() => {
                 .to(copy, { opacity: 1, y: 0, duration: 0.6, ease: "power1.out" }, 0.6)
                 // The list wipes open top-to-bottom first, then the cards inside
                 // it rise in sequence once the wipe has mostly cleared them.
-                .to(listWrap, { clipPath: () => roundedClipTimeline("0px 0px 0% 0px"), duration: 0.9, ease: "power4.inOut" }, 0.2)
+                .to(listWrap, { clipPath: () => roundedClipTimeline("0% 0% 0% 0%"), duration: 0.9, ease: "power4.inOut" }, 0.2)
                 .to(timelineCards, { opacity: 1, y: 0, duration: 0.55, stagger: 0.12, ease: "power3.out" }, 0.65);
 
             if (callout) {
