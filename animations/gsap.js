@@ -338,6 +338,7 @@ runWhenReady(() => {
         sections.forEach((sectionRoot) => {
             const icon = sectionRoot.querySelector(".heading_icon");
             const copy = sectionRoot.querySelector(".u-text.u-rich-text");
+            const callout = sectionRoot.querySelector(".services_who_content .card_quote_wrap");
             const buttons = sectionRoot.querySelectorAll(".u-button-wrapper .button_main_wrap");
             const largeImage = sectionRoot.querySelector(".services_who_visual_wrap.is-large");
             const smallImage = sectionRoot.querySelector(".services_who_visual_wrap.is-small");
@@ -351,6 +352,7 @@ runWhenReady(() => {
                 .set(icon, { autoAlpha: 0, scaleY: 0, transformOrigin: "top center" }, 0)
                 .set(words, { yPercent: 115, rotate: 3 }, 0)
                 .set(copy, { opacity: 0, y: 14 }, 0)
+                .set(callout, { opacity: 0, y: 14 }, 0)
                 .set(buttons, { opacity: 0, y: 10 }, 0)
                 // Each wrap's own box clips the reveal; the wipe direction differs per
                 // image so the two frames don't feel like one mechanical repeat.
@@ -368,8 +370,10 @@ runWhenReady(() => {
                 .to(words, { yPercent: 0, rotate: 0, duration: 0.9, stagger: 0.04, ease: "power4.out" }, 0.2)
                 // Paragraph settles in slower and plainer — it's secondary, not a feature.
                 .to(copy, { opacity: 1, y: 0, duration: 0.6, ease: "power1.out" }, 0.6)
+                // The callout box lands after the paragraph, quiet and without anticipation.
+                .to(callout, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }, 0.78)
                 // Button lands with a touch of anticipation, no cartoon bounce.
-                .to(buttons, { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: "back.out(1.4)" }, 0.75)
+                .to(buttons, { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: "back.out(1.4)" }, 0.95)
                 // Large frame wipes open left-to-right; its photo settles back into place as the clip reveals it.
                 // Paced to land alongside the text sequence instead of finishing early.
                 .to(largeImage, { clipPath: roundedClip("0px 0% 0px 0px", 1, 0.625), duration: 1.1, ease: "power4.inOut" }, 0.2)
