@@ -246,7 +246,6 @@ runWhenReady(() => {
     function roundedClipTimeline(insetValues, radiusRem = 1) {
         const isBelow53rem = !window.matchMedia("(min-width: 53rem)").matches;
         const radius = isBelow53rem ? 0 : radiusRem;
-        console.log("[DEBUG roundedClipTimeline]", { isBelow53rem, radius, innerWidth: window.innerWidth, insetValues });
         return `inset(${insetValues} round ${radius}rem)`;
     }
 
