@@ -2,3 +2,6 @@
 qa-screenshots/
 node_modules/
 keys
+.env
+.env.*
+!.env.example

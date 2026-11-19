@@ -231,6 +231,25 @@ runWhenReady(() => {
             .to(topImage, { autoAlpha: 1, scale: 1, duration: 1.3, ease: "power2.out" }, 0);
     }
 
+    // Every clip-path wipe below rounds its corners with "round 1rem" so the
+    // wrap's own border radius survives the animation. Same radius at every
+    // size by default; mobileRadiusRem lets one call site use a smaller radius
+    // on mobile instead (only the Who section's image pair does this).
+    function roundedClip(insetValues, radiusRem = 1, mobileRadiusRem = radiusRem) {
+        const isBelow53rem = !window.matchMedia("(min-width: 53rem)").matches;
+        const radius = isBelow53rem ? mobileRadiusRem : radiusRem;
+        return `inset(${insetValues} round ${radius}rem)`;
+    }
+
+    // Timeline list wipe only: same rule, checked via an actual media query
+    // (not the shared width math above) per its own breakpoint.
+    function roundedClipTimeline(insetValues, radiusRem = 1) {
+        const isBelow53rem = !window.matchMedia("(min-width: 53rem)").matches;
+        return isBelow53rem
+            ? `inset(${insetValues})`
+            : `inset(${insetValues} round ${radiusRem}rem)`;
+    }
+
     // --- Main homepage hero: eyebrow tag -> headline -> copy -> buttons -> divider -> badge -> features ---
     (function initHeroMain() {
         const heroRoot = document.querySelector('[data-animation-trigger="hero-main"]');
@@ -335,10 +354,10 @@ runWhenReady(() => {
                 .set(buttons, { opacity: 0, y: 10 }, 0)
                 // Each wrap's own box clips the reveal; the wipe direction differs per
                 // image so the two frames don't feel like one mechanical repeat.
-                // "round 16px" keeps the wrap's own corner radius intact mid-wipe
+                // "round 1rem" keeps the wrap's own corner radius intact mid-wipe
                 // instead of squaring it off while the clip shape animates.
-                .set(largeImage, { clipPath: "inset(0px 100% 0px 0px round 16px)" }, 0)
-                .set(smallImage, { clipPath: "inset(0px 0px 0px 100% round 16px)" }, 0)
+                .set(largeImage, { clipPath: roundedClip("0px 100% 0px 0px", 1, 0.625) }, 0)
+                .set(smallImage, { clipPath: roundedClip("0px 0px 0px 100%", 1, 0.625) }, 0)
                 // Counter-scale + shift the photo itself against the wipe so the
                 // image reads as uncovered rather than just a box growing open.
                 .set(largeImg, { scale: 1.15, xPercent: 6 }, 0)
@@ -353,10 +372,10 @@ runWhenReady(() => {
                 .to(buttons, { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: "back.out(1.4)" }, 0.75)
                 // Large frame wipes open left-to-right; its photo settles back into place as the clip reveals it.
                 // Paced to land alongside the text sequence instead of finishing early.
-                .to(largeImage, { clipPath: "inset(0px 0% 0px 0px round 16px)", duration: 1.1, ease: "power4.inOut" }, 0.2)
+                .to(largeImage, { clipPath: roundedClip("0px 0% 0px 0px", 1, 0.625), duration: 1.1, ease: "power4.inOut" }, 0.2)
                 .to(largeImg, { scale: 1, xPercent: 0, duration: 1.3, ease: "power3.out" }, 0.2)
                 // Small frame wipes open right-to-left, offset later so the two don't land together.
-                .to(smallImage, { clipPath: "inset(0px 0px 0px 0% round 16px)", duration: 1, ease: "power4.inOut" }, 0.5)
+                .to(smallImage, { clipPath: roundedClip("0px 0px 0px 0%", 1, 0.625), duration: 1, ease: "power4.inOut" }, 0.5)
                 .to(smallImg, { scale: 1, xPercent: 0, duration: 1.2, ease: "power3.out" }, 0.5);
 
             revealSectionOnScroll(sectionRoot, tl);
@@ -381,9 +400,9 @@ runWhenReady(() => {
                 .set(words, { yPercent: 115, rotate: 3 }, 0)
                 .set(copy, { opacity: 0, y: 14 }, 0)
                 .set(callout, { opacity: 0, y: 14 }, 0)
-                // "round 16px" keeps the image wrap's own corner radius intact
+                // "round 1rem" keeps the image wrap's own corner radius intact
                 // mid-wipe instead of squaring it off while the clip animates.
-                .set(imageWrap, { clipPath: "inset(0px 100% 0px 0px round 16px)" }, 0)
+                .set(imageWrap, { clipPath: roundedClip("0px 100% 0px 0px") }, 0)
                 .set(img, { scale: 1.15, xPercent: 6 }, 0)
                 // The spine icon draws open first, in place of the eyebrow tag used elsewhere.
                 .to(icon, { autoAlpha: 1, scaleY: 1, duration: 0.6, ease: "power3.out" }, 0)
@@ -395,7 +414,7 @@ runWhenReady(() => {
                 .to(callout, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }, 0.78)
                 // The image wipes open left-to-right; the photo settles back into place as the clip reveals it.
                 // Paced to land alongside the text sequence instead of finishing early.
-                .to(imageWrap, { clipPath: "inset(0px 0% 0px 0px round 16px)", duration: 1.2, ease: "power4.inOut" }, 0.2)
+                .to(imageWrap, { clipPath: roundedClip("0px 0% 0px 0px"), duration: 1.2, ease: "power4.inOut" }, 0.2)
                 .to(img, { scale: 1, xPercent: 0, duration: 1.4, ease: "power3.out" }, 0.2);
 
             revealSectionOnScroll(sectionRoot, tl);
@@ -512,9 +531,9 @@ runWhenReady(() => {
                 .set(icon, { autoAlpha: 0, scaleY: 0, transformOrigin: "top center" }, 0)
                 .set(words, { yPercent: 115, rotate: 3 }, 0)
                 .set(copy, { opacity: 0, y: 14 }, 0)
-                // "round 16px" keeps the list's own corner radius intact mid-wipe
+                // "round 1rem" keeps the list's own corner radius intact mid-wipe
                 // instead of squaring it off while the clip shape animates.
-                .set(listWrap, { clipPath: "inset(0px 0px 100% 0px round 16px)" }, 0)
+                .set(listWrap, { clipPath: roundedClipTimeline("0px 0px 100% 0px") }, 0)
                 .set(timelineCards, { opacity: 0, y: 20 }, 0)
                 // The spine icon draws open first, in place of the eyebrow tag used elsewhere.
                 .to(icon, { autoAlpha: 1, scaleY: 1, duration: 0.6, ease: "power3.out" }, 0)
@@ -524,7 +543,7 @@ runWhenReady(() => {
                 .to(copy, { opacity: 1, y: 0, duration: 0.6, ease: "power1.out" }, 0.6)
                 // The list wipes open top-to-bottom first, then the cards inside
                 // it rise in sequence once the wipe has mostly cleared them.
-                .to(listWrap, { clipPath: "inset(0px 0px 0% 0px round 16px)", duration: 0.9, ease: "power4.inOut" }, 0.2)
+                .to(listWrap, { clipPath: roundedClipTimeline("0px 0px 0% 0px"), duration: 0.9, ease: "power4.inOut" }, 0.2)
                 .to(timelineCards, { opacity: 1, y: 0, duration: 0.55, stagger: 0.12, ease: "power3.out" }, 0.65);
 
             if (callout) {
@@ -866,9 +885,9 @@ runWhenReady(() => {
                 .set(copy, { opacity: 0, y: 14 }, 0)
                 .set(callout, { opacity: 0, y: 14 }, 0)
                 .set(buttons, { opacity: 0, y: 10 }, 0)
-                // "round 16px" keeps the image wrap's own corner radius intact
+                // "round 1rem" keeps the image wrap's own corner radius intact
                 // mid-wipe instead of squaring it off while the clip animates.
-                .set(imageWrap, { clipPath: "inset(0px 100% 0px 0px round 16px)" }, 0)
+                .set(imageWrap, { clipPath: roundedClip("0px 100% 0px 0px") }, 0)
                 .set(img, { scale: 1.15, xPercent: 6 }, 0)
                 // The spine icon draws open first, in place of the eyebrow tag used elsewhere.
                 .to(icon, { autoAlpha: 1, scaleY: 1, duration: 0.6, ease: "power3.out" }, 0)
@@ -881,7 +900,7 @@ runWhenReady(() => {
                 // Button lands with a touch of anticipation, no cartoon bounce.
                 .to(buttons, { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: "back.out(1.4)" }, 0.95)
                 // The image wipes open left-to-right alongside the text column's reveal.
-                .to(imageWrap, { clipPath: "inset(0px 0% 0px 0px round 16px)", duration: 1.2, ease: "power4.inOut" }, 0.2)
+                .to(imageWrap, { clipPath: roundedClip("0px 0% 0px 0px"), duration: 1.2, ease: "power4.inOut" }, 0.2)
                 .to(img, { scale: 1, xPercent: 0, duration: 1.4, ease: "power3.out" }, 0.2);
 
             revealSectionOnScroll(sectionRoot, tl);
@@ -909,12 +928,8 @@ runWhenReady(() => {
             const imageOnLeft =
                 sectionRoot.querySelector(".split_visual_wrap").getBoundingClientRect().left <
                 sectionRoot.querySelector(".split_content").getBoundingClientRect().left;
-            const closedClip = imageOnLeft
-                ? "inset(0px 0px 0px 100% round 16px)"
-                : "inset(0px 100% 0px 0px round 16px)";
-            const openClip = imageOnLeft
-                ? "inset(0px 0px 0px 0% round 16px)"
-                : "inset(0px 0% 0px 0px round 16px)";
+            const closedClip = roundedClip(imageOnLeft ? "0px 0px 0px 100%" : "0px 100% 0px 0px");
+            const openClip = roundedClip(imageOnLeft ? "0px 0px 0px 0%" : "0px 0% 0px 0px");
             const imgStartXPercent = imageOnLeft ? -6 : 6;
 
             const tl = gsap.timeline({ paused: true });
@@ -955,7 +970,7 @@ runWhenReady(() => {
         const tl = gsap.timeline({ paused: true });
 
         tl.set(sectionRoot, { visibility: "visible" }, 0)
-            .set(visual, { clipPath: "inset(0px 0px 0px 100% round 16px)" }, 0)
+            .set(visual, { clipPath: roundedClip("0px 0px 0px 100%") }, 0)
             .set(img, { scale: 1.15, xPercent: -6 }, 0)
             .set(tag, { opacity: 0, y: 10 }, 0)
             .set(words, { yPercent: 115, rotate: 3 }, 0)
@@ -963,7 +978,7 @@ runWhenReady(() => {
             .set(button, { opacity: 0, y: 10 }, 0)
             // Video thumbnail wipes open right-to-left, since it's the left
             // column here (mirror of the gallery/causes wipe direction).
-            .to(visual, { clipPath: "inset(0px 0px 0px 0% round 16px)", duration: 1.2, ease: "power4.inOut" }, 0)
+            .to(visual, { clipPath: roundedClip("0px 0px 0px 0%"), duration: 1.2, ease: "power4.inOut" }, 0)
             .to(img, { scale: 1, xPercent: 0, duration: 1.4, ease: "power3.out" }, 0)
             .to(tag, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 0)
             .to(words, { yPercent: 0, rotate: 0, duration: 0.9, stagger: 0.04, ease: "power4.out" }, 0.2)
@@ -1082,7 +1097,7 @@ runWhenReady(() => {
 
         tl.set(sectionRoot, { visibility: "visible" }, 0)
             .set(card, { opacity: 0, y: 20 }, 0)
-            .set(visual, { clipPath: "inset(0px 100% 0px 0px round 16px)" }, 0)
+            .set(visual, { clipPath: roundedClip("0px 100% 0px 0px") }, 0)
             .set(img, { scale: 1.15, xPercent: 6 }, 0)
             .set(words, { yPercent: 115, rotate: 3 }, 0)
             .set(copy, { opacity: 0, y: 14 }, 0)
@@ -1090,7 +1105,7 @@ runWhenReady(() => {
             // Card settles in as one plate first — it's a single contained
             // unit on the gradient background, not a text-then-image reveal.
             .to(card, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 0)
-            .to(visual, { clipPath: "inset(0px 0% 0px 0px round 16px)", duration: 1.1, ease: "power4.inOut" }, 0.1)
+            .to(visual, { clipPath: roundedClip("0px 0% 0px 0px"), duration: 1.1, ease: "power4.inOut" }, 0.1)
             .to(img, { scale: 1, xPercent: 0, duration: 1.3, ease: "power3.out" }, 0.1)
             .to(words, { yPercent: 0, rotate: 0, duration: 0.9, stagger: 0.04, ease: "power4.out" }, 0.3)
             .to(copy, { opacity: 1, y: 0, duration: 0.6, ease: "power1.out" }, 0.65)
