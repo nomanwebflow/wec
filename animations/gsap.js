@@ -245,9 +245,8 @@ runWhenReady(() => {
     // (not the shared width math above) per its own breakpoint.
     function roundedClipTimeline(insetValues, radiusRem = 1) {
         const isBelow53rem = !window.matchMedia("(min-width: 53rem)").matches;
-        return isBelow53rem
-            ? `inset(${insetValues})`
-            : `inset(${insetValues} round ${radiusRem}rem)`;
+        const radius = isBelow53rem ? 0 : radiusRem;
+        return `inset(${insetValues} round ${radius}rem)`;
     }
 
     // --- Main homepage hero: eyebrow tag -> headline -> copy -> buttons -> divider -> badge -> features ---
