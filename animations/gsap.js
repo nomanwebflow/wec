@@ -534,12 +534,13 @@ runWhenReady(() => {
                 .set(icon, { autoAlpha: 0, scaleY: 0, transformOrigin: "top center" }, 0)
                 .set(words, { yPercent: 115, rotate: 3 }, 0)
                 .set(copy, { opacity: 0, y: 14 }, 0)
-                // "round 1rem" keeps the list's own corner radius intact mid-wipe
-                // instead of squaring it off while the clip shape animates.
-                // clipPath as a function value: GSAP calls it at tween-start
-                // time (when the scroll trigger actually fires), not when
-                // this timeline is first built — so the mobile/desktop
-                // breakpoint check reflects the real viewport at play time.
+                // The "round" token is never part of a tweened clip-path:
+                // GSAP's inset() interpolator was injecting a spurious
+                // left-inset value whenever "round" rode along in the
+                // animated property (a CSSPlugin quirk), dragging the card
+                // sideways mid-wipe. So the wipe itself tweens a plain,
+                // round-free inset(); the rounded corners are restored with
+                // a plain .set() the instant the wipe finishes.
                 .set(listWrap, { clipPath: () => roundedClipTimeline("0% 0% 100% 0%") }, 0)
                 .set(timelineCards, { opacity: 0, y: 20 }, 0)
                 // The spine icon draws open first, in place of the eyebrow tag used elsewhere.
@@ -550,7 +551,8 @@ runWhenReady(() => {
                 .to(copy, { opacity: 1, y: 0, duration: 0.6, ease: "power1.out" }, 0.6)
                 // The list wipes open top-to-bottom first, then the cards inside
                 // it rise in sequence once the wipe has mostly cleared them.
-                .to(listWrap, { clipPath: () => roundedClipTimeline("0% 0% 0% 0%"), duration: 0.9, ease: "power4.inOut" }, 0.2)
+                .to(listWrap, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.9, ease: "power4.inOut" }, 0.2)
+                .set(listWrap, { clipPath: () => roundedClipTimeline("0% 0% 0% 0%") })
                 .to(timelineCards, { opacity: 1, y: 0, duration: 0.55, stagger: 0.12, ease: "power3.out" }, 0.65);
 
             if (callout) {
