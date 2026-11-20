@@ -57,12 +57,22 @@ logic — call the existing function.
 - Splits heading text into per-word `<span class="word-mask">` (the clipping
   box, `overflow:hidden`) wrapping `<span class="word-inner">` (the element
   that actually translates/rotates).
-- **Accessibility**: before splitting, the original text is captured and set
-  as `aria-label` on the heading, then all the heading's real children are
-  moved into one `aria-hidden="true"` wrapper span before the per-word spans
-  are built inside it. Screen readers get one clean read of the real
-  sentence; the fragmented word-mask markup is invisible to assistive tech.
+- **Accessibility**: before splitting, the original text is captured, then
+  all the heading's real children are moved into one `aria-hidden="true"`
+  wrapper span before the per-word spans are built inside it. Screen readers
+  get one clean read of the real sentence; the fragmented word-mask markup is
+  invisible to assistive tech. On a real `h1`-`h6` the text is set as
+  `aria-label`; on a `p` or `div` styled as a heading (where `aria-label` is
+  not permitted) a visually hidden copy of the text is added instead.
   Never split a heading without this step.
+
+## Reduced motion
+
+`prefers-reduced-motion: reduce` skips every section animation. The init
+adds the `gsap-not-found` class and returns, which lifts the flicker-prevention
+hiding so the finished page shows immediately. Any new animation added inside
+the main `runWhenReady` block is covered automatically; do not add animation
+code outside it.
 - Animated with `yPercent: 115 → 0` plus a few degrees of `rotate` settling
   to `0`, `power4.out` ease, small stagger (~0.04s) per word. Never animate
   individual characters — only whole words; character-level splitting reads

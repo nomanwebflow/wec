@@ -23,6 +23,14 @@ runWhenReady(() => {
         document.documentElement.classList.add("gsap-not-found");
         return;
     }
+
+    // Visitors who ask for reduced motion get the finished page with no
+    // reveals at all. Reusing the fail-open class lifts the flicker-prevention
+    // hiding in CSS, so every section is simply visible from the start.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        document.documentElement.classList.add("gsap-not-found");
+        return;
+    }
     gsap.registerPlugin(ScrollTrigger);
 
     // Track every pending reveal check so any ScrollTrigger.refresh() or late
@@ -168,15 +176,27 @@ runWhenReady(() => {
         if (!h2) return [];
         if (h2.dataset.split) return h2.querySelectorAll(".word-inner");
 
-        // Screen readers get the original text via aria-label; the split
+        // Screen readers get the original text (aria-label on headings, a hidden copy
+        // elsewhere, see below); the split
         // markup that builds the word-mask animation is hidden from them so
         // nothing gets read out word-by-word or garbled by the extra spans.
         const fullText = h2.textContent;
-        h2.setAttribute("aria-label", fullText);
+        const isHeadingTag = /^H[1-6]$/.test(h2.tagName);
+        // aria-label is only permitted on elements with a role. Real headings
+        // have one; a p or div styled as a heading does not, so those get a
+        // visually hidden copy of the text instead.
+        if (isHeadingTag) h2.setAttribute("aria-label", fullText);
 
         const visual = document.createElement("span");
         visual.setAttribute("aria-hidden", "true");
         while (h2.firstChild) visual.appendChild(h2.firstChild);
+        if (!isHeadingTag) {
+            const srText = document.createElement("span");
+            srText.textContent = fullText;
+            srText.style.cssText =
+                "position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0;";
+            h2.appendChild(srText);
+        }
         h2.appendChild(visual);
 
         const walker = document.createTreeWalker(visual, NodeFilter.SHOW_TEXT);
