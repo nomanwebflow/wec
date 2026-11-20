@@ -297,11 +297,11 @@ runWhenReady(() => {
         const heroRoot = document.querySelector('[data-animation-trigger="services-hero"]');
         if (!heroRoot) return;
 
-        const layout = heroRoot.querySelector(".services_hero_layout");
+        const layout = heroRoot.querySelector(".hero_secondary_layout");
         const badge = heroRoot.querySelector(".reviews-badge_outer");
         const copy = heroRoot.querySelector(".u-text.u-rich-text");
         const buttons = heroRoot.querySelectorAll(".u-button-wrapper .button_main_wrap");
-        const divider = heroRoot.querySelector(".services_hero_divder");
+        const divider = heroRoot.querySelector(".hero_secondary_divider");
         const features = heroRoot.querySelectorAll(".icon-label_wrap");
         const words = splitHeadingIntoWords(layout, ".u-heading");
 
@@ -1215,6 +1215,113 @@ runWhenReady(() => {
         }
 
         revealSectionOnScroll(sectionRoot, tl, "top 90%");
+    })();
+
+    // --- Report-of-findings graph (new patient page embed): the long decline draws, the fall, then the climb ---
+    // Markup lives in an HTML embed (.rof-graph). It is fully drawn and visible
+    // with no JS, so this only ever animates on top of a complete chart.
+    (function initReportGraph() {
+        const charts = document.querySelectorAll(".rof-graph");
+        if (!charts.length) return;
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+        // Fraction (0-1) along a path of the point nearest to x,y.
+        function fractionNear(path, x, y) {
+            const total = path.getTotalLength();
+            let best = 0;
+            let bestDist = Infinity;
+            for (let i = 0; i <= 400; i += 1) {
+                const p = path.getPointAtLength((total * i) / 400);
+                const dist = (p.x - x) * (p.x - x) + (p.y - y) * (p.y - y);
+                if (dist < bestDist) {
+                    bestDist = dist;
+                    best = i / 400;
+                }
+            }
+            return best;
+        }
+
+        // Fraction (0-1) along a path where it first reaches y.
+        function fractionAtY(path, y) {
+            const total = path.getTotalLength();
+            for (let i = 0; i <= 400; i += 1) {
+                if (path.getPointAtLength((total * i) / 400).y >= y) return i / 400;
+            }
+            return 1;
+        }
+
+        charts.forEach((root) => {
+            // The embed holds a desktop and a mobile <svg>; the container query
+            // hides one, so only drive the one that is actually showing.
+            const svg = [...root.querySelectorAll(".rof-graph__svg")].find(
+                (el) => getComputedStyle(el).display !== "none"
+            );
+            if (!svg) return;
+
+            const part = (name) => svg.querySelector(".rof-graph__" + name);
+            const label = (key) => root.querySelector('[data-rof="' + key + '"]');
+            const decline = part("decline");
+            const climb = part("climb");
+            const then = part("then");
+            const arrow = part("arrowhead");
+            const fallDot = part("dot--fall");
+            const findDot = part("dot--find");
+            const zone = part("zone");
+            const labels = root.querySelectorAll(".rof-graph__label");
+            if (!decline || !climb || !then || !arrow || !fallDot || !findDot || !zone) return;
+
+            const length = (path) => path.getTotalLength();
+            // Where the hollow dot ("fell off the horse") and the symptom-zone line
+            // sit along the decline path, so the timing follows the drawing.
+            const fall = decline.dataset.fall.split(",").map(Number);
+            const fractionFall = fractionNear(decline, fall[0], fall[1]);
+            const fractionZone = fractionAtY(decline, Number(decline.dataset.zoneY));
+
+            // Lines start undrawn and hidden: a round cap on a zero-length dash
+            // would otherwise leave a dot at the path's origin.
+            [decline, climb, then].forEach((path) => {
+                gsap.set(path, { strokeDasharray: length(path), strokeDashoffset: length(path), autoAlpha: 0 });
+            });
+            gsap.set([fallDot, findDot], { scale: 0, transformOrigin: "50% 50%" });
+            gsap.set(arrow, { autoAlpha: 0, x: -6 });
+            gsap.set(labels, { autoAlpha: 0, y: 8 });
+
+            const show = { autoAlpha: 1, y: 0, duration: 0.5, ease: "power2.out" };
+            const pop = { scale: 1, duration: 0.35, ease: "back.out(2.5)" };
+            const DRIFT = 1.5; // the slow years
+            const DROP = 0.75; // the fall
+            const tDrop = DRIFT + 0.45; // a beat after "fell off the horse"
+            // The drop eases with power2.in (progress = t squared), so invert that
+            // to find when the line crosses into the symptom zone.
+            const tZone = tDrop + DROP * Math.sqrt((fractionZone - fractionFall) / (1 - fractionFall));
+            const tBottom = tDrop + DROP;
+            const tClimb = tBottom + 0.5;
+            const CLIMB = 1.2;
+
+            const tl = gsap.timeline({ paused: true });
+
+            tl.set(decline, { autoAlpha: 1 }, 0)
+                .to(label("optimal"), show, 0)
+                .to(decline, { strokeDashoffset: length(decline) * (1 - fractionFall), duration: DRIFT, ease: "none" }, 0)
+                .to(label("years"), show, DRIFT * 0.4)
+                .to(fallDot, pop, DRIFT - 0.05)
+                .to(label("moment"), show, DRIFT + 0.05)
+                .to(decline, { strokeDashoffset: 0, duration: DROP, ease: "power2.in" }, tDrop)
+                // The zone flashes as the line crosses into it, then settles back.
+                .to(zone, { fillOpacity: 0.34, duration: 0.25, ease: "power1.out", yoyo: true, repeat: 1 }, tZone)
+                .to(label("symptom"), show, tZone)
+                .to(findDot, pop, tBottom - 0.05)
+                .to(label("find"), show, tBottom + 0.05)
+                .set(climb, { autoAlpha: 1 }, tClimb)
+                .to(climb, { strokeDashoffset: 0, duration: CLIMB, ease: "power2.in" }, tClimb)
+                .to(label("plan"), show, tClimb + CLIMB * 0.45)
+                .set(then, { autoAlpha: 1 }, tClimb + CLIMB)
+                .to(then, { strokeDashoffset: 0, duration: 0.5, ease: "power2.out" }, tClimb + CLIMB)
+                .to(arrow, { autoAlpha: 1, x: 0, duration: 0.3, ease: "power2.out" }, tClimb + CLIMB + 0.3)
+                .to(label("then"), show, tClimb + CLIMB + 0.25);
+
+            revealSectionOnScroll(root, tl, "top 70%");
+        });
     })();
 
     // Keep ScrollTrigger positions accurate across images, async webfont swaps,
