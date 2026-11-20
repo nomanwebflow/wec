@@ -513,6 +513,16 @@ runWhenReady(() => {
                     .to(closingCopy, { opacity: 1, y: 0, duration: 0.6, ease: "power1.out" }, 1.25);
             }
 
+            // Right-hand photo: wipes open from the content side, same as the other image sections.
+            const visualWrap = sectionRoot.querySelector(".how_visual_wrap .image_wrap");
+            const visualImg = visualWrap && visualWrap.querySelector("img");
+            if (visualWrap) {
+                tl.set(visualWrap, { clipPath: roundedClip("0px 100% 0px 0px") }, 0)
+                    .set(visualImg, { scale: 1.15, xPercent: 6 }, 0)
+                    .to(visualWrap, { clipPath: roundedClip("0px 0% 0px 0px"), duration: 1.2, ease: "power4.inOut" }, 0.4)
+                    .to(visualImg, { scale: 1, xPercent: 0, duration: 1.4, ease: "power3.out" }, 0.4);
+            }
+
             revealSectionOnScroll(sectionRoot, tl);
         });
     })();
@@ -960,6 +970,14 @@ runWhenReady(() => {
                     .to(callout, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }, 0.78);
             }
 
+            // The CTA wrapper rises last (not the button itself, so the
+            // button's own hover transforms stay untouched).
+            const buttonWrap = sectionRoot.querySelector(".split_content .u-button-wrapper");
+            if (buttonWrap) {
+                tl.set(buttonWrap, { opacity: 0, y: 10 }, 0)
+                    .to(buttonWrap, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 0.95);
+            }
+
             revealSectionOnScroll(sectionRoot, tl);
         });
     })();
@@ -971,9 +989,11 @@ runWhenReady(() => {
 
         const visual = sectionRoot.querySelector(".intro_visual_wrap");
         const img = visual && visual.querySelector("img");
+        const playIcon = sectionRoot.querySelector(".intro_visual_icon");
         const tag = sectionRoot.querySelector(".tag_wrap");
         const words = splitHeadingIntoWords(sectionRoot, ".u-heading");
         const listItems = sectionRoot.querySelectorAll(".intro_list_item");
+        const listIcons = sectionRoot.querySelectorAll(".intro_list_item svg");
         const button = sectionRoot.querySelector(".button_main_wrap");
 
         const tl = gsap.timeline({ paused: true });
@@ -981,17 +1001,22 @@ runWhenReady(() => {
         tl.set(sectionRoot, { visibility: "visible" }, 0)
             .set(visual, { clipPath: roundedClip("0px 0px 0px 100%") }, 0)
             .set(img, { scale: 1.15, xPercent: -6 }, 0)
+            .set(playIcon, { scale: 0.4, opacity: 0, transformOrigin: "50% 50%" }, 0)
             .set(tag, { opacity: 0, y: 10 }, 0)
             .set(words, { yPercent: 115, rotate: 3 }, 0)
             .set(listItems, { opacity: 0, y: 14 }, 0)
+            .set(listIcons, { scale: 0, transformOrigin: "50% 50%" }, 0)
             .set(button, { opacity: 0, y: 10 }, 0)
             // Video thumbnail wipes open right-to-left, since it's the left
             // column here (mirror of the gallery/causes wipe direction).
             .to(visual, { clipPath: roundedClip("0px 0px 0px 0%"), duration: 1.2, ease: "power4.inOut" }, 0)
             .to(img, { scale: 1, xPercent: 0, duration: 1.4, ease: "power3.out" }, 0)
+            // Play button pops in as the wipe finishes, so it lands on a visible thumbnail.
+            .to(playIcon, { scale: 1, opacity: 1, duration: 0.6, ease: "back.out(1.7)" }, 0.8)
             .to(tag, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 0)
             .to(words, { yPercent: 0, rotate: 0, duration: 0.9, stagger: 0.04, ease: "power4.out" }, 0.2)
             .to(listItems, { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: "power3.out" }, 0.6)
+            .to(listIcons, { scale: 1, duration: 0.4, stagger: 0.08, ease: "back.out(2)" }, 0.75)
             .to(button, { opacity: 1, y: 0, duration: 0.5, ease: "back.out(1.4)" }, 0.9);
 
         // Sits directly below a full-viewport hero — trigger as soon as it
@@ -1087,6 +1112,21 @@ runWhenReady(() => {
             .to(copy, { opacity: 1, y: 0, duration: 0.6, ease: "power1.out" }, 0.35)
             .to(items, { opacity: 1, y: 0, duration: 0.55, stagger: 0.1, ease: "power3.out" }, 0.55);
 
+        // Photo beside the grid wipes open; the closing buttons + note rise last.
+        const imageWrap = sectionRoot.querySelector(".image_visual_wrap .image_wrap");
+        const image = imageWrap && imageWrap.querySelector("img");
+        if (imageWrap) {
+            tl.set(imageWrap, { clipPath: roundedClip("0px 100% 0px 0px") }, 0)
+                .set(image, { scale: 1.15, xPercent: 6 }, 0)
+                .to(imageWrap, { clipPath: roundedClip("0px 0% 0px 0px"), duration: 1.2, ease: "power4.inOut" }, 0.4)
+                .to(image, { scale: 1, xPercent: 0, duration: 1.4, ease: "power3.out" }, 0.4);
+        }
+        const closing = sectionRoot.querySelector(".new_contain > .u-content-wrapper:last-child");
+        if (closing) {
+            tl.set(closing, { opacity: 0, y: 12 }, 0)
+                .to(closing, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }, 1.1);
+        }
+
         revealSectionOnScroll(sectionRoot, tl);
     })();
 
@@ -1146,6 +1186,13 @@ runWhenReady(() => {
             // A dozen-plus logos — tight stagger keeps the wave fast and cheap.
             .to(logos, { opacity: 1, y: 0, duration: 0.4, stagger: 0.03, ease: "power3.out" }, 0.65);
 
+        // Closing note + button below the logo wall rise once the wave has mostly landed.
+        const closing = sectionRoot.querySelector(".insuranse_contain > .u-content-wrapper:last-child");
+        if (closing) {
+            tl.set(closing, { opacity: 0, y: 12 }, 0)
+                .to(closing, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }, 1.1);
+        }
+
         revealSectionOnScroll(sectionRoot, tl);
     })();
 
@@ -1158,7 +1205,7 @@ runWhenReady(() => {
         const words = splitHeadingIntoWords(sectionRoot, ".heading_wrap .u-heading");
         const copy = sectionRoot.querySelector(".u-text.u-rich-text");
         const mapWrap = sectionRoot.querySelector(".contact_map_wrap");
-        const rows = sectionRoot.querySelectorAll(".contact_map_content > div, .contact_map_content > a");
+        const rows = sectionRoot.querySelectorAll(".contact_map_content > div, .contact_map_content > a, .contact_list_item");
 
         const tl = gsap.timeline({ paused: true });
 
@@ -1206,6 +1253,13 @@ runWhenReady(() => {
             // reads as one wave sweeping left to right across the row.
             .to(about, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 0)
             .to(columns, { opacity: 1, y: 0, duration: 0.6, stagger: 0.08, ease: "power2.out" }, 0.1);
+
+        // Bottom strip (copyright + links) and the legal disclaimer settle last.
+        const bottom = sectionRoot.querySelectorAll(".footer_bottom_layout, .footer_disclaimer_wrap");
+        if (bottom.length) {
+            tl.set(bottom, { opacity: 0, y: 12 }, 0)
+                .to(bottom, { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: "power2.out" }, 0.7);
+        }
 
         if (wordmark) {
             tl.set(wordmark, { opacity: 0, y: 12 }, 0)
