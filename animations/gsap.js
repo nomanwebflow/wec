@@ -1821,6 +1821,31 @@ runWhenReady(() => {
         });
     })();
 
+    // --- Partners (insurance page): headline -> carrier logo grid in a wave -> note -> quote -> button ---
+    (function initPartnersSection() {
+        document.querySelectorAll('[data-animation-trigger="partners"]').forEach((sectionRoot) => {
+            const words = splitHeadingIntoWords(sectionRoot, ".partner_contain > .u-content-wrapper .u-heading");
+            const logos = sectionRoot.querySelectorAll(".insurance_logo_item");
+            const note = sectionRoot.querySelector(".partner_contain > .u-content-wrapper .u-text.u-rich-text");
+            const quote = sectionRoot.querySelector(".partner_quote");
+            const buttons = sectionRoot.querySelectorAll(".u-button-wrapper .button_main_wrap");
+
+            const tl = gsap.timeline({ paused: true });
+            tl.set(sectionRoot, { visibility: "visible" }, 0);
+            riseWords(tl, words, 0);
+            // A dozen logos: tight stagger keeps the wave quick, same as the homepage logo wall.
+            rise(tl, logos, 0.35, { y: 12, stagger: 0.04, duration: 0.45, ease: "power3.out" });
+            rise(tl, note, 0.85, { ease: "power1.out" });
+            rise(tl, quote, 1.0, { duration: 0.55 });
+            if (buttons.length) {
+                tl.set(buttons, { opacity: 0, y: 10 }, 0)
+                    .to(buttons, { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: "back.out(1.4)" }, 1.15);
+            }
+
+            revealSectionOnScroll(sectionRoot, tl);
+        });
+    })();
+
     // Keep ScrollTrigger positions accurate across images, async webfont swaps,
     // CMS hydration, lazy image loads, and browser scroll-restoration.
     let refreshRaf = 0;
