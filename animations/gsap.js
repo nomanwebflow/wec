@@ -507,6 +507,19 @@ runWhenReady(() => {
                     .to(closingCopy, { opacity: 1, y: 0, duration: 0.6, ease: "power1.out" }, 1.05);
             }
 
+            // ER callout (car accident articles): the panel settles, then the alert icon lands with one short shake.
+            const warning = sectionRoot.querySelector(".card_warning_wrap");
+            if (warning) {
+                const warnIcon = warning.querySelector(".icon_wrap");
+                tl.set(warning, { opacity: 0, y: 16 }, 0)
+                    .to(warning, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 0.95);
+                if (warnIcon) {
+                    tl.set(warnIcon, { scale: 0, transformOrigin: "50% 50%" }, 0)
+                        .to(warnIcon, { scale: 1, duration: 0.45, ease: "back.out(2)" }, 1.15)
+                        .to(warnIcon, { keyframes: { rotate: [0, -10, 8, -4, 0] }, duration: 0.5, ease: "power1.inOut" }, 1.5);
+                }
+            }
+
             revealSectionOnScroll(sectionRoot, tl);
         });
     })();
@@ -1892,6 +1905,35 @@ runWhenReady(() => {
                 tl.set(cardIcons, { scale: 0, transformOrigin: "50% 50%" }, 0)
                     .to(cardIcons, { scale: 1, duration: 0.4, stagger: 0.1, ease: "back.out(2)" }, 0.7);
             }
+
+            revealSectionOnScroll(sectionRoot, tl);
+        });
+    })();
+
+    // --- Why early (car accident articles): headline, the orange panel opens, then the two reason cards and their tags ---
+    (function initWhyEarlySection() {
+        document.querySelectorAll('[data-animation-trigger="why-early"]').forEach((sectionRoot) => {
+            const words = splitHeadingIntoWords(sectionRoot, ".why_early_contain > .u-content-wrapper .u-heading");
+            const panel = sectionRoot.querySelector(".why_early_list");
+            const cards = sectionRoot.querySelectorAll(".why_early_list .card_timeline_element");
+            const tags = sectionRoot.querySelectorAll(".why_early_list .tag_wrap");
+            const texts = sectionRoot.querySelectorAll(".why_early_list .card_timeline_text");
+
+            const tl = gsap.timeline({ paused: true });
+            tl.set(sectionRoot, { visibility: "visible" }, 0);
+            drawIcon(tl, sectionRoot.querySelector(".heading_icon"), 0);
+            riseWords(tl, words, 0.1);
+            if (panel) {
+                // The panel opens from its centre outward, so both reasons arrive as a pair.
+                tl.set(panel, { clipPath: roundedClip("0px 50% 0px 50%") }, 0)
+                    .to(panel, { clipPath: roundedClip("0px 0% 0px 0%"), duration: 1, ease: "power4.inOut" }, 0.35);
+            }
+            rise(tl, cards, 0.8, { y: 18, stagger: 0.12, duration: 0.6, ease: "power3.out" });
+            if (tags.length) {
+                tl.set(tags, { scale: 0.6, opacity: 0, transformOrigin: "0% 50%" }, 0)
+                    .to(tags, { scale: 1, opacity: 1, duration: 0.45, stagger: 0.12, ease: "back.out(2)" }, 1.05);
+            }
+            rise(tl, texts, 1.2, { y: 8, stagger: 0.12, ease: "power1.out" });
 
             revealSectionOnScroll(sectionRoot, tl);
         });
