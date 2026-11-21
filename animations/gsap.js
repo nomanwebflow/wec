@@ -642,10 +642,28 @@ runWhenReady(() => {
         const sections = document.querySelectorAll('[data-animation-trigger="review"]');
         sections.forEach((sectionRoot) => {
             const closingButtons = sectionRoot.querySelectorAll(".u-button-wrapper .button_main_wrap");
-            const closingBadge = sectionRoot.querySelector(".reviews-badge_outer");
+            // The rating badge under the closing buttons (never one inside a review card).
+            const closingBadge = [...sectionRoot.querySelectorAll(".reviews-badge_outer")].filter(
+                (el) => !el.closest(".card_reviews_outer")
+            );
             const words = splitHeadingIntoWords(sectionRoot, ".reviews_contain .u-heading");
 
             const tl = gsap.timeline({ paused: true });
+
+            // "Banner" variant (auto accident hub): a photo strip opens over the
+            // section top, the strip uncovering top-down while the photo settles
+            // from a slight zoom. Whichever banner image the breakpoint shows is
+            // driven; the other stays untouched.
+            const banner = sectionRoot.querySelector(".reviews_banner_wrap");
+            if (banner && getComputedStyle(banner).display !== "none") {
+                const bannerImgs = [...banner.querySelectorAll(".reviews_banner_image")].filter(
+                    (img) => getComputedStyle(img).display !== "none"
+                );
+                tl.set(banner, { clipPath: "inset(0% 0% 100% 0%)" }, 0)
+                    .set(bannerImgs, { scale: 1.12 }, 0)
+                    .to(banner, { clipPath: "inset(0% 0% 0% 0%)", duration: 1.1, ease: "power4.inOut" }, 0)
+                    .to(bannerImgs, { scale: 1, duration: 1.5, ease: "power3.out" }, 0);
+            }
 
             tl.set(sectionRoot, { visibility: "visible" }, 0)
                 .set(words, { yPercent: 115, rotate: 3 }, 0)
