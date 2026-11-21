@@ -1864,6 +1864,39 @@ runWhenReady(() => {
         });
     })();
 
+    // --- ER warning (car accident articles): dark panel settles, alert icon pops, headline/copy, then the four warning cards ---
+    (function initWarningSection() {
+        document.querySelectorAll('[data-animation-trigger="warning"]').forEach((sectionRoot) => {
+            const panel = sectionRoot.querySelector(".warning_banner_wrap");
+            const alertIcon = sectionRoot.querySelector(".warning_banner_wrap .icon_wrap");
+            const words = splitHeadingIntoWords(sectionRoot, ".warning_banner_title");
+            const lead = sectionRoot.querySelector(".warning_banner_text");
+            const note = sectionRoot.querySelector(".warning_banner_bottom");
+            const cards = sectionRoot.querySelectorAll(".warning_list_wrap .card_primary_wrap");
+            const cardIcons = sectionRoot.querySelectorAll(".warning_list_wrap .icon_wrap");
+
+            const tl = gsap.timeline({ paused: true });
+            tl.set(sectionRoot, { visibility: "visible" }, 0);
+            rise(tl, panel, 0, { y: 20, duration: 0.7 });
+            if (alertIcon) {
+                // The alert lands with one short shake: urgent, not playful.
+                tl.set(alertIcon, { scale: 0, transformOrigin: "50% 50%" }, 0)
+                    .to(alertIcon, { scale: 1, duration: 0.5, ease: "back.out(2)" }, 0.3)
+                    .to(alertIcon, { keyframes: { rotate: [0, -10, 8, -4, 0] }, duration: 0.5, ease: "power1.inOut" }, 0.75);
+            }
+            riseWords(tl, words, 0.4);
+            rise(tl, lead, 0.75, { ease: "power1.out" });
+            rise(tl, note, 0.95, { y: 10, duration: 0.55 });
+            rise(tl, cards, 0.5, { y: 16, stagger: 0.1, duration: 0.55, ease: "power3.out" });
+            if (cardIcons.length) {
+                tl.set(cardIcons, { scale: 0, transformOrigin: "50% 50%" }, 0)
+                    .to(cardIcons, { scale: 1, duration: 0.4, stagger: 0.1, ease: "back.out(2)" }, 0.7);
+            }
+
+            revealSectionOnScroll(sectionRoot, tl);
+        });
+    })();
+
     // Keep ScrollTrigger positions accurate across images, async webfont swaps,
     // CMS hydration, lazy image loads, and browser scroll-restoration.
     let refreshRaf = 0;
