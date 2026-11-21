@@ -317,7 +317,13 @@ runWhenReady(() => {
         const heroRoot = document.querySelector('[data-animation-trigger="services-hero"]');
         if (!heroRoot) return;
 
-        const layout = heroRoot.querySelector(".hero_secondary_layout");
+        // Same trigger serves two hero layouts: the secondary hero (condition
+        // and service pages) and the tertiary hero (forms pages, with a
+        // breadcrumb and no badge/divider/features). Missing pieces resolve to
+        // empty and GSAP skips them.
+        const isTertiary = heroRoot.classList.contains("hero_tertiary_wrap");
+        const layout = heroRoot.querySelector(".hero_secondary_layout, .hero_tertiary_layout") || heroRoot;
+        const crumbs = heroRoot.querySelector(".hero_tertiary_crumbs");
         const badge = heroRoot.querySelector(".reviews-badge_outer");
         const copy = heroRoot.querySelector(".u-text.u-rich-text");
         const buttons = heroRoot.querySelectorAll(".u-button-wrapper .button_main_wrap");
@@ -327,7 +333,13 @@ runWhenReady(() => {
 
         const tl = gsap.timeline({ paused: true });
 
-        animateHeroBackdrop(tl, heroRoot);
+        animateHeroBackdrop(tl, heroRoot, isTertiary ? "hero_tertiary_bg_image" : undefined);
+
+        if (crumbs) {
+            // Breadcrumb leads, in the slot the rating badge takes on the secondary hero.
+            tl.set(crumbs, { opacity: 0, x: -8 }, 0)
+                .to(crumbs, { opacity: 1, x: 0, duration: 0.45, ease: "power2.out" }, 0.35);
+        }
 
         tl.set(heroRoot, { visibility: "visible" }, 0)
             .set(badge, { opacity: 0, y: 10 }, 0)
@@ -508,14 +520,25 @@ runWhenReady(() => {
             // Pass the heading's own wrapper, not .how_content — that block also
             // contains the steps list's own h3 titles, and querySelector would grab
             // whichever h-tag comes first in the DOM, which is fragile here.
-            const words = splitHeadingIntoWords(sectionRoot, ".how_content > .u-heading");
+            // The new-patients "Timeline Cover" variant wraps its heading in
+            // .timeline_cover_content instead of .how_content.
+            const words = splitHeadingIntoWords(sectionRoot, ".how_content > .u-heading, .timeline_cover_content > .u-heading");
+            const isCover = sectionRoot.classList.contains("timeline_cover_wrap");
 
             const tl = gsap.timeline({ paused: true });
 
             // Reuses the hero's backdrop treatment: whichever bg image variant
             // is actually visible settles in from a slight zoom. This section's
-            // bg image class is "how_bg_image", not the hero's default.
-            animateHeroBackdrop(tl, sectionRoot, "how_bg_image");
+            // bg image class is "how_bg_image" (or "timeline_cover_bg_image" on
+            // the cover variant), not the hero's default.
+            animateHeroBackdrop(tl, sectionRoot, isCover ? "timeline_cover_bg_image" : "how_bg_image");
+
+            // Cover variant closes with a quote card under the steps.
+            const bottomCallout = sectionRoot.querySelector(".timeline_cover_bottom .card_quote_wrap");
+            if (bottomCallout) {
+                tl.set(bottomCallout, { opacity: 0, y: 14 }, 0)
+                    .to(bottomCallout, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }, 1.25);
+            }
 
             tl.set(sectionRoot, { visibility: "visible" }, 0)
                 .set(words, { yPercent: 115, rotate: 3 }, 0)
@@ -589,6 +612,25 @@ runWhenReady(() => {
                 tl.set(callout, { opacity: 0, y: 14 }, 0)
                     // The callout box lands after the paragraph, quiet and without anticipation.
                     .to(callout, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }, 0.78);
+            }
+
+            // New-patients "New Visit Timeline" variant: a vertical rail with an
+            // arrow tip and four milestone items instead of timeline cards.
+            const rail = sectionRoot.querySelector(".new-visit_timeline_list_line");
+            const railArrow = sectionRoot.querySelector(".new-visit_timeline_list_arrow");
+            const milestones = sectionRoot.querySelectorAll(".new-visit_timeline_list_item");
+            if (rail) {
+                tl.set(rail, { scaleY: 0, transformOrigin: "top center" }, 0)
+                    // The rail draws downward like time passing, then the arrow lands at its tip.
+                    .to(rail, { scaleY: 1, duration: 1.2, ease: "power2.inOut" }, 0.4);
+            }
+            if (railArrow) {
+                tl.set(railArrow, { autoAlpha: 0, y: -8 }, 0)
+                    .to(railArrow, { autoAlpha: 1, y: 0, duration: 0.4, ease: "power2.out" }, 1.45);
+            }
+            if (milestones.length) {
+                tl.set(milestones, { opacity: 0, x: 16 }, 0)
+                    .to(milestones, { opacity: 1, x: 0, duration: 0.55, stagger: 0.22, ease: "power3.out" }, 0.55);
             }
 
             revealSectionOnScroll(sectionRoot, tl);
@@ -787,10 +829,18 @@ runWhenReady(() => {
             const closingText = sectionRoot.querySelector(".services_cost_text");
             const imageWrap = sectionRoot.querySelector(".services_cost_visual_wrap");
             const img = imageWrap && imageWrap.querySelector("img");
-            const belowText = sectionRoot.querySelector(".u-order-last-medium .u-text.u-rich-text");
+            // Either the note under the image (condition pages) or the
+            // "Using insurance? / Paying yourself?" note closing the content
+            // column (new patients page).
+            const belowText = sectionRoot.querySelectorAll(
+                ".u-order-last-medium .u-text.u-rich-text, .services_cost_content > .u-text.u-rich-text"
+            );
             const logoWrap = sectionRoot.querySelector(".insurance_logo_wrap");
             const buttons = sectionRoot.querySelectorAll(".u-button-wrapper .button_main_wrap");
             const words = splitHeadingIntoWords(sectionRoot, ".u-container > .u-content-wrapper .u-heading");
+            // Some cost sections carry an intro line under the heading (the
+            // auto accident hub's "This is the part that stops most people...").
+            const introCopy = sectionRoot.querySelector(".u-container > .u-content-wrapper .u-text.u-rich-text");
             // "YOUR FIRST VISIT" (a plain styled div) and "This Covers" (an
             // unwrapped h3) above the covered-items list.
             const visitWords = splitHeadingIntoWords(sectionRoot, ".services_cost_content > .u-text-style-h3");
@@ -836,9 +886,13 @@ runWhenReady(() => {
                 if (dividers[0]) tl.to(dividers[0], { scaleX: 1, duration: 0.5, ease: "power3.inOut" }, 0.3);
                 if (dividers[1]) tl.to(dividers[1], { scaleX: 1, duration: 0.5, ease: "power3.inOut" }, 0.9);
             }
-            if (belowText) {
+            if (introCopy) {
+                tl.set(introCopy, { opacity: 0, y: 14 }, 0)
+                    .to(introCopy, { opacity: 1, y: 0, duration: 0.6, ease: "power1.out" }, 0.3);
+            }
+            if (belowText.length) {
                 tl.set(belowText, { opacity: 0, y: 14 }, 0)
-                    .to(belowText, { opacity: 1, y: 0, duration: 0.6, ease: "power1.out" }, 1.2);
+                    .to(belowText, { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: "power1.out" }, 1.2);
             }
 
             revealSectionOnScroll(sectionRoot, tl);
@@ -1395,6 +1449,375 @@ runWhenReady(() => {
                 .to(label("then"), show, tClimb + CLIMB + 0.25);
 
             revealSectionOnScroll(root, tl, "top 70%");
+        });
+    })();
+
+    // Shared beats for the about / team / forms / new-patient sections below.
+    // Each helper adds one familiar move to a section timeline so the pages
+    // read as one system with the rest of the site.
+    const rise = (tl, targets, at, opts = {}) => {
+        if (!targets || targets.length === 0) return;
+        tl.set(targets, { opacity: 0, y: opts.y || 14 }, 0).to(
+            targets,
+            {
+                opacity: 1,
+                y: 0,
+                duration: opts.duration || 0.6,
+                stagger: opts.stagger || 0,
+                ease: opts.ease || "power2.out"
+            },
+            at
+        );
+    };
+    const riseWords = (tl, words, at) => {
+        if (!words || !words.length) return;
+        tl.set(words, { yPercent: 115, rotate: 3 }, 0).to(
+            words,
+            { yPercent: 0, rotate: 0, duration: 0.9, stagger: 0.04, ease: "power4.out" },
+            at
+        );
+    };
+    // Image wrap wipes open toward its own outer edge while the photo inside
+    // settles from a slight zoom. "fromRight" = content sits to the left.
+    const wipeImage = (tl, wrap, at, fromRight = true) => {
+        if (!wrap) return;
+        const img = wrap.querySelector("img");
+        tl.set(wrap, { clipPath: roundedClip(fromRight ? "0px 100% 0px 0px" : "0px 0px 0px 100%") }, 0)
+            .to(wrap, { clipPath: roundedClip(fromRight ? "0px 0% 0px 0px" : "0px 0px 0px 0%"), duration: 1.2, ease: "power4.inOut" }, at);
+        if (img) {
+            tl.set(img, { scale: 1.15, xPercent: fromRight ? 6 : -6 }, 0)
+                .to(img, { scale: 1, xPercent: 0, duration: 1.4, ease: "power3.out" }, at);
+        }
+    };
+    // The spine mark beside a heading draws open top-down, same as every other section using it.
+    const drawIcon = (tl, icon, at) => {
+        if (!icon) return;
+        tl.set(icon, { autoAlpha: 0, scaleY: 0, transformOrigin: "top center" }, 0)
+            .to(icon, { autoAlpha: 1, scaleY: 1, duration: 0.6, ease: "power3.out" }, at);
+    };
+    const isLeftOf = (a, b) => a && b && a.getBoundingClientRect().left < b.getBoundingClientRect().left;
+    // A paused timeline does not render its time-0 start states on its own.
+    // Sections hidden by the flicker-prevention CSS never notice, but a
+    // sub-timeline inside an already-visible section (a lower card, the part
+    // of a tall section below the fold) must apply them now, or its content
+    // shows at rest and then snaps back to hidden when the reveal starts.
+    const primeStartState = (tl) => tl.progress(1, true).progress(0, true);
+
+    // --- About / Team hero: tag -> headline -> copy, portraits wipe up in sequence ---
+    (function initAboutHeroSection() {
+        document.querySelectorAll('[data-animation-trigger="about-hero"]').forEach((sectionRoot) => {
+            const tag = sectionRoot.querySelector(".hero_about_content .tag_wrap");
+            const copy = sectionRoot.querySelector(".hero_about_content .u-text.u-rich-text");
+            const words = splitHeadingIntoWords(sectionRoot, ".hero_about_content .u-heading");
+            // One large portrait on About, three small ones on Team.
+            const visuals = sectionRoot.querySelectorAll(".hero_about_visual_wrap");
+            const imgs = sectionRoot.querySelectorAll(".hero_about_visual_image");
+
+            const tl = gsap.timeline({ paused: true });
+
+            tl.set(sectionRoot, { visibility: "visible" }, 0)
+                .set(tag, { opacity: 0, x: -8 }, 0)
+                .set(visuals, { clipPath: roundedClip("100% 0px 0px 0px") }, 0)
+                .set(imgs, { scale: 1.15, yPercent: 6 }, 0)
+                .to(tag, { opacity: 1, x: 0, duration: 0.45, ease: "power2.out" }, 0.2)
+                // Portraits rise out of their frames bottom-up, one after another.
+                .to(visuals, { clipPath: roundedClip("0% 0px 0px 0px"), duration: 1.2, stagger: 0.14, ease: "power4.inOut" }, 0.1)
+                .to(imgs, { scale: 1, yPercent: 0, duration: 1.4, stagger: 0.14, ease: "power3.out" }, 0.1);
+            riseWords(tl, words, 0.3);
+            rise(tl, copy, 0.7, { ease: "power1.out" });
+
+            revealSectionOnScroll(sectionRoot, tl, "top 100%");
+        });
+    })();
+
+    // --- Story (About Morgan): headline -> copy -> quote card with portrait -> closing line ---
+    (function initStorySection() {
+        document.querySelectorAll('[data-animation-trigger="story"]').forEach((sectionRoot) => {
+            const words = splitHeadingIntoWords(sectionRoot, ".heading_wrap .u-heading");
+            const blocks = sectionRoot.querySelectorAll(".about_layout > .u-text.u-rich-text");
+            const quote = sectionRoot.querySelector(".team_quote_wrap");
+            const quoteImg = sectionRoot.querySelector(".team_quote_visual_image");
+
+            const tl = gsap.timeline({ paused: true });
+            tl.set(sectionRoot, { visibility: "visible" }, 0);
+            drawIcon(tl, sectionRoot.querySelector(".heading_icon"), 0);
+            riseWords(tl, words, 0.2);
+            rise(tl, blocks[0], 0.5, { ease: "power1.out" });
+            rise(tl, quote, 0.75, { y: 18, duration: 0.7 });
+            if (quoteImg) {
+                tl.set(quoteImg, { scale: 1.2 }, 0).to(quoteImg, { scale: 1, duration: 1.3, ease: "power3.out" }, 0.65);
+            }
+            rise(tl, blocks[1], 0.95, { ease: "power1.out" });
+
+            revealSectionOnScroll(sectionRoot, tl);
+        });
+    })();
+
+    // --- Credentials: tag/headline -> photo wipe -> credential rows (icons pop) -> divider -> stats ---
+    (function initCredentialsSection() {
+        document.querySelectorAll('[data-animation-trigger="credentials"]').forEach((sectionRoot) => {
+            const tag = sectionRoot.querySelector(".tag_wrap");
+            const words = splitHeadingIntoWords(sectionRoot, ".credentials_column .u-heading");
+            const visual = sectionRoot.querySelector(".credentials_visual_wrap");
+            const rows = sectionRoot.querySelectorAll(".credentials_list_item");
+            const icons = sectionRoot.querySelectorAll(".credentials_list_item .icon_wrap");
+            const divider = sectionRoot.querySelector(".credentials_divider");
+            const stats = sectionRoot.querySelectorAll(".credentials_stats_item");
+
+            const tl = gsap.timeline({ paused: true });
+            tl.set(sectionRoot, { visibility: "visible" }, 0)
+                .set(tag, { opacity: 0, x: -8 }, 0)
+                .to(tag, { opacity: 1, x: 0, duration: 0.45, ease: "power2.out" }, 0);
+            riseWords(tl, words, 0.15);
+            wipeImage(tl, visual, 0.35);
+            rise(tl, rows, 0.45, { y: 16, stagger: 0.12, duration: 0.55, ease: "power3.out" });
+            if (icons.length) {
+                tl.set(icons, { scale: 0, transformOrigin: "50% 50%" }, 0)
+                    .to(icons, { scale: 1, duration: 0.45, stagger: 0.12, ease: "back.out(2)" }, 0.6);
+            }
+            if (divider) {
+                tl.set(divider, { scaleX: 0, transformOrigin: "left center" }, 0)
+                    .to(divider, { scaleX: 1, duration: 0.6, ease: "power3.inOut" }, 0.95);
+            }
+            rise(tl, stats, 1.1, { stagger: 0.12, duration: 0.55 });
+
+            revealSectionOnScroll(sectionRoot, tl);
+        });
+    })();
+
+    // --- Approach: headline -> copy -> photo card -> copy -> quote, tall photo wipes alongside ---
+    (function initApproachSection() {
+        document.querySelectorAll('[data-animation-trigger="approach"]').forEach((sectionRoot) => {
+            const words = splitHeadingIntoWords(sectionRoot, ".heading_wrap .u-heading");
+            const blocks = sectionRoot.querySelectorAll(".approach_layout .u-text.u-rich-text");
+            const card = sectionRoot.querySelector(".approach_card_wrap");
+            const cardImg = sectionRoot.querySelector(".approach_card_image");
+            const quote = sectionRoot.querySelector(".card_quote_wrap");
+            const visual = sectionRoot.querySelector(".approach_visual_wrap");
+            const content = visual && visual.previousElementSibling;
+
+            const tl = gsap.timeline({ paused: true });
+            tl.set(sectionRoot, { visibility: "visible" }, 0);
+            drawIcon(tl, sectionRoot.querySelector(".heading_icon"), 0);
+            riseWords(tl, words, 0.2);
+            rise(tl, blocks[0], 0.5, { ease: "power1.out" });
+            rise(tl, card, 0.7, { y: 18, duration: 0.7 });
+            if (cardImg) {
+                tl.set(cardImg, { scale: 1.2 }, 0).to(cardImg, { scale: 1, duration: 1.3, ease: "power3.out" }, 0.6);
+            }
+            rise(tl, blocks[1], 0.85, { ease: "power1.out" });
+            rise(tl, quote, 1.05, { duration: 0.55 });
+            wipeImage(tl, visual, 0.2, !isLeftOf(visual, content));
+
+            revealSectionOnScroll(sectionRoot, tl);
+        });
+    })();
+
+    // --- Qualities: headline -> three cards rise in sequence ---
+    (function initQualitiesSection() {
+        document.querySelectorAll('[data-animation-trigger="qualities"]').forEach((sectionRoot) => {
+            const words = splitHeadingIntoWords(sectionRoot, ".u-heading");
+            const items = sectionRoot.querySelectorAll(".qualities_list_item");
+
+            const tl = gsap.timeline({ paused: true });
+            tl.set(sectionRoot, { visibility: "visible" }, 0);
+            riseWords(tl, words, 0);
+            rise(tl, items, 0.4, { y: 20, stagger: 0.12, duration: 0.6, ease: "power3.out" });
+
+            revealSectionOnScroll(sectionRoot, tl);
+        });
+    })();
+
+    // --- After work: photo wipes from its side -> headline -> copy -> badge stamps on ---
+    (function initAfterWorkSection() {
+        document.querySelectorAll('[data-animation-trigger="after-work"]').forEach((sectionRoot) => {
+            const visual = sectionRoot.querySelector(".home_visual_wrap");
+            const content = visual && visual.nextElementSibling;
+            const words = splitHeadingIntoWords(sectionRoot, ".heading_wrap .u-heading");
+            const copy = sectionRoot.querySelector(".home_layout .u-text.u-rich-text");
+            const badge = sectionRoot.querySelector(".home_visual_badge");
+
+            const tl = gsap.timeline({ paused: true });
+            tl.set(sectionRoot, { visibility: "visible" }, 0);
+            // Photo is the left column on desktop: wipe toward its outer (left) edge.
+            wipeImage(tl, visual, 0, !isLeftOf(visual, content));
+            drawIcon(tl, sectionRoot.querySelector(".heading_icon"), 0.1);
+            riseWords(tl, words, 0.3);
+            rise(tl, copy, 0.7, { ease: "power1.out" });
+            if (badge) {
+                // The round badge stamps on last with a small turn, like a sticker.
+                tl.set(badge, { scale: 0.4, rotate: -24, autoAlpha: 0, transformOrigin: "50% 50%" }, 0)
+                    .to(badge, { scale: 1, rotate: 0, autoAlpha: 1, duration: 0.7, ease: "back.out(1.8)" }, 1.0);
+            }
+
+            revealSectionOnScroll(sectionRoot, tl);
+        });
+    })();
+
+    // --- Goal: headline -> quote card with portrait ---
+    (function initGoalSection() {
+        document.querySelectorAll('[data-animation-trigger="goal"]').forEach((sectionRoot) => {
+            const words = splitHeadingIntoWords(sectionRoot, ".u-content-wrapper .u-heading");
+            const quote = sectionRoot.querySelector(".team_quote_wrap");
+            const quoteImg = sectionRoot.querySelector(".team_quote_visual_image");
+            const quoteBlocks = sectionRoot.querySelectorAll(".team_quote_content .u-text.u-rich-text");
+
+            const tl = gsap.timeline({ paused: true });
+            tl.set(sectionRoot, { visibility: "visible" }, 0);
+            riseWords(tl, words, 0);
+            rise(tl, quote, 0.35, { y: 18, duration: 0.7 });
+            if (quoteImg) {
+                tl.set(quoteImg, { scale: 1.2 }, 0).to(quoteImg, { scale: 1, duration: 1.3, ease: "power3.out" }, 0.35);
+            }
+            rise(tl, quoteBlocks, 0.6, { y: 10, stagger: 0.15, duration: 0.55 });
+
+            revealSectionOnScroll(sectionRoot, tl);
+        });
+    })();
+
+    // --- Team list: each bio card reveals on its own as it scrolls in ---
+    // Cards are tall and stacked, so one section-wide timeline would play the
+    // lower cards before anyone can see them.
+    (function initTeamListSection() {
+        document.querySelectorAll('[data-animation-trigger="team-list"]').forEach((sectionRoot) => {
+            const cards = sectionRoot.querySelectorAll(".card_team_wrap");
+            const timelines = [];
+
+            cards.forEach((card) => {
+                const visual = card.querySelector(".card_team_visual");
+                const content = card.querySelector(".card_team_content");
+                const words = splitHeadingIntoWords(card, ".card_team_title");
+                const subhead = card.querySelector(".card_team_subhead");
+                const copy = card.querySelector(".card_team_content .u-text.u-rich-text");
+                const button = card.querySelector(".button_main_wrap");
+
+                const tl = gsap.timeline({ paused: true });
+                wipeImage(tl, visual, 0, !isLeftOf(visual, content));
+                riseWords(tl, words, 0.2);
+                rise(tl, subhead, 0.5, { y: 8, duration: 0.45 });
+                rise(tl, copy, 0.65, { ease: "power1.out" });
+                if (button) {
+                    tl.set(button, { opacity: 0, y: 10 }, 0)
+                        .to(button, { opacity: 1, y: 0, duration: 0.5, ease: "back.out(1.4)" }, 0.9);
+                }
+                primeStartState(tl);
+                timelines.push([card, tl]);
+            });
+
+            // Every card's hidden start state is in place (primed above), so the
+            // section itself can show now; this keeps its screen-reader heading
+            // exposed throughout.
+            gsap.set(sectionRoot, { visibility: "visible" });
+            timelines.forEach(([card, tl]) => revealSectionOnScroll(card, tl));
+        });
+    })();
+
+    // --- Forms: headline -> form card (icon pops, buttons land) | divider -> directions -> sign-off ---
+    (function initFormsEmbedSection() {
+        document.querySelectorAll('[data-animation-trigger="forms-embed"]').forEach((sectionRoot) => {
+            const headings = sectionRoot.querySelectorAll(".form_embed_layout > .u-heading");
+            const card = sectionRoot.querySelector(".form_embed_card");
+            const icon = sectionRoot.querySelector(".form_embed_header .icon_wrap");
+            const headerText = sectionRoot.querySelector(".form_embed_header_text");
+            const buttons = sectionRoot.querySelectorAll(".form_embed_card .button_main_wrap");
+            const divider = sectionRoot.querySelector(".form_embed_divider");
+            const items = sectionRoot.querySelectorAll(".list_item");
+            const numbers = sectionRoot.querySelectorAll(".list_number");
+            const signoff = sectionRoot.querySelector(".form_embed_layout > .u-text.u-rich-text:last-child");
+
+            const topWords = headings[0] ? splitHeadingIntoWords(headings[0], "h1, h2, h3") : [];
+            const bottomWords = headings[1] ? splitHeadingIntoWords(headings[1], "h1, h2, h3") : [];
+
+            // Part one: the form card.
+            const top = gsap.timeline({ paused: true });
+            top.set(sectionRoot, { visibility: "visible" }, 0);
+            riseWords(top, topWords, 0);
+            rise(top, card, 0.3, { y: 20, duration: 0.7 });
+            if (icon) {
+                top.set(icon, { scale: 0, transformOrigin: "50% 50%" }, 0)
+                    .to(icon, { scale: 1, duration: 0.5, ease: "back.out(2)" }, 0.6);
+            }
+            rise(top, headerText, 0.7, { y: 10, duration: 0.5 });
+            if (buttons.length) {
+                top.set(buttons, { opacity: 0, y: 10 }, 0)
+                    .to(buttons, { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: "back.out(1.4)" }, 0.9);
+            }
+            // Variants add blocks between the card and the divider (the
+            // personal injury forms page has a note card and a self-pay
+            // button there). Whatever sits in that gap rises right after.
+            const layoutKids = card ? [...card.parentElement.children] : [];
+            const gapEnd = divider ? layoutKids.indexOf(divider) : layoutKids.length;
+            const extras = layoutKids.slice(layoutKids.indexOf(card) + 1, gapEnd);
+            rise(top, extras, 1.05, { y: 12, stagger: 0.1, duration: 0.55 });
+            revealSectionOnScroll(sectionRoot, top);
+
+            // Part two (below the fold of this tall section): directions list,
+            // triggered by its own divider so it plays when it is actually seen.
+            if (divider) {
+                const bottom = gsap.timeline({ paused: true });
+                bottom.set(divider, { scaleX: 0, transformOrigin: "left center" }, 0)
+                    .to(divider, { scaleX: 1, duration: 0.6, ease: "power3.inOut" }, 0);
+                riseWords(bottom, bottomWords, 0.2);
+                rise(bottom, items, 0.5, { y: 12, stagger: 0.12, duration: 0.5, ease: "power3.out" });
+                if (numbers.length) {
+                    bottom.set(numbers, { scale: 0, transformOrigin: "50% 50%" }, 0)
+                        .to(numbers, { scale: 1, duration: 0.4, stagger: 0.12, ease: "back.out(2)" }, 0.6);
+                }
+                rise(bottom, signoff, 1.0, { y: 10, duration: 0.5 });
+                primeStartState(bottom);
+                revealSectionOnScroll(divider, bottom);
+            }
+        });
+    })();
+
+    // --- Prerequisite: headline -> two numbered steps (numbers pop) -> note, photo wipes ---
+    (function initPrerequisiteSection() {
+        document.querySelectorAll('[data-animation-trigger="prerequisite"]').forEach((sectionRoot) => {
+            const words = splitHeadingIntoWords(sectionRoot, ".heading_wrap .u-heading");
+            const steps = sectionRoot.querySelectorAll(".steps_list_item");
+            const numbers = sectionRoot.querySelectorAll(".steps_list_number");
+            const note = sectionRoot.querySelector(".uneven_content > .u-text.u-rich-text");
+            const visual = sectionRoot.querySelector(".uneven_visual");
+            const content = sectionRoot.querySelector(".uneven_content");
+
+            const tl = gsap.timeline({ paused: true });
+            tl.set(sectionRoot, { visibility: "visible" }, 0);
+            drawIcon(tl, sectionRoot.querySelector(".heading_icon"), 0);
+            riseWords(tl, words, 0.2);
+            rise(tl, steps, 0.5, { y: 16, stagger: 0.14, duration: 0.55, ease: "power3.out" });
+            if (numbers.length) {
+                tl.set(numbers, { scale: 0, transformOrigin: "50% 50%" }, 0)
+                    .to(numbers, { scale: 1, duration: 0.45, stagger: 0.14, ease: "back.out(2)" }, 0.5);
+            }
+            rise(tl, note, 0.9, { ease: "power1.out" });
+            wipeImage(tl, visual, 0.2, !isLeftOf(visual, content));
+
+            revealSectionOnScroll(sectionRoot, tl);
+        });
+    })();
+
+    // --- Report of findings: headline -> copy (graph animates itself) -> closing copy below the graph ---
+    (function initReportSection() {
+        document.querySelectorAll('[data-animation-trigger="report"]').forEach((sectionRoot) => {
+            const contents = sectionRoot.querySelectorAll(".report_content");
+            const words = splitHeadingIntoWords(sectionRoot, ".heading_wrap .u-heading");
+            const intro = contents[0] && contents[0].querySelector(".u-text.u-rich-text");
+            const closing = contents[1] && contents[1].querySelector(".u-text.u-rich-text");
+
+            const tl = gsap.timeline({ paused: true });
+            tl.set(sectionRoot, { visibility: "visible" }, 0);
+            drawIcon(tl, sectionRoot.querySelector(".heading_icon"), 0);
+            riseWords(tl, words, 0.2);
+            rise(tl, intro, 0.6, { ease: "power1.out" });
+            revealSectionOnScroll(sectionRoot, tl);
+
+            // Closing copy sits under the tall graph: give it its own trigger.
+            if (closing) {
+                const end = gsap.timeline({ paused: true });
+                rise(end, closing, 0, { ease: "power1.out" });
+                primeStartState(end);
+                revealSectionOnScroll(contents[1], end);
+            }
         });
     })();
 

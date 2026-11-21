@@ -180,3 +180,21 @@ reading the code:
 5. A live-page edit only reflects on `*.webflow.io` after the Webflow site
    is published — Designer attribute/content changes are not visible on the
    staging URL until then.
+
+## Sub-timelines inside a visible section
+
+A section's own timeline can rely on the flicker-prevention CSS: the root is
+hidden until the reveal plays, so its time-0 `.set()` start states never show.
+A second timeline inside an already-visible section (a lower team card, the
+part of a tall section below the fold, closing copy under a graph) has no
+such cover, and a paused timeline does not render its time-0 sets on its own.
+Call `primeStartState(tl)` after building it, before `revealSectionOnScroll`,
+so its content starts hidden instead of showing at rest and snapping back.
+
+## Shared helpers for content sections
+
+`rise`, `riseWords`, `wipeImage`, `drawIcon` and `isLeftOf` (defined above the
+about/team/forms/new-patient inits) cover the common beats: copy fading up,
+the word-mask heading, the clip-path photo wipe with its zoom settle, and the
+spine icon drawing open. Use them for new sections instead of repeating the
+`.set()`/`.to()` pairs by hand.
