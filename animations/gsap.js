@@ -1939,6 +1939,51 @@ runWhenReady(() => {
         });
     })();
 
+    // --- Nav: one hover highlight that slides between links (GSAP Flip) ---
+    // The single .nav_link_hover lives in one .nav_links_inner. On hover it is
+    // re-parented into the hovered link's inner and Flip animates the jump, so
+    // it glides and resizes to fit the new label. It fades in on the first
+    // hover and out when the pointer leaves the whole link row.
+    (function initNavHoverFlip() {
+        if (typeof Flip === "undefined") return;
+        const pill = document.querySelector(".nav_link_hover");
+        const wrap = pill && pill.closest(".nav_links_wrap");
+        if (!wrap) return;
+        gsap.registerPlugin(Flip);
+        gsap.set(pill, { opacity: 0 });
+        let shown = false;
+
+        function moveTo(inner) {
+            if (shown && pill.parentElement === inner) return;
+            if (!shown) {
+                // First hover: appear in place, no slide in from the old link.
+                inner.appendChild(pill);
+                shown = true;
+                gsap.to(pill, { opacity: 1, duration: 0.2, ease: "power1.out", overwrite: "auto" });
+                return;
+            }
+            const state = Flip.getState(pill);
+            inner.appendChild(pill);
+            Flip.from(state, { duration: 0.45, ease: "power3.out" });
+        }
+
+        wrap.querySelectorAll(".nav_links_item").forEach((item) => {
+            const inner = item.querySelector(".nav_links_inner");
+            if (!inner) return;
+            item.addEventListener("mouseenter", () => moveTo(inner));
+            item.addEventListener("focusin", () => moveTo(inner));
+        });
+
+        function hide() {
+            shown = false;
+            gsap.to(pill, { opacity: 0, duration: 0.2, ease: "power1.out", overwrite: "auto" });
+        }
+        wrap.addEventListener("mouseleave", hide);
+        wrap.addEventListener("focusout", (e) => {
+            if (!wrap.contains(e.relatedTarget)) hide();
+        });
+    })();
+
     // Keep ScrollTrigger positions accurate across images, async webfont swaps,
     // CMS hydration, lazy image loads, and browser scroll-restoration.
     let refreshRaf = 0;
