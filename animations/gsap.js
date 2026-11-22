@@ -2047,17 +2047,21 @@ runWhenReady(() => {
 
             const slides = [...target.panel.children];
             target.panel.appendChild(ghost);
-            const width = target.panel.offsetWidth;
-            const slide = { duration: 0.6, ease: "power3.inOut" };
+            // Short travel + crossfade reads as one surface shifting, not a
+            // slideshow. expo.out answers the hover instantly, then settles.
+            const move = { duration: 0.5, ease: "expo.out" };
 
-            // overflow:hidden clips both slides inside the white panel.
+            // overflow:hidden clips both layers inside the white panel.
             gsap.fromTo(
                 target.panel,
                 { height: fromH > 0 ? fromH : "auto", overflow: "hidden", position: "relative" },
-                { height: "auto", ...slide, clearProps: "height,overflow,position" }
+                { height: "auto", ...move, clearProps: "height,overflow,position" }
             );
-            gsap.fromTo(slides, { x: dir * width }, { x: 0, ...slide, clearProps: "transform" });
-            gsap.to(ghost, { x: -dir * width, ...slide, onComplete: () => ghost.remove() });
+            gsap.set(slides, { opacity: 0 });
+            gsap.fromTo(slides, { x: dir * 120 }, { x: 0, ...move, clearProps: "transform" });
+            gsap.to(slides, { opacity: 1, duration: 0.3, delay: 0.06, ease: "power1.out", clearProps: "opacity" });
+            gsap.to(ghost, { x: -dir * 80, ...move });
+            gsap.to(ghost, { opacity: 0, duration: 0.18, ease: "power1.out", onComplete: () => ghost.remove() });
             // Give the old toggle time to drop w--open, then hand the lists
             // back to the CSS transitions. setTimeout, not gsap.delayedCall, so
             // a paused GSAP ticker (hidden tab) can never leave them stuck.
