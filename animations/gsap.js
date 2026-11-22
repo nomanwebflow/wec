@@ -1984,6 +1984,79 @@ runWhenReady(() => {
         });
     })();
 
+    // --- Nav: switching between open dropdowns keeps the panel open ---
+    // The nav CSS closes the old dropdown (400ms) and only then opens the new
+    // one (400ms). When a dropdown opens while another is still open, this
+    // skips both CSS transitions, hides the old panel at once, and morphs the
+    // white panel from the old height to the new one while its columns fade in.
+    (function initNavDropdownSwitch() {
+        const desk = document.querySelector(".nav_desktop_wrap");
+        if (!desk) return;
+        const dds = [...desk.querySelectorAll(".nav_dropdown_component")]
+            .map((el) => ({
+                toggle: el.querySelector(":scope > .w-dropdown-toggle"),
+                list: el.querySelector(":scope > .w-dropdown-list"),
+                panel: el.querySelector(".nav_dropdown_mega_layout"),
+            }))
+            .filter((d) => d.toggle && d.list && d.panel);
+        if (dds.length < 2) return;
+        let restore = null;
+
+        // Height of a panel as it looks right now: clipped while its list is
+        // still opening or closing, its own height once fully open.
+        function visibleHeight(d) {
+            const listBottom = d.list.getBoundingClientRect().bottom;
+            const top = d.panel.getBoundingClientRect().top;
+            return Math.max(0, Math.min(d.panel.offsetHeight, listBottom - top));
+        }
+
+        function onOpen(target) {
+            const prev = dds.find(
+                (d) => d !== target && d.toggle.classList.contains("w--open")
+            );
+            if (!prev) return; // nothing open: let the normal CSS open run
+            const fromH = visibleHeight(prev);
+            clearTimeout(restore);
+            dds.forEach((d) => {
+                gsap.killTweensOf(d.panel);
+                gsap.set(d.panel, { clearProps: "height,overflow,opacity" });
+                gsap.set(d.list, {
+                    transition: "none",
+                    visibility: d === target ? "" : "hidden",
+                });
+            });
+            if (fromH > 0) {
+                gsap.fromTo(
+                    target.panel,
+                    { height: fromH, overflow: "hidden" },
+                    { height: "auto", duration: 0.35, ease: "power3.out", clearProps: "height,overflow" }
+                );
+            }
+            gsap.fromTo(
+                target.panel.children,
+                { opacity: 0 },
+                { opacity: 1, duration: 0.25, ease: "power1.out", clearProps: "opacity" }
+            );
+            // Give the old toggle time to drop w--open, then hand the lists
+            // back to the CSS transitions. setTimeout, not gsap.delayedCall, so
+            // a paused GSAP ticker (hidden tab) can never leave them stuck.
+            restore = setTimeout(() => {
+                dds.forEach((d) => gsap.set(d.list, { clearProps: "transition,visibility" }));
+            }, 450);
+        }
+
+        const observer = new MutationObserver((records) => {
+            records.forEach((r) => {
+                if (r.target.getAttribute("aria-expanded") !== "true") return;
+                const target = dds.find((d) => d.toggle === r.target);
+                if (target) onOpen(target);
+            });
+        });
+        dds.forEach((d) =>
+            observer.observe(d.toggle, { attributes: true, attributeFilter: ["aria-expanded"] })
+        );
+    })();
+
     // Keep ScrollTrigger positions accurate across images, async webfont swaps,
     // CMS hydration, lazy image loads, and browser scroll-restoration.
     let refreshRaf = 0;
