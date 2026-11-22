@@ -2020,26 +2020,44 @@ runWhenReady(() => {
             // Moving right along the nav slides the new content in from the
             // right, moving left from the left.
             const dir = dds.indexOf(target) > dds.indexOf(prev) ? 1 : -1;
+
+            // Carousel: the old panel's content (as it looks right now, even
+            // mid-slide) is cloned into the new panel as a ghost layer, so both
+            // slides sit inside one white frame and travel together.
+            dds.forEach((d) => d.panel.querySelectorAll(".nav_slide_ghost").forEach((g) => g.remove()));
+            const ghost = prev.panel.cloneNode(true);
+            ghost.classList.add("nav_slide_ghost");
+            ghost.setAttribute("aria-hidden", "true");
+            ghost.inert = true;
+            ghost.removeAttribute("id");
+            ghost.querySelectorAll("[id]").forEach((el) => el.removeAttribute("id"));
+            ghost.style.cssText =
+                "position:absolute;top:0;left:0;width:100%;height:auto;margin:0;" +
+                "background:transparent;box-shadow:none;overflow:visible;pointer-events:none;";
+
             dds.forEach((d) => {
                 gsap.killTweensOf([d.panel, ...d.panel.children]);
-                gsap.set(d.panel, { clearProps: "height,overflow,opacity" });
+                gsap.set(d.panel, { clearProps: "height,overflow,position" });
                 gsap.set(d.panel.children, { clearProps: "opacity,transform" });
                 gsap.set(d.list, {
                     transition: "none",
                     visibility: d === target ? "" : "hidden",
                 });
             });
-            // overflow:hidden clips the sliding columns inside the white panel.
+
+            const slides = [...target.panel.children];
+            target.panel.appendChild(ghost);
+            const width = target.panel.offsetWidth;
+            const slide = { duration: 0.6, ease: "power3.inOut" };
+
+            // overflow:hidden clips both slides inside the white panel.
             gsap.fromTo(
                 target.panel,
-                { height: fromH > 0 ? fromH : "auto", overflow: "hidden" },
-                { height: "auto", duration: 0.35, ease: "power3.out", clearProps: "height,overflow" }
+                { height: fromH > 0 ? fromH : "auto", overflow: "hidden", position: "relative" },
+                { height: "auto", ...slide, clearProps: "height,overflow,position" }
             );
-            gsap.fromTo(
-                target.panel.children,
-                { opacity: 0, x: dir * 48 },
-                { opacity: 1, x: 0, duration: 0.4, ease: "power3.out", clearProps: "opacity,transform" }
-            );
+            gsap.fromTo(slides, { x: dir * width }, { x: 0, ...slide, clearProps: "transform" });
+            gsap.to(ghost, { x: -dir * width, ...slide, onComplete: () => ghost.remove() });
             // Give the old toggle time to drop w--open, then hand the lists
             // back to the CSS transitions. setTimeout, not gsap.delayedCall, so
             // a paused GSAP ticker (hidden tab) can never leave them stuck.
