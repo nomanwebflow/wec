@@ -2017,25 +2017,28 @@ runWhenReady(() => {
             if (!prev) return; // nothing open: let the normal CSS open run
             const fromH = visibleHeight(prev);
             clearTimeout(restore);
+            // Moving right along the nav slides the new content in from the
+            // right, moving left from the left.
+            const dir = dds.indexOf(target) > dds.indexOf(prev) ? 1 : -1;
             dds.forEach((d) => {
-                gsap.killTweensOf(d.panel);
+                gsap.killTweensOf([d.panel, ...d.panel.children]);
                 gsap.set(d.panel, { clearProps: "height,overflow,opacity" });
+                gsap.set(d.panel.children, { clearProps: "opacity,transform" });
                 gsap.set(d.list, {
                     transition: "none",
                     visibility: d === target ? "" : "hidden",
                 });
             });
-            if (fromH > 0) {
-                gsap.fromTo(
-                    target.panel,
-                    { height: fromH, overflow: "hidden" },
-                    { height: "auto", duration: 0.35, ease: "power3.out", clearProps: "height,overflow" }
-                );
-            }
+            // overflow:hidden clips the sliding columns inside the white panel.
+            gsap.fromTo(
+                target.panel,
+                { height: fromH > 0 ? fromH : "auto", overflow: "hidden" },
+                { height: "auto", duration: 0.35, ease: "power3.out", clearProps: "height,overflow" }
+            );
             gsap.fromTo(
                 target.panel.children,
-                { opacity: 0 },
-                { opacity: 1, duration: 0.25, ease: "power1.out", clearProps: "opacity" }
+                { opacity: 0, x: dir * 48 },
+                { opacity: 1, x: 0, duration: 0.4, ease: "power3.out", clearProps: "opacity,transform" }
             );
             // Give the old toggle time to drop w--open, then hand the lists
             // back to the CSS transitions. setTimeout, not gsap.delayedCall, so
