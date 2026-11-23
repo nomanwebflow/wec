@@ -1401,7 +1401,8 @@ runWhenReady(() => {
         if (!sectionRoot) return;
 
         const icon = sectionRoot.querySelector(".icon_wrap");
-        const title = sectionRoot.querySelector(".insuranse_title");
+        // Same word-mask reveal as every other section headline.
+        const words = splitHeadingIntoWords(sectionRoot, ".insuranse_title");
         const copy = sectionRoot.querySelector(".u-text.u-rich-text");
         const logos = sectionRoot.querySelectorAll(".insurance_logo_item");
 
@@ -1409,11 +1410,11 @@ runWhenReady(() => {
 
         tl.set(sectionRoot, { visibility: "visible" }, 0)
             .set(icon, { opacity: 0, y: 10 }, 0)
-            .set(title, { opacity: 0, y: 14 }, 0)
+            .set(words, { yPercent: 115, rotate: 3 }, 0)
             .set(copy, { opacity: 0, y: 14 }, 0)
             .set(logos, { opacity: 0, y: 12 }, 0)
             .to(icon, { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" }, 0)
-            .to(title, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 0.15)
+            .to(words, { yPercent: 0, rotate: 0, duration: 0.9, stagger: 0.04, ease: "power4.out" }, 0.15)
             .to(copy, { opacity: 1, y: 0, duration: 0.6, ease: "power1.out" }, 0.4)
             // A dozen-plus logos — tight stagger keeps the wave fast and cheap.
             .to(logos, { opacity: 1, y: 0, duration: 0.4, stagger: 0.03, ease: "power3.out" }, 0.65);
@@ -2214,6 +2215,23 @@ runWhenReady(() => {
         dds.forEach((d) =>
             observer.observe(d.toggle, { attributes: true, attributeFilter: ["aria-expanded"] })
         );
+    })();
+
+    // --- Catch-all: any section headline no section timeline claimed ---
+    // Runs after every section init, so it only touches headings that are
+    // still unsplit (sections with no trigger, or secondary headings a
+    // section timeline skips). Each one gets the same word-mask reveal on
+    // its own scroll trigger. Text stays visible if this never runs.
+    (function initStrayHeadings() {
+        document.querySelectorAll(".page_main .u-heading, .page_main h2").forEach((el) => {
+            const h = el.matches("h1, h2, h3, p") ? el : el.querySelector("h1, h2, h3, p") || el;
+            if (h.tagName === "H1" || h.dataset.split || h.closest("[data-split]")) return;
+            const words = splitHeadingIntoWords({ querySelector: () => h }, "");
+            if (!words.length) return;
+            const tl = gsap.timeline({ paused: true });
+            riseWords(tl, words, 0);
+            revealSectionOnScroll(h, tl, "top 85%");
+        });
     })();
 
     // --- Nav: solid background grows in once the page scrolls past the banner ---
