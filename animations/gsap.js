@@ -2082,6 +2082,25 @@ runWhenReady(() => {
         );
     })();
 
+    // --- Nav: solid background grows in once the page scrolls past the banner ---
+    // .nav_background sits at height 0 inside the fixed nav. When the scroll
+    // distance reaches the banner height it grows to fill the nav (100%), and
+    // shrinks back when the page returns above that point.
+    (function initNavBackground() {
+        const bg = document.querySelector(".nav_background");
+        const banner = document.querySelector(".nav_banner_wrap");
+        if (!bg) return;
+        // The element carries a CSS `transition: all`, which would fight the tween.
+        gsap.set(bg, { height: "0%", transition: "none" });
+        const tween = gsap.to(bg, { height: "100%", duration: 0.5, ease: "power3.out", paused: true });
+        ScrollTrigger.create({
+            start: () => (banner ? banner.offsetHeight : 0),
+            end: "max",
+            onEnter: () => tween.play(),
+            onLeaveBack: () => tween.reverse(),
+        });
+    })();
+
     // Keep ScrollTrigger positions accurate across images, async webfont swaps,
     // CMS hydration, lazy image loads, and browser scroll-restoration.
     let refreshRaf = 0;
