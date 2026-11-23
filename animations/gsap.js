@@ -18,6 +18,133 @@ function runWhenLoaded(fn) {
     }
 }
 
+// --- Heading tags ---
+// Typography Heading text set through a component prop override arrives as a
+// <p>, which strips the heading from the outline. Promote it to the level the
+// heading variant names (h2 variant -> <h2>); "display" becomes an h2 so a page
+// never gains a second h1. Registered first so it runs before word splitting.
+runWhenReady(function fixHeadingTags() {
+    document.querySelectorAll(".u-heading").forEach((wrap) => {
+        const p = wrap.firstElementChild;
+        if (!p || p.tagName !== "P" || wrap.children.length !== 1) return;
+        const variant = wrap.getAttribute("data-wf--typography-heading--variant") || "";
+        const tag = /^h[2-6]$/.test(variant) ? variant : "h2";
+        const h = document.createElement(tag);
+        for (const attr of p.attributes) h.setAttribute(attr.name, attr.value);
+        h.append(...p.childNodes);
+        p.replaceWith(h);
+    });
+});
+
+// --- Booking widget (Schedule Appointment hero) ---
+// Not an animation, so it runs on its own, without GSAP and regardless of
+// reduced motion. The Webflow markup ships a static month as the fallback;
+// this re-renders the month from today, and wires date, time and month
+// navigation so the selection summary in the footer stays in sync.
+runWhenReady(function initBookingWidget() {
+    const root = document.querySelector("[data-booking]");
+    if (!root) return;
+    const datesEl = root.querySelector("[data-booking-dates]");
+    const monthEl = root.querySelector("[data-booking-month]");
+    const prevBtn = root.querySelector("[data-booking-prev]");
+    const nextBtn = root.querySelector("[data-booking-next]");
+    const dayEl = root.querySelector("[data-booking-day]");
+    const fullEl = root.querySelector("[data-booking-selected-full]");
+    const shortEl = root.querySelector("[data-booking-selected-short]");
+    const slots = [...root.querySelectorAll("[data-booking-slot]")];
+    if (!datesEl || !monthEl) return;
+
+    const OPEN_DAYS = [1, 2, 3, 4]; // Monday to Thursday
+    const fmt = (opts) => new Intl.DateTimeFormat("en-US", opts);
+    const monthFmt = fmt({ month: "long", year: "numeric" });
+    const dayFmt = fmt({ weekday: "long", month: "long", day: "numeric" });
+    const shortFmt = fmt({ weekday: "short", month: "short", day: "numeric" });
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const isOpen = (d) => d >= today && OPEN_DAYS.includes(d.getDay());
+    const firstOpenFrom = (d) => {
+        const c = new Date(d);
+        for (let i = 0; i < 62; i++, c.setDate(c.getDate() + 1)) if (isOpen(c)) return new Date(c);
+        return null;
+    };
+
+    let selected = firstOpenFrom(today);
+    if (!selected) return;
+    let view = new Date(selected.getFullYear(), selected.getMonth(), 1);
+    const minView = new Date(today.getFullYear(), today.getMonth(), 1);
+    let time = (slots.find((s) => s.classList.contains("is-selected")) || {}).textContent || "";
+    time = time.trim();
+
+    function updateSummary() {
+        if (dayEl) dayEl.textContent = dayFmt.format(selected);
+        if (fullEl) fullEl.textContent = time ? `${dayFmt.format(selected)} at ${time}` : `${dayFmt.format(selected)}, choose a time`;
+        if (shortEl) shortEl.textContent = time ? `${shortFmt.format(selected)} at ${time}` : shortFmt.format(selected);
+    }
+
+    function render() {
+        monthEl.textContent = monthFmt.format(view);
+        const atMin = view <= minView;
+        if (prevBtn) {
+            prevBtn.setAttribute("aria-disabled", String(atMin));
+            prevBtn.style.opacity = atMin ? "0.4" : "";
+            prevBtn.style.cursor = atMin ? "default" : "";
+        }
+        const frag = document.createDocumentFragment();
+        for (let i = 0; i < view.getDay(); i++) frag.appendChild(document.createElement("div"));
+        const days = new Date(view.getFullYear(), view.getMonth() + 1, 0).getDate();
+        for (let day = 1; day <= days; day++) {
+            const d = new Date(view.getFullYear(), view.getMonth(), day);
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.textContent = String(day);
+            btn.className = "booking_date";
+            btn.setAttribute("aria-label", dayFmt.format(d));
+            if (isOpen(d)) {
+                const on = d.getTime() === selected.getTime();
+                btn.classList.add(on ? "is-selected" : "is-available");
+                btn.setAttribute("aria-pressed", String(on));
+                btn.addEventListener("click", () => {
+                    selected = d;
+                    render();
+                    updateSummary();
+                });
+            } else {
+                btn.disabled = true;
+            }
+            frag.appendChild(btn);
+        }
+        datesEl.replaceChildren(frag);
+    }
+
+    function step(delta) {
+        const next = new Date(view.getFullYear(), view.getMonth() + delta, 1);
+        if (next < minView) return;
+        view = next;
+        render();
+    }
+    if (prevBtn) prevBtn.addEventListener("click", () => step(-1));
+    if (nextBtn) nextBtn.addEventListener("click", () => step(1));
+
+    slots.forEach((slot) => {
+        slot.setAttribute("aria-pressed", String(slot.classList.contains("is-selected")));
+        slot.addEventListener("click", () => {
+            slots.forEach((s) => {
+                s.classList.toggle("is-selected", s === slot);
+                s.setAttribute("aria-pressed", String(s === slot));
+            });
+            time = slot.textContent.trim();
+            updateSummary();
+        });
+    });
+
+    // Webflow reserves the type attribute; stop buttons defaulting to submit.
+    root.querySelectorAll("button").forEach((b) => (b.type = "button"));
+
+    render();
+    updateSummary();
+});
+
 runWhenReady(() => {
     if (typeof gsap === "undefined" || typeof ScrollTrigger === "undefined") {
         document.documentElement.classList.add("gsap-not-found");
