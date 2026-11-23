@@ -1982,9 +1982,16 @@ runWhenReady(() => {
     // --- Partners (insurance page): headline -> carrier logo grid in a wave -> note -> quote -> button ---
     (function initPartnersSection() {
         document.querySelectorAll('[data-animation-trigger="partners"]').forEach((sectionRoot) => {
-            const words = splitHeadingIntoWords(sectionRoot, ".partner_contain > .u-content-wrapper .u-heading");
+            // The container lost its partner_contain class in the Designer, so
+            // also match the plain u-container wrapper.
+            const words = splitHeadingIntoWords(
+                sectionRoot,
+                ".partner_contain > .u-content-wrapper .u-heading, .u-container > .u-content-wrapper .u-heading"
+            );
             const logos = sectionRoot.querySelectorAll(".insurance_logo_item");
-            const note = sectionRoot.querySelector(".partner_contain > .u-content-wrapper .u-text.u-rich-text");
+            const note = sectionRoot.querySelector(
+                ".partner_contain > .u-content-wrapper .u-text.u-rich-text, .u-container > .u-content-wrapper .u-text.u-rich-text"
+            );
             const quote = sectionRoot.querySelector(".partner_quote");
             const buttons = sectionRoot.querySelectorAll(".u-button-wrapper .button_main_wrap");
 
