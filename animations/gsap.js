@@ -2136,14 +2136,17 @@ runWhenReady(() => {
     // --- Prerequisite: headline -> two numbered steps (numbers pop) -> note, photo wipes ---
     deferredInits.push(function initPrerequisiteSection() {
         document.querySelectorAll('[data-animation-trigger="prerequisite"]').forEach((sectionRoot) => {
-            const words = splitHeadingIntoWords(sectionRoot, ".heading_wrap .u-heading");
+            // The reviews page binds the heading from CMS: a bare h2 in .heading_wrap.
+            const words = splitHeadingIntoWords(sectionRoot, ".heading_wrap .u-heading, .heading_wrap > h2");
             const steps = sectionRoot.querySelectorAll(".steps_list_item");
             const numbers = sectionRoot.querySelectorAll(".steps_list_number");
             // The pregnancy page's benefits layout reuses this trigger with
             // split_content / benefits_visual_wrap instead of the uneven_* classes.
+            // ...and the reviews page nests its copy one level deeper, in .u-margin-trim.
             const note = sectionRoot.querySelector(
-                ".uneven_content > .u-text.u-rich-text, .split_content > .u-text.u-rich-text"
+                ".uneven_content > .u-text.u-rich-text, .uneven_content > .u-margin-trim > .u-text.u-rich-text, .split_content > .u-text.u-rich-text"
             );
+            const badge = sectionRoot.querySelector(".uneven_content .reviews-badge_outer");
             const visuals = [...sectionRoot.querySelectorAll(".uneven_visual, .benefits_visual_wrap")].filter(
                 (el) => getComputedStyle(el).display !== "none"
             );
@@ -2164,6 +2167,7 @@ runWhenReady(() => {
                 tl.set(buttons, { opacity: 0, y: 10 }, 0)
                     .to(buttons, { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: "back.out(1.4)" }, 1.05);
             }
+            rise(tl, badge, 1.2, { y: 10, duration: 0.5 });
             visuals.forEach((visual, i) => wipeImage(tl, visual, 0.2 + i * 0.15, !isLeftOf(visual, content)));
 
             revealSectionOnScroll(sectionRoot, tl);
