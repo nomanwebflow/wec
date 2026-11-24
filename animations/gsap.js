@@ -2182,6 +2182,7 @@ runWhenReady(() => {
             if (toc) {
                 const tocTl = gsap.timeline({ paused: true });
                 rise(tocTl, toc, 0, { y: 20, duration: 0.7, ease: "power3.out" });
+                primeStartState(tocTl);
                 revealSectionOnScroll(sectionRoot, tocTl);
             }
 
@@ -2192,6 +2193,9 @@ runWhenReady(() => {
                     const headTl = gsap.timeline({ paused: true });
                     riseWords(headTl, words, 0);
                     landButtons(headTl, header.querySelectorAll(".button_main_wrap"), 0.35);
+                    // Render the hidden start state now; a paused timeline would
+                    // otherwise leave it visible until its trigger fires, then blink.
+                    primeStartState(headTl);
                     revealSectionOnScroll(header, headTl, "top 85%");
                 }
 
@@ -2207,6 +2211,7 @@ runWhenReady(() => {
                     prevTop = top;
                     const cardTl = gsap.timeline({ paused: true });
                     rise(cardTl, card, delay, { y: 24, duration: 0.7, ease: "power3.out" });
+                    primeStartState(cardTl);
                     revealSectionOnScroll(card, cardTl, "top 90%");
                 });
             });
