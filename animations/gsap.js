@@ -74,6 +74,92 @@ runWhenReady(function dealReviewColumns() {
     });
 });
 
+// --- Reviews page table of contents ---
+// The "On this page" list and the condition sections are two lists of the same
+// CMS collection. Pair them by name: each section gets an id slugged from its
+// heading, each TOC link points at it, and the orange marker slides to the
+// section in view. Not an animation, so it runs without GSAP.
+runWhenReady(function initContentToc() {
+    const toc = document.querySelector(".content_toc_wrap");
+    if (!toc) return;
+    const slug = (s) => s.trim().toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+    const sections = new Map();
+    document.querySelectorAll(".curated_reviews_section").forEach((section) => {
+        const heading = section.querySelector("h2");
+        if (!heading) return;
+        section.id = section.id || slug(heading.textContent);
+        // Clear the fixed nav when the page opens on #section.
+        section.style.scrollMarginTop = "11rem";
+        sections.set(section.id, section);
+    });
+
+    const links = [...toc.querySelectorAll(".content_toc_list_link")].filter((link) => {
+        const id = slug(link.textContent);
+        if (!sections.has(id)) return false;
+        link.setAttribute("href", `#${id}`);
+        link.dataset.tocTarget = id;
+        return true;
+    });
+    if (!links.length) return;
+
+    // Webflow's and Lenis's anchor scrolling ignore the fixed nav, so the
+    // heading lands under it. Scroll ourselves, stopping below the nav.
+    const nav = document.querySelector(".nav_component");
+    toc.addEventListener("click", (event) => {
+        const link = event.target.closest("[data-toc-target]");
+        if (!link) return;
+        event.preventDefault();
+        event.stopPropagation();
+        const section = sections.get(link.dataset.tocTarget);
+        const offset = (nav ? nav.offsetHeight : 0) + 32;
+        const top = section.getBoundingClientRect().top + window.scrollY - offset;
+        if (window.lenis) window.lenis.scrollTo(top);
+        else window.scrollTo({ top, behavior: "smooth" });
+        history.replaceState(null, "", `#${section.id}`);
+    });
+
+    // One marker for the whole list, moved to the active link. The Designer
+    // ships it inside the first link; lift it onto the list so it can slide.
+    const list = links[0].closest(".content_toc_list_wrap") || links[0].parentElement.parentElement;
+    const marker = toc.querySelector(".content_toc_border") || document.createElement("div");
+    marker.classList.add("content_toc_border");
+    list.style.position = "relative";
+    list.appendChild(marker);
+    marker.style.transition = "transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), height 0.35s cubic-bezier(0.22, 1, 0.36, 1)";
+
+    let active = null;
+    const setActive = (link) => {
+        if (link === active) return;
+        if (active) active.removeAttribute("aria-current");
+        active = link;
+        link.setAttribute("aria-current", "location");
+        const listTop = list.getBoundingClientRect().top;
+        const rect = link.getBoundingClientRect();
+        marker.style.transform = `translateY(${rect.top - listTop}px)`;
+        marker.style.height = `${rect.height}px`;
+    };
+
+    // Active = the last section whose top has passed a line 35% down the viewport.
+    const update = () => {
+        const line = window.innerHeight * 0.35;
+        let current = links[0];
+        for (const link of links) {
+            if (sections.get(link.dataset.tocTarget).getBoundingClientRect().top <= line) current = link;
+        }
+        setActive(current);
+    };
+    let ticking = false;
+    const onScroll = () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => { ticking = false; update(); });
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", () => { active = null; update(); });
+    update();
+});
+
 // --- Booking widget (Schedule Appointment hero) ---
 // Not an animation, so it runs on its own, without GSAP and regardless of
 // reduced motion. The Webflow markup ships a static month as the fallback;
