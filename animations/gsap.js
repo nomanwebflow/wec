@@ -36,6 +36,44 @@ runWhenReady(function fixHeadingTags() {
     });
 });
 
+// --- Review card order ---
+// The review list is laid out with CSS columns, which fill top to bottom, so
+// CMS order 1-2-3 runs down the first column. Deal the visible cards into one
+// grid of column wrappers instead, left to right (card i -> column i % n), so
+// the CMS order reads across rows as in Figma. The grid spans all the CSS
+// columns, so the wrap's column count stays readable and is re-dealt when a
+// breakpoint changes it. Without this script the CSS columns still show every
+// card, just in column order.
+runWhenReady(function dealReviewColumns() {
+    document.querySelectorAll(".reviews_list_wrap").forEach((wrap) => {
+        // Skip cards in hidden lists (display: none has no client rects).
+        const items = [...wrap.querySelectorAll(".reviews_list_item")].filter(
+            (el) => el.getClientRects().length
+        );
+        if (items.length < 2) return;
+
+        const grid = document.createElement("div");
+        grid.className = "reviews_list_grid";
+        grid.style.cssText = "column-span:all;display:grid;align-items:start;";
+        wrap.appendChild(grid);
+
+        let dealt = 0;
+        const deal = () => {
+            const cs = getComputedStyle(wrap);
+            const n = Math.max(1, parseInt(cs.columnCount, 10) || 1);
+            if (n === dealt) return;
+            dealt = n;
+            grid.style.gridTemplateColumns = `repeat(${n}, minmax(0, 1fr))`;
+            grid.style.columnGap = cs.columnGap === "normal" ? "1.5rem" : cs.columnGap;
+            const cols = Array.from({ length: n }, () => document.createElement("div"));
+            items.forEach((el, i) => cols[i % n].appendChild(el));
+            grid.replaceChildren(...cols);
+        };
+        deal();
+        window.addEventListener("resize", deal);
+    });
+});
+
 // --- Booking widget (Schedule Appointment hero) ---
 // Not an animation, so it runs on its own, without GSAP and regardless of
 // reduced motion. The Webflow markup ships a static month as the fallback;
