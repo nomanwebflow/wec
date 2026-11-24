@@ -163,6 +163,33 @@ runWhenReady(() => {
     // optional child passes null to a tween, which is harmless but warns.
     gsap.config({ nullTargetWarn: false });
 
+    // Inject word-mask rules once instead of writing inline style.cssText on
+    // hundreds of span elements per page.
+    if (!document.getElementById("gsap-word-mask-styles")) {
+        const maskStyle = document.createElement("style");
+        maskStyle.id = "gsap-word-mask-styles";
+        maskStyle.textContent =
+            ".word-mask{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:0.15em;margin-bottom:-0.15em}.word-inner{display:inline-block}";
+        document.head.appendChild(maskStyle);
+    }
+
+    const min53RemQuery = window.matchMedia("(min-width: 53rem)");
+    let cachedRootFontSize = 0;
+    function getRootFontSize() {
+        if (!cachedRootFontSize) {
+            cachedRootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+        }
+        return cachedRootFontSize;
+    }
+    window.addEventListener("resize", () => {
+        cachedRootFontSize = 0;
+    }, { passive: true });
+
+    const deferredInits = [];
+    let queuedScrollTriggers = [];
+    let initComplete = false;
+    let needsRefresh = false;
+
     // Track every pending reveal check so any ScrollTrigger.refresh() or late
     // scroll restoration can immediately settle sections/cards that landed at
     // or above their trigger line without waiting for a scroll event.
@@ -205,7 +232,7 @@ runWhenReady(() => {
         }
     }, 150);
 
-    function revealSectionOnScroll(sectionRoot, tl, start = "top 80%") {
+    function mountScrollTrigger(sectionRoot, tl, start = "top 80%") {
         let settled = false;
         let trigger = null;
         let checkCount = 0;
@@ -290,6 +317,23 @@ runWhenReady(() => {
         }
     }
 
+    function revealSectionOnScroll(sectionRoot, tl, start = "top 80%") {
+        if (queuedScrollTriggers !== null) {
+            queuedScrollTriggers.push([sectionRoot, tl, start]);
+            return;
+        }
+        mountScrollTrigger(sectionRoot, tl, start);
+    }
+
+    function flushQueuedScrollTriggers() {
+        if (!queuedScrollTriggers || !queuedScrollTriggers.length) return;
+        const batch = queuedScrollTriggers;
+        queuedScrollTriggers = [];
+        for (let i = 0; i < batch.length; i += 1) {
+            mountScrollTrigger(batch[i][0], batch[i][1], batch[i][2]);
+        }
+    }
+
     function splitHeadingIntoWords(heroRoot, headingSelector) {
         const heading = heroRoot.querySelector(headingSelector);
         // Usually the selector resolves to a wrapper div containing the real
@@ -334,6 +378,7 @@ runWhenReady(() => {
         let node;
         while ((node = walker.nextNode())) textNodes.push(node);
 
+        const inners = [];
         textNodes.forEach((textNode) => {
             const parts = textNode.textContent.split(/(\s+)/);
             const frag = document.createDocumentFragment();
@@ -344,19 +389,17 @@ runWhenReady(() => {
                 }
                 const mask = document.createElement("span");
                 mask.className = "word-mask";
-                mask.style.cssText =
-                    "display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:0.15em;margin-bottom:-0.15em;";
                 const inner = document.createElement("span");
                 inner.className = "word-inner";
-                inner.style.display = "inline-block";
                 inner.textContent = part;
                 mask.appendChild(inner);
                 frag.appendChild(mask);
+                inners.push(inner);
             });
             textNode.parentNode.replaceChild(frag, textNode);
         });
         h2.dataset.split = "true";
-        return h2.querySelectorAll(".word-inner");
+        return inners;
     }
 
     function animateHeroBackdrop(tl, heroRoot, bgImageClass) {
@@ -374,8 +417,7 @@ runWhenReady(() => {
         // Mirror the hero's own container-query breakpoint (64em) rather than
         // the viewport, since the CSS switches the bg image/layout off the
         // section's own inline size, not window width.
-        const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
-        const isMobile = heroRoot.getBoundingClientRect().width < 64 * rootFontSize;
+        const isMobile = heroRoot.getBoundingClientRect().width < 64 * getRootFontSize();
         const imageStartScale = isMobile ? 0.92 : 1.08;
 
         tl.set(topImage, { scale: imageStartScale, autoAlpha: 0 }, 0)
@@ -388,18 +430,65 @@ runWhenReady(() => {
     // size by default; mobileRadiusRem lets one call site use a smaller radius
     // on mobile instead (only the Who section's image pair does this).
     function roundedClip(insetValues, radiusRem = 1, mobileRadiusRem = radiusRem) {
-        const isBelow53rem = !window.matchMedia("(min-width: 53rem)").matches;
-        const radius = isBelow53rem ? mobileRadiusRem : radiusRem;
+        const radius = !min53RemQuery.matches ? mobileRadiusRem : radiusRem;
         return `inset(${insetValues} round ${radius}rem)`;
     }
 
     // Timeline list wipe only: same rule, checked via an actual media query
     // (not the shared width math above) per its own breakpoint.
     function roundedClipTimeline(insetValues, radiusRem = 1) {
-        const isBelow53rem = !window.matchMedia("(min-width: 53rem)").matches;
-        const radius = isBelow53rem ? 0 : radiusRem;
+        const radius = !min53RemQuery.matches ? 0 : radiusRem;
         return `inset(${insetValues} round ${radius}rem)`;
     }
+
+    // Shared beats for section timelines so pages read as one system.
+    const rise = (tl, targets, at, opts = {}) => {
+        if (!targets || targets.length === 0) return;
+        tl.set(targets, { opacity: 0, y: opts.y || 14 }, 0).to(
+            targets,
+            {
+                opacity: 1,
+                y: 0,
+                duration: opts.duration || 0.6,
+                stagger: opts.stagger || 0,
+                ease: opts.ease || "power2.out"
+            },
+            at
+        );
+    };
+    const riseWords = (tl, words, at) => {
+        if (!words || !words.length) return;
+        tl.set(words, { yPercent: 115, rotate: 3 }, 0).to(
+            words,
+            { yPercent: 0, rotate: 0, duration: 0.9, stagger: 0.04, ease: "power4.out" },
+            at
+        );
+    };
+    // Image wrap wipes open toward its own outer edge while the photo inside
+    // settles from a slight zoom. "fromRight" = content sits to the left.
+    const wipeImage = (tl, wrap, at, fromRight = true) => {
+        if (!wrap) return;
+        const img = wrap.querySelector("img");
+        tl.set(wrap, { clipPath: roundedClip(fromRight ? "0px 100% 0px 0px" : "0px 0px 0px 100%") }, 0)
+            .to(wrap, { clipPath: roundedClip(fromRight ? "0px 0% 0px 0px" : "0px 0px 0px 0%"), duration: 1.2, ease: "power4.inOut" }, at);
+        if (img) {
+            tl.set(img, { scale: 1.15, xPercent: fromRight ? 6 : -6 }, 0)
+                .to(img, { scale: 1, xPercent: 0, duration: 1.4, ease: "power3.out" }, at);
+        }
+    };
+    // The spine mark beside a heading draws open top-down, same as every other section using it.
+    const drawIcon = (tl, icon, at) => {
+        if (!icon) return;
+        tl.set(icon, { autoAlpha: 0, scaleY: 0, transformOrigin: "top center" }, 0)
+            .to(icon, { autoAlpha: 1, scaleY: 1, duration: 0.6, ease: "power3.out" }, at);
+    };
+    const isLeftOf = (a, b) => a && b && a.getBoundingClientRect().left < b.getBoundingClientRect().left;
+    const primeStartState = (tl) => tl.progress(1, true).progress(0, true);
+    const landButtons = (tl, buttons, at) => {
+        if (!buttons || !buttons.length) return;
+        tl.set(buttons, { opacity: 0, y: 10 }, 0)
+            .to(buttons, { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: "back.out(1.4)" }, at);
+    };
 
     // --- Main homepage hero: eyebrow tag -> headline -> copy -> buttons -> divider -> badge -> features ---
     (function initHeroMain() {
@@ -412,11 +501,11 @@ runWhenReady(() => {
         const divider = heroRoot.querySelector(".hero_main_divider");
         const badge = heroRoot.querySelector(".reviews-badge_outer");
         const features = heroRoot.querySelectorAll(".icon-label_wrap");
-        const words = splitHeadingIntoWords(heroRoot, ".hero_main_content .u-heading");
 
         const tl = gsap.timeline({ paused: true });
 
         animateHeroBackdrop(tl, heroRoot);
+        const words = splitHeadingIntoWords(heroRoot, ".hero_main_content .u-heading");
 
         // Set visibility in the same tick as every hidden start state, so the
         // section never becomes visible before its animation is ready to run.
@@ -461,11 +550,11 @@ runWhenReady(() => {
         const buttons = heroRoot.querySelectorAll(".u-button-wrapper .button_main_wrap");
         const divider = heroRoot.querySelector(".hero_secondary_divider");
         const features = heroRoot.querySelectorAll(".icon-label_wrap");
-        const words = splitHeadingIntoWords(layout, ".u-heading");
 
         const tl = gsap.timeline({ paused: true });
 
         animateHeroBackdrop(tl, heroRoot, isTertiary ? "hero_tertiary_bg_image" : undefined);
+        const words = splitHeadingIntoWords(layout, ".u-heading");
 
         if (crumbs) {
             // Breadcrumb leads, in the slot the rating badge takes on the secondary hero.
@@ -496,7 +585,7 @@ runWhenReady(() => {
     })();
 
     // --- Scroll-reveal content + image gallery section: icon -> headline -> copy -> button -> images ---
-    (function initGallerySection() {
+    deferredInits.push(function initGallerySection() {
         const sections = document.querySelectorAll('[data-animation-trigger="gallery"]');
         sections.forEach((sectionRoot) => {
             const icon = sectionRoot.querySelector(".heading_icon");
@@ -547,10 +636,10 @@ runWhenReady(() => {
 
             revealSectionOnScroll(sectionRoot, tl);
         });
-    })();
+    });
 
     // --- Scroll-reveal content + single image section: icon -> headline -> copy -> callout -> image ---
-    (function initCausesSection() {
+    deferredInits.push(function initCausesSection() {
         const sections = document.querySelectorAll('[data-animation-trigger="causes"]');
         sections.forEach((sectionRoot) => {
             const icon = sectionRoot.querySelector(".heading_icon");
@@ -586,10 +675,10 @@ runWhenReady(() => {
 
             revealSectionOnScroll(sectionRoot, tl);
         });
-    })();
+    });
 
     // --- Scroll-reveal process tabs section: tag -> headline -> cards -> closing copy/button ---
-    (function initProcessSection() {
+    deferredInits.push(function initProcessSection() {
         const sections = document.querySelectorAll('[data-animation-trigger="process"]');
         sections.forEach((sectionRoot) => {
             const tag = sectionRoot.querySelector(".tag_wrap");
@@ -654,20 +743,14 @@ runWhenReady(() => {
 
             revealSectionOnScroll(sectionRoot, tl);
         });
-    })();
+    });
 
     // --- Dark bg-image section: backdrop settle -> headline -> numbered steps -> closing copy ---
-    (function initFirstVisitSection() {
+    deferredInits.push(function initFirstVisitSection() {
         const sections = document.querySelectorAll('[data-animation-trigger="first-visit"]');
         sections.forEach((sectionRoot) => {
             const steps = sectionRoot.querySelectorAll(".steps_list_item");
             const closingCopy = sectionRoot.querySelector(".u-text.u-rich-text");
-            // Pass the heading's own wrapper, not .how_content — that block also
-            // contains the steps list's own h3 titles, and querySelector would grab
-            // whichever h-tag comes first in the DOM, which is fragile here.
-            // The new-patients "Timeline Cover" variant wraps its heading in
-            // .timeline_cover_content instead of .how_content.
-            const words = splitHeadingIntoWords(sectionRoot, ".how_content > .u-heading, .timeline_cover_content > .u-heading");
             const isCover = sectionRoot.classList.contains("timeline_cover_wrap");
 
             const tl = gsap.timeline({ paused: true });
@@ -683,6 +766,13 @@ runWhenReady(() => {
                   ? "services_first_bg_image"
                   : "how_bg_image";
             animateHeroBackdrop(tl, sectionRoot, bgClass);
+
+            // Pass the heading's own wrapper, not .how_content — that block also
+            // contains the steps list's own h3 titles, and querySelector would grab
+            // whichever h-tag comes first in the DOM, which is fragile here.
+            // The new-patients "Timeline Cover" variant wraps its heading in
+            // .timeline_cover_content instead of .how_content.
+            const words = splitHeadingIntoWords(sectionRoot, ".how_content > .u-heading, .timeline_cover_content > .u-heading");
 
             // Cover variant closes with a quote card under the steps.
             const bottomCallout = sectionRoot.querySelector(".timeline_cover_bottom .card_quote_wrap");
@@ -719,10 +809,10 @@ runWhenReady(() => {
 
             revealSectionOnScroll(sectionRoot, tl);
         });
-    })();
+    });
 
     // --- Icon/heading/copy/callout + timeline card list (causes-style content, no image wipe) ---
-    (function initTimelineSection() {
+    deferredInits.push(function initTimelineSection() {
         const sections = document.querySelectorAll('[data-animation-trigger="timeline"]');
         sections.forEach((sectionRoot) => {
             const icon = sectionRoot.querySelector(".heading_icon");
@@ -786,10 +876,10 @@ runWhenReady(() => {
 
             revealSectionOnScroll(sectionRoot, tl);
         });
-    })();
+    });
 
     // --- Centered heading + review cards + closing button/badge ---
-    (function initReviewSection() {
+    deferredInits.push(function initReviewSection() {
         const sections = document.querySelectorAll('[data-animation-trigger="review"]');
         sections.forEach((sectionRoot) => {
             const closingButtons = sectionRoot.querySelectorAll(".u-button-wrapper .button_main_wrap");
@@ -851,12 +941,14 @@ runWhenReady(() => {
                 }
 
                 const revealedCards = new WeakSet();
+                let activeCards = [];
                 let batchTriggers = [];
 
                 const revealCards = (items, immediate) => {
                     const pending = items.filter((item) => !revealedCards.has(item));
                     if (!pending.length) return;
                     pending.forEach((item) => revealedCards.add(item));
+                    activeCards = activeCards.filter((item) => !revealedCards.has(item));
 
                     if (immediate) {
                         gsap.set(pending, { opacity: 1, y: 0 });
@@ -871,7 +963,7 @@ runWhenReady(() => {
                         });
                     }
 
-                    if (batchTriggers.length && reviewItems.every((item) => revealedCards.has(item))) {
+                    if (batchTriggers.length && !activeCards.length) {
                         const triggersToKill = batchTriggers;
                         batchTriggers = [];
                         gsap.delayedCall(0, () => triggersToKill.forEach((st) => st.kill()));
@@ -879,12 +971,12 @@ runWhenReady(() => {
                 };
 
                 const checkCards = () => {
+                    if (!activeCards.length) return true;
                     const vh = window.innerHeight || document.documentElement.clientHeight;
                     const passed = [];
                     const visible = [];
-                    for (let i = 0; i < reviewItems.length; i += 1) {
-                        const item = reviewItems[i];
-                        if (revealedCards.has(item)) continue;
+                    for (let i = 0; i < activeCards.length; i += 1) {
+                        const item = activeCards[i];
                         const rect = item.getBoundingClientRect();
                         if (rect.bottom <= 0) {
                             passed.push(item);
@@ -894,7 +986,7 @@ runWhenReady(() => {
                     }
                     if (passed.length) revealCards(passed, true);
                     if (visible.length) revealCards(visible, false);
-                    return reviewItems.every((item) => revealedCards.has(item));
+                    return !activeCards.length;
                 };
 
                 // Only hide cards that are not already scrolled past above the
@@ -914,6 +1006,7 @@ runWhenReady(() => {
                 });
 
                 if (cardsToWatch.length) {
+                    activeCards = cardsToWatch;
                     gsap.set(cardsToWatch, { opacity: 0, y: 20 });
                     // Omit `once: true` to avoid GSAP 3.15's recursive Te.refresh
                     // self-kill array mutation bug; revealCards deduplicates and
@@ -942,10 +1035,10 @@ runWhenReady(() => {
             };
             trySetupCards();
         });
-    })();
+    });
 
     // --- Dark card group (cost cards): header then cards staggered ---
-    (function initCardGroupSection() {
+    deferredInits.push(function initCardGroupSection() {
         const sections = document.querySelectorAll('[data-animation-trigger="card-group"]');
         sections.forEach((sectionRoot) => {
             const headerWords = splitHeadingIntoWords(sectionRoot, ".card-group_header .u-heading");
@@ -968,10 +1061,10 @@ runWhenReady(() => {
 
             revealSectionOnScroll(sectionRoot, tl);
         });
-    })();
+    });
 
     // --- Final CTA: hero-pattern backdrop -> headline -> copy -> buttons -> closing address line ---
-    (function initCtaSection() {
+    deferredInits.push(function initCtaSection() {
         const sections = document.querySelectorAll('[data-animation-trigger="cta"]');
         sections.forEach((sectionRoot) => {
             const copy = sectionRoot.querySelector(".u-text.u-rich-text.u-color-faded");
@@ -1001,10 +1094,10 @@ runWhenReady(() => {
 
             revealSectionOnScroll(sectionRoot, tl);
         });
-    })();
+    });
 
     // --- Cost section: heading -> covered-items list -> image -> closing text -> logo marquee -> buttons ---
-    (function initCostSection() {
+    deferredInits.push(function initCostSection() {
         const sections = document.querySelectorAll('[data-animation-trigger="cost"]');
         sections.forEach((sectionRoot) => {
             const dividers = sectionRoot.querySelectorAll(".services_cost_divider");
@@ -1086,10 +1179,10 @@ runWhenReady(() => {
 
             revealSectionOnScroll(sectionRoot, tl);
         });
-    })();
+    });
 
     // --- FAQ section: heading -> accordion items staggered ---
-    (function initFaqSection() {
+    deferredInits.push(function initFaqSection() {
         const sections = document.querySelectorAll('[data-animation-trigger="faqs"]');
         sections.forEach((sectionRoot) => {
             const words = splitHeadingIntoWords(sectionRoot, ".faq_contain > .u-content-wrapper .u-heading");
@@ -1145,10 +1238,10 @@ runWhenReady(() => {
             };
             requestAnimationFrame(trySetupAccordion);
         });
-    })();
+    });
 
     // --- Who-single (Auto Accident variant): icon -> headline -> copy -> callout -> button -> image ---
-    (function initWhoSingleSection() {
+    deferredInits.push(function initWhoSingleSection() {
         const sections = document.querySelectorAll('[data-animation-trigger="who-single"]');
         sections.forEach((sectionRoot) => {
             const icon = sectionRoot.querySelector(".heading_icon");
@@ -1187,10 +1280,10 @@ runWhenReady(() => {
 
             revealSectionOnScroll(sectionRoot, tl);
         });
-    })();
+    });
 
     // --- Split section (image left, icon/heading/copy/callout right — causes mirrored) ---
-    (function initSplitSection() {
+    deferredInits.push(function initSplitSection() {
         const sections = document.querySelectorAll('[data-animation-trigger="split"]');
         sections.forEach((sectionRoot) => {
             const icon = sectionRoot.querySelector(".heading_icon");
@@ -1243,10 +1336,10 @@ runWhenReady(() => {
 
             revealSectionOnScroll(sectionRoot, tl);
         });
-    })();
+    });
 
     // --- Intro (conditions video teaser): visual wipe + headline/copy ---
-    (function initIntroSection() {
+    deferredInits.push(function initIntroSection() {
         const sectionRoot = document.querySelector('[data-animation-trigger="intro"]');
         if (!sectionRoot) return;
 
@@ -1286,10 +1379,10 @@ runWhenReady(() => {
         // starts entering the viewport (not the usual "top 80%") so it never
         // leaves a blank gap while the hero is still fully in view.
         revealSectionOnScroll(sectionRoot, tl, "top 100%");
-    })();
+    });
 
     // --- Conditions grid: headline/copy -> symptom tiles staggered in a wave ---
-    (function initConditionsSection() {
+    deferredInits.push(function initConditionsSection() {
         const sectionRoot = document.querySelector('[data-animation-trigger="conditions"]');
         if (!sectionRoot) return;
 
@@ -1310,10 +1403,10 @@ runWhenReady(() => {
             .to(items, { opacity: 1, y: 0, duration: 0.45, stagger: 0.025, ease: "power3.out" }, 0.55);
 
         revealSectionOnScroll(sectionRoot, tl);
-    })();
+    });
 
     // --- Team/bio section: slider visual settle -> headline/copy -> button ---
-    (function initTeamSection() {
+    deferredInits.push(function initTeamSection() {
         const sectionRoot = document.querySelector('[data-animation-trigger="team"]');
         if (!sectionRoot) return;
 
@@ -1354,10 +1447,10 @@ runWhenReady(() => {
             .to(teamButton, { opacity: 1, y: 0, duration: 0.5, ease: "back.out(1.4)" }, 1.75);
 
         revealSectionOnScroll(sectionRoot, tl);
-    })();
+    });
 
     // --- New-patient first-visit grid: headline/copy -> icon items staggered ---
-    (function initNewPatientSection() {
+    deferredInits.push(function initNewPatientSection() {
         const sectionRoot = document.querySelector('[data-animation-trigger="new-patient"]');
         if (!sectionRoot) return;
 
@@ -1391,10 +1484,10 @@ runWhenReady(() => {
         }
 
         revealSectionOnScroll(sectionRoot, tl);
-    })();
+    });
 
     // --- Auto accident callout card: gradient card settles -> headline/copy -> button ---
-    (function initAccidentSection() {
+    deferredInits.push(function initAccidentSection() {
         const sectionRoot = document.querySelector('[data-animation-trigger="accident"]');
         if (!sectionRoot) return;
 
@@ -1424,10 +1517,10 @@ runWhenReady(() => {
             .to(buttons, { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: "back.out(1.4)" }, 0.9);
 
         revealSectionOnScroll(sectionRoot, tl);
-    })();
+    });
 
     // --- Insurance section: icon/title/copy -> logo wall staggered in a wave ---
-    (function initInsuranceSection() {
+    deferredInits.push(function initInsuranceSection() {
         const sectionRoot = document.querySelector('[data-animation-trigger="insurance"]');
         if (!sectionRoot) return;
 
@@ -1458,10 +1551,10 @@ runWhenReady(() => {
         }
 
         revealSectionOnScroll(sectionRoot, tl);
-    })();
+    });
 
     // --- Contact/map section: icon -> headline/copy -> map frame -> contact rows ---
-    (function initContactSection() {
+    deferredInits.push(function initContactSection() {
         const sectionRoot = document.querySelector('[data-animation-trigger="contact"]');
         if (!sectionRoot) return;
 
@@ -1492,10 +1585,10 @@ runWhenReady(() => {
         }
 
         revealSectionOnScroll(sectionRoot, tl);
-    })();
+    });
 
     // --- Footer: about block -> nav columns (staggered) -> wordmark settles last ---
-    (function initFooterSection() {
+    deferredInits.push(function initFooterSection() {
         const sectionRoot = document.querySelector(".footer_wrap");
         if (!sectionRoot) return;
 
@@ -1533,12 +1626,12 @@ runWhenReady(() => {
         }
 
         revealSectionOnScroll(sectionRoot, tl, "top 90%");
-    })();
+    });
 
     // --- Report-of-findings graph (new patient page embed): the long decline draws, the fall, then the climb ---
     // Markup lives in an HTML embed (.rof-graph). It is fully drawn and visible
     // with no JS, so this only ever animates on top of a complete chart.
-    (function initReportGraph() {
+    deferredInits.push(function initReportGraph() {
         const charts = document.querySelectorAll(".rof-graph");
         if (!charts.length) return;
         if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -1640,58 +1733,7 @@ runWhenReady(() => {
 
             revealSectionOnScroll(root, tl, "top 70%");
         });
-    })();
-
-    // Shared beats for the about / team / forms / new-patient sections below.
-    // Each helper adds one familiar move to a section timeline so the pages
-    // read as one system with the rest of the site.
-    const rise = (tl, targets, at, opts = {}) => {
-        if (!targets || targets.length === 0) return;
-        tl.set(targets, { opacity: 0, y: opts.y || 14 }, 0).to(
-            targets,
-            {
-                opacity: 1,
-                y: 0,
-                duration: opts.duration || 0.6,
-                stagger: opts.stagger || 0,
-                ease: opts.ease || "power2.out"
-            },
-            at
-        );
-    };
-    const riseWords = (tl, words, at) => {
-        if (!words || !words.length) return;
-        tl.set(words, { yPercent: 115, rotate: 3 }, 0).to(
-            words,
-            { yPercent: 0, rotate: 0, duration: 0.9, stagger: 0.04, ease: "power4.out" },
-            at
-        );
-    };
-    // Image wrap wipes open toward its own outer edge while the photo inside
-    // settles from a slight zoom. "fromRight" = content sits to the left.
-    const wipeImage = (tl, wrap, at, fromRight = true) => {
-        if (!wrap) return;
-        const img = wrap.querySelector("img");
-        tl.set(wrap, { clipPath: roundedClip(fromRight ? "0px 100% 0px 0px" : "0px 0px 0px 100%") }, 0)
-            .to(wrap, { clipPath: roundedClip(fromRight ? "0px 0% 0px 0px" : "0px 0px 0px 0%"), duration: 1.2, ease: "power4.inOut" }, at);
-        if (img) {
-            tl.set(img, { scale: 1.15, xPercent: fromRight ? 6 : -6 }, 0)
-                .to(img, { scale: 1, xPercent: 0, duration: 1.4, ease: "power3.out" }, at);
-        }
-    };
-    // The spine mark beside a heading draws open top-down, same as every other section using it.
-    const drawIcon = (tl, icon, at) => {
-        if (!icon) return;
-        tl.set(icon, { autoAlpha: 0, scaleY: 0, transformOrigin: "top center" }, 0)
-            .to(icon, { autoAlpha: 1, scaleY: 1, duration: 0.6, ease: "power3.out" }, at);
-    };
-    const isLeftOf = (a, b) => a && b && a.getBoundingClientRect().left < b.getBoundingClientRect().left;
-    // A paused timeline does not render its time-0 start states on its own.
-    // Sections hidden by the flicker-prevention CSS never notice, but a
-    // sub-timeline inside an already-visible section (a lower card, the part
-    // of a tall section below the fold) must apply them now, or its content
-    // shows at rest and then snaps back to hidden when the reveal starts.
-    const primeStartState = (tl) => tl.progress(1, true).progress(0, true);
+    });
 
     // --- About / Team hero: tag -> headline -> copy, portraits wipe up in sequence ---
     (function initAboutHeroSection() {
@@ -1721,7 +1763,7 @@ runWhenReady(() => {
     })();
 
     // --- Story (About Morgan): headline -> copy -> quote card with portrait -> closing line ---
-    (function initStorySection() {
+    deferredInits.push(function initStorySection() {
         document.querySelectorAll('[data-animation-trigger="story"]').forEach((sectionRoot) => {
             const words = splitHeadingIntoWords(sectionRoot, ".heading_wrap .u-heading");
             const blocks = sectionRoot.querySelectorAll(".about_layout > .u-text.u-rich-text");
@@ -1741,10 +1783,10 @@ runWhenReady(() => {
 
             revealSectionOnScroll(sectionRoot, tl);
         });
-    })();
+    });
 
     // --- Credentials: tag/headline -> photo wipe -> credential rows (icons pop) -> divider -> stats ---
-    (function initCredentialsSection() {
+    deferredInits.push(function initCredentialsSection() {
         document.querySelectorAll('[data-animation-trigger="credentials"]').forEach((sectionRoot) => {
             const tag = sectionRoot.querySelector(".tag_wrap");
             const words = splitHeadingIntoWords(sectionRoot, ".credentials_column .u-heading");
@@ -1773,10 +1815,10 @@ runWhenReady(() => {
 
             revealSectionOnScroll(sectionRoot, tl);
         });
-    })();
+    });
 
     // --- Approach: headline -> copy -> photo card -> copy -> quote, tall photo wipes alongside ---
-    (function initApproachSection() {
+    deferredInits.push(function initApproachSection() {
         document.querySelectorAll('[data-animation-trigger="approach"]').forEach((sectionRoot) => {
             const words = splitHeadingIntoWords(sectionRoot, ".heading_wrap .u-heading");
             const blocks = sectionRoot.querySelectorAll(".approach_layout .u-text.u-rich-text");
@@ -1801,10 +1843,10 @@ runWhenReady(() => {
 
             revealSectionOnScroll(sectionRoot, tl);
         });
-    })();
+    });
 
     // --- Qualities: headline -> three cards rise in sequence ---
-    (function initQualitiesSection() {
+    deferredInits.push(function initQualitiesSection() {
         document.querySelectorAll('[data-animation-trigger="qualities"]').forEach((sectionRoot) => {
             const words = splitHeadingIntoWords(sectionRoot, ".u-heading");
             const items = sectionRoot.querySelectorAll(".qualities_list_item");
@@ -1816,10 +1858,10 @@ runWhenReady(() => {
 
             revealSectionOnScroll(sectionRoot, tl);
         });
-    })();
+    });
 
     // --- After work: photo wipes from its side -> headline -> copy -> badge stamps on ---
-    (function initAfterWorkSection() {
+    deferredInits.push(function initAfterWorkSection() {
         document.querySelectorAll('[data-animation-trigger="after-work"]').forEach((sectionRoot) => {
             const visual = sectionRoot.querySelector(".home_visual_wrap");
             const content = visual && visual.nextElementSibling;
@@ -1842,10 +1884,10 @@ runWhenReady(() => {
 
             revealSectionOnScroll(sectionRoot, tl);
         });
-    })();
+    });
 
     // --- Goal: headline -> quote card with portrait ---
-    (function initGoalSection() {
+    deferredInits.push(function initGoalSection() {
         document.querySelectorAll('[data-animation-trigger="goal"]').forEach((sectionRoot) => {
             const words = splitHeadingIntoWords(sectionRoot, ".u-content-wrapper .u-heading");
             const quote = sectionRoot.querySelector(".team_quote_wrap");
@@ -1863,12 +1905,12 @@ runWhenReady(() => {
 
             revealSectionOnScroll(sectionRoot, tl);
         });
-    })();
+    });
 
     // --- Team list: each bio card reveals on its own as it scrolls in ---
     // Cards are tall and stacked, so one section-wide timeline would play the
     // lower cards before anyone can see them.
-    (function initTeamListSection() {
+    deferredInits.push(function initTeamListSection() {
         document.querySelectorAll('[data-animation-trigger="team-list"]').forEach((sectionRoot) => {
             const cards = sectionRoot.querySelectorAll(".card_team_wrap");
             const timelines = [];
@@ -1900,10 +1942,10 @@ runWhenReady(() => {
             gsap.set(sectionRoot, { visibility: "visible" });
             timelines.forEach(([card, tl]) => revealSectionOnScroll(card, tl));
         });
-    })();
+    });
 
     // --- Forms: headline -> form card (icon pops, buttons land) | divider -> directions -> sign-off ---
-    (function initFormsEmbedSection() {
+    deferredInits.push(function initFormsEmbedSection() {
         document.querySelectorAll('[data-animation-trigger="forms-embed"]').forEach((sectionRoot) => {
             const headings = sectionRoot.querySelectorAll(".form_embed_layout > .u-heading");
             const card = sectionRoot.querySelector(".form_embed_card");
@@ -1958,10 +2000,10 @@ runWhenReady(() => {
                 revealSectionOnScroll(divider, bottom);
             }
         });
-    })();
+    });
 
     // --- Prerequisite: headline -> two numbered steps (numbers pop) -> note, photo wipes ---
-    (function initPrerequisiteSection() {
+    deferredInits.push(function initPrerequisiteSection() {
         document.querySelectorAll('[data-animation-trigger="prerequisite"]').forEach((sectionRoot) => {
             const words = splitHeadingIntoWords(sectionRoot, ".heading_wrap .u-heading");
             const steps = sectionRoot.querySelectorAll(".steps_list_item");
@@ -1995,10 +2037,10 @@ runWhenReady(() => {
 
             revealSectionOnScroll(sectionRoot, tl);
         });
-    })();
+    });
 
     // --- Report of findings: headline -> copy (graph animates itself) -> closing copy below the graph ---
-    (function initReportSection() {
+    deferredInits.push(function initReportSection() {
         document.querySelectorAll('[data-animation-trigger="report"]').forEach((sectionRoot) => {
             const contents = sectionRoot.querySelectorAll(".report_content");
             const words = splitHeadingIntoWords(sectionRoot, ".heading_wrap .u-heading");
@@ -2020,14 +2062,7 @@ runWhenReady(() => {
                 revealSectionOnScroll(contents[1], end);
             }
         });
-    })();
-
-    // Shared closing beat: buttons land last with a touch of anticipation.
-    const landButtons = (tl, buttons, at) => {
-        if (!buttons || !buttons.length) return;
-        tl.set(buttons, { opacity: 0, y: 10 }, 0)
-            .to(buttons, { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: "back.out(1.4)" }, at);
-    };
+    });
 
     // --- Booking hero (schedule page): badge -> headline -> copy -> booking widget -> notes ---
     // Sits outside .page_main, so it needs its own init.
@@ -2053,7 +2088,7 @@ runWhenReady(() => {
     })();
 
     // --- Slim CTA strip: headline -> copy -> buttons ---
-    (function initCtaStripSection() {
+    deferredInits.push(function initCtaStripSection() {
         document.querySelectorAll('[data-animation-trigger="cta-strip"]').forEach((sectionRoot) => {
             const words = splitHeadingIntoWords(sectionRoot, ".cta_strip_text .u-heading");
             const copy = sectionRoot.querySelector(".cta_strip_text .u-text");
@@ -2066,10 +2101,10 @@ runWhenReady(() => {
 
             revealSectionOnScroll(sectionRoot, tl);
         });
-    })();
+    });
 
     // --- Location (area pages): eyebrow + headline -> copy -> quote + address -> buttons; map card settles ---
-    (function initLocationSection() {
+    deferredInits.push(function initLocationSection() {
         document.querySelectorAll('[data-animation-trigger="location"]').forEach((sectionRoot) => {
             const header = sectionRoot.querySelector(".location_header");
             const texts = header ? [...header.querySelectorAll(":scope > .u-text")] : [];
@@ -2093,10 +2128,10 @@ runWhenReady(() => {
 
             revealSectionOnScroll(sectionRoot, tl);
         });
-    })();
+    });
 
     // --- Employers / in-network plans: eyebrow + headline -> copy -> quote/buttons; plan cards or tags in a wave ---
-    (function initEmployersSection() {
+    deferredInits.push(function initEmployersSection() {
         document.querySelectorAll('[data-animation-trigger="employers"]').forEach((sectionRoot) => {
             const content = sectionRoot.querySelector(".employers_content");
             const textWrap = content && content.querySelector(".u-margin-trim");
@@ -2124,10 +2159,10 @@ runWhenReady(() => {
 
             revealSectionOnScroll(sectionRoot, tl);
         });
-    })();
+    });
 
     // --- Partners (insurance page): headline -> carrier logo grid in a wave -> note -> quote -> button ---
-    (function initPartnersSection() {
+    deferredInits.push(function initPartnersSection() {
         document.querySelectorAll('[data-animation-trigger="partners"]').forEach((sectionRoot) => {
             // The container lost its partner_contain class in the Designer, so
             // also match the plain u-container wrapper.
@@ -2162,10 +2197,10 @@ runWhenReady(() => {
 
             revealSectionOnScroll(sectionRoot, tl);
         });
-    })();
+    });
 
     // --- ER warning (car accident articles): dark panel settles, alert icon pops, headline/copy, then the four warning cards ---
-    (function initWarningSection() {
+    deferredInits.push(function initWarningSection() {
         document.querySelectorAll('[data-animation-trigger="warning"]').forEach((sectionRoot) => {
             const panel = sectionRoot.querySelector(".warning_banner_wrap");
             const alertIcon = sectionRoot.querySelector(".warning_banner_wrap .icon_wrap");
@@ -2195,10 +2230,10 @@ runWhenReady(() => {
 
             revealSectionOnScroll(sectionRoot, tl);
         });
-    })();
+    });
 
     // --- Why early (car accident articles): headline, the orange panel opens, then the two reason cards and their tags ---
-    (function initWhyEarlySection() {
+    deferredInits.push(function initWhyEarlySection() {
         document.querySelectorAll('[data-animation-trigger="why-early"]').forEach((sectionRoot) => {
             const words = splitHeadingIntoWords(sectionRoot, ".why_early_contain > .u-content-wrapper .u-heading");
             const panel = sectionRoot.querySelector(".why_early_list");
@@ -2224,7 +2259,7 @@ runWhenReady(() => {
 
             revealSectionOnScroll(sectionRoot, tl);
         });
-    })();
+    });
 
     // --- Nav: one hover highlight that slides between links (GSAP Flip) ---
     // The single .nav_link_hover lives in one .nav_links_inner. On hover it is
@@ -2374,7 +2409,7 @@ runWhenReady(() => {
     // still unsplit (sections with no trigger, or secondary headings a
     // section timeline skips). Each one gets the same word-mask reveal on
     // its own scroll trigger. Text stays visible if this never runs.
-    (function initStrayHeadings() {
+    deferredInits.push(function initStrayHeadings() {
         document.querySelectorAll(".page_main .u-heading, .page_main h2").forEach((el) => {
             const h = el.matches("h1, h2, h3, p") ? el : el.querySelector("h1, h2, h3, p") || el;
             if (h.tagName === "H1" || h.dataset.split || h.closest("[data-split]")) return;
@@ -2384,7 +2419,7 @@ runWhenReady(() => {
             riseWords(tl, words, 0);
             revealSectionOnScroll(h, tl, "top 85%");
         });
-    })();
+    });
 
     // --- Nav: solid background grows in once the page scrolls past the banner ---
     // .nav_background sits at height 0 inside the fixed nav. When the scroll
@@ -2409,6 +2444,10 @@ runWhenReady(() => {
     // CMS hydration, lazy image loads, and browser scroll-restoration.
     let refreshRaf = 0;
     function scheduleRefresh() {
+        if (!initComplete) {
+            needsRefresh = true;
+            return;
+        }
         if (refreshRaf) return;
         refreshRaf = requestAnimationFrame(() => {
             refreshRaf = 0;
@@ -2417,7 +2456,38 @@ runWhenReady(() => {
         });
     }
 
+    // Flush hero & nav triggers immediately so above-the-fold reveals run on frame 0,
+    // then initialize below-the-fold sections in small non-blocking slices.
+    flushQueuedScrollTriggers();
+
+    let deferredIdx = 0;
+    function runDeferredChunk() {
+        const chunkStart = performance.now();
+        while (deferredIdx < deferredInits.length) {
+            deferredInits[deferredIdx]();
+            deferredIdx += 1;
+            if (deferredIdx < deferredInits.length && performance.now() - chunkStart >= 10) {
+                flushQueuedScrollTriggers();
+                setTimeout(runDeferredChunk, 0);
+                return;
+            }
+        }
+        flushQueuedScrollTriggers();
+        queuedScrollTriggers = null;
+        initComplete = true;
+        if (needsRefresh || document.readyState === "complete") {
+            needsRefresh = false;
+            ScrollTrigger.refresh();
+            flushPendingReveals();
+        }
+    }
+    setTimeout(runDeferredChunk, 0);
+
     runWhenLoaded(() => {
+        if (!initComplete) {
+            needsRefresh = true;
+            return;
+        }
         ScrollTrigger.refresh();
         flushPendingReveals();
     });
@@ -2428,11 +2498,13 @@ runWhenReady(() => {
 
     if (typeof ResizeObserver !== "undefined" && document.body) {
         let lastHeight = document.body.scrollHeight;
+        let resizeDebounce = 0;
         const bodyObserver = new ResizeObserver(() => {
             const nextHeight = document.body.scrollHeight;
             if (nextHeight !== lastHeight) {
                 lastHeight = nextHeight;
-                scheduleRefresh();
+                clearTimeout(resizeDebounce);
+                resizeDebounce = setTimeout(scheduleRefresh, 150);
             }
         });
         bodyObserver.observe(document.body);
