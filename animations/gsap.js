@@ -2174,6 +2174,43 @@ runWhenReady(() => {
         });
     });
 
+    // --- Reviews by condition (reviews page): TOC panel rises; each condition block
+    // reveals its headline + "Learn more"; each card rises as it reaches the viewport ---
+    deferredInits.push(function initReviewsByConditionSection() {
+        document.querySelectorAll("section.reviews_wrap").forEach((sectionRoot) => {
+            const toc = sectionRoot.querySelector(".content_toc_wrap");
+            if (toc) {
+                const tocTl = gsap.timeline({ paused: true });
+                rise(tocTl, toc, 0, { y: 20, duration: 0.7, ease: "power3.out" });
+                revealSectionOnScroll(sectionRoot, tocTl);
+            }
+
+            sectionRoot.querySelectorAll(".curated_reviews_section").forEach((block) => {
+                const header = block.querySelector(".reviews_header");
+                if (header) {
+                    const words = splitHeadingIntoWords(block, ".reviews_header h2");
+                    const headTl = gsap.timeline({ paused: true });
+                    riseWords(headTl, words, 0);
+                    landButtons(headTl, header.querySelectorAll(".button_main_wrap"), 0.35);
+                    revealSectionOnScroll(header, headTl, "top 85%");
+                }
+
+                // One trigger per card: blocks are taller than the viewport, so a
+                // block-level trigger would play the lower cards unseen. The second
+                // card of a pair waits a beat so each row reads left to right.
+                let prevTop = null;
+                block.querySelectorAll(".curated_reviews_list > .w-dyn-item").forEach((card) => {
+                    const top = card.offsetTop;
+                    const delay = top === prevTop ? 0.12 : 0;
+                    prevTop = top;
+                    const cardTl = gsap.timeline({ paused: true });
+                    rise(cardTl, card, delay, { y: 24, duration: 0.7, ease: "power3.out" });
+                    revealSectionOnScroll(card, cardTl, "top 90%");
+                });
+            });
+        });
+    });
+
     // --- Report of findings: headline -> copy (graph animates itself) -> closing copy below the graph ---
     deferredInits.push(function initReportSection() {
         document.querySelectorAll('[data-animation-trigger="report"]').forEach((sectionRoot) => {
