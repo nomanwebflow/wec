@@ -159,6 +159,9 @@ runWhenReady(() => {
         return;
     }
     gsap.registerPlugin(ScrollTrigger);
+    // Section inits are shared across page templates; a section missing an
+    // optional child passes null to a tween, which is harmless but warns.
+    gsap.config({ nullTargetWarn: false });
 
     // Track every pending reveal check so any ScrollTrigger.refresh() or late
     // scroll restoration can immediately settle sections/cards that landed at
@@ -360,10 +363,12 @@ runWhenReady(() => {
         bgImageClass = bgImageClass || "hero_bg_image";
         // DOM order of the mobile/desktop bg images isn't fixed — the CSS picks
         // which one is on screen per breakpoint via a data attribute, so animate
-        // whichever one is actually visible, never a fixed DOM position.
-        const topImage = [...heroRoot.querySelectorAll("." + bgImageClass)].find(
-            (img) => img.tagName === "IMG" && getComputedStyle(img).display !== "none"
-        );
+        // whichever one is actually visible, never a fixed DOM position. Some
+        // heroes (home) keep both displayed and stack the mobile one on top, so
+        // take the last displayed image: later siblings paint above earlier ones.
+        const topImage = [...heroRoot.querySelectorAll("." + bgImageClass)]
+            .filter((img) => img.tagName === "IMG" && getComputedStyle(img).display !== "none")
+            .pop();
         if (!topImage) return;
 
         // Mirror the hero's own container-query breakpoint (64em) rather than
@@ -671,7 +676,13 @@ runWhenReady(() => {
             // is actually visible settles in from a slight zoom. This section's
             // bg image class is "how_bg_image" (or "timeline_cover_bg_image" on
             // the cover variant), not the hero's default.
-            animateHeroBackdrop(tl, sectionRoot, isCover ? "timeline_cover_bg_image" : "how_bg_image");
+            // Condition pages use the same layout with a services_first_bg_image.
+            const bgClass = isCover
+                ? "timeline_cover_bg_image"
+                : sectionRoot.querySelector(".services_first_bg_image")
+                  ? "services_first_bg_image"
+                  : "how_bg_image";
+            animateHeroBackdrop(tl, sectionRoot, bgClass);
 
             // Cover variant closes with a quote card under the steps.
             const bottomCallout = sectionRoot.querySelector(".timeline_cover_bottom .card_quote_wrap");
@@ -787,8 +798,17 @@ runWhenReady(() => {
                 (el) => !el.closest(".card_reviews_outer")
             );
             const words = splitHeadingIntoWords(sectionRoot, ".reviews_contain .u-heading");
+            // Optional subtitle under the headline (pregnancy page), never card text.
+            const subtitle = [...sectionRoot.querySelectorAll(".reviews_contain .u-text.u-rich-text")].filter(
+                (el) => !el.closest(".card_reviews_outer")
+            );
 
             const tl = gsap.timeline({ paused: true });
+
+            if (subtitle.length) {
+                tl.set(subtitle, { opacity: 0, y: 14 }, 0)
+                    .to(subtitle, { opacity: 1, y: 0, duration: 0.6, ease: "power1.out" }, 0.5);
+            }
 
             // "Banner" variant (auto accident hub): a photo strip opens over the
             // section top, the strip uncovering top-down while the photo settles
@@ -877,11 +897,16 @@ runWhenReady(() => {
                     return reviewItems.every((item) => revealedCards.has(item));
                 };
 
-                // Only hide cards that are not already scrolled past above the viewport.
+                // Only hide cards that are not already scrolled past above the
+                // viewport, and that sit inside the visible part of the 720px
+                // clipped card box. Cards below the clip can never be seen or
+                // cross the viewport line, so hiding them would leave them stuck.
+                const clip = sectionRoot.querySelector(".card_reviews_outer");
+                const clipBottom = clip ? clip.getBoundingClientRect().bottom : Infinity;
                 const cardsToWatch = [];
                 reviewItems.forEach((item) => {
                     const rect = item.getBoundingClientRect();
-                    if (rect.bottom <= 0) {
+                    if (rect.bottom <= 0 || rect.top >= clipBottom) {
                         revealedCards.add(item);
                     } else {
                         cardsToWatch.push(item);
@@ -1043,6 +1068,12 @@ runWhenReady(() => {
                 // The top divider draws open first, framing "Your First Visit" / "This Covers".
                 if (dividers[0]) tl.to(dividers[0], { scaleX: 1, duration: 0.5, ease: "power3.inOut" }, 0.3);
                 if (dividers[1]) tl.to(dividers[1], { scaleX: 1, duration: 0.5, ease: "power3.inOut" }, 0.9);
+            }
+            // Optional eyebrow tag above the headline (spinal decompression).
+            const tag = sectionRoot.querySelector(".u-container > .u-content-wrapper .tag_wrap");
+            if (tag) {
+                tl.set(tag, { opacity: 0, x: -8 }, 0)
+                    .to(tag, { opacity: 1, x: 0, duration: 0.45, ease: "power2.out" }, 0);
             }
             if (introCopy) {
                 tl.set(introCopy, { opacity: 0, y: 14 }, 0)
@@ -1935,9 +1966,16 @@ runWhenReady(() => {
             const words = splitHeadingIntoWords(sectionRoot, ".heading_wrap .u-heading");
             const steps = sectionRoot.querySelectorAll(".steps_list_item");
             const numbers = sectionRoot.querySelectorAll(".steps_list_number");
-            const note = sectionRoot.querySelector(".uneven_content > .u-text.u-rich-text");
-            const visual = sectionRoot.querySelector(".uneven_visual");
-            const content = sectionRoot.querySelector(".uneven_content");
+            // The pregnancy page's benefits layout reuses this trigger with
+            // split_content / benefits_visual_wrap instead of the uneven_* classes.
+            const note = sectionRoot.querySelector(
+                ".uneven_content > .u-text.u-rich-text, .split_content > .u-text.u-rich-text"
+            );
+            const visuals = [...sectionRoot.querySelectorAll(".uneven_visual, .benefits_visual_wrap")].filter(
+                (el) => getComputedStyle(el).display !== "none"
+            );
+            const content = sectionRoot.querySelector(".uneven_content, .split_content");
+            const buttons = sectionRoot.querySelectorAll(".uneven_content .button_main_wrap");
 
             const tl = gsap.timeline({ paused: true });
             tl.set(sectionRoot, { visibility: "visible" }, 0);
@@ -1949,7 +1987,11 @@ runWhenReady(() => {
                     .to(numbers, { scale: 1, duration: 0.45, stagger: 0.14, ease: "back.out(2)" }, 0.5);
             }
             rise(tl, note, 0.9, { ease: "power1.out" });
-            wipeImage(tl, visual, 0.2, !isLeftOf(visual, content));
+            if (buttons.length) {
+                tl.set(buttons, { opacity: 0, y: 10 }, 0)
+                    .to(buttons, { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: "back.out(1.4)" }, 1.05);
+            }
+            visuals.forEach((visual, i) => wipeImage(tl, visual, 0.2 + i * 0.15, !isLeftOf(visual, content)));
 
             revealSectionOnScroll(sectionRoot, tl);
         });
@@ -1995,10 +2037,16 @@ runWhenReady(() => {
             );
             const quote = sectionRoot.querySelector(".partner_quote");
             const buttons = sectionRoot.querySelectorAll(".u-button-wrapper .button_main_wrap");
+            // Optional eyebrow tag above the headline (schedule page).
+            const tag = sectionRoot.querySelector(".u-content-wrapper .tag_wrap");
 
             const tl = gsap.timeline({ paused: true });
             tl.set(sectionRoot, { visibility: "visible" }, 0);
-            riseWords(tl, words, 0);
+            if (tag) {
+                tl.set(tag, { opacity: 0, x: -8 }, 0)
+                    .to(tag, { opacity: 1, x: 0, duration: 0.45, ease: "power2.out" }, 0);
+            }
+            riseWords(tl, words, tag ? 0.15 : 0);
             // A dozen logos: tight stagger keeps the wave quick, same as the homepage logo wall.
             rise(tl, logos, 0.35, { y: 12, stagger: 0.04, duration: 0.45, ease: "power3.out" });
             rise(tl, note, 0.85, { ease: "power1.out" });
