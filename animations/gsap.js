@@ -2022,6 +2022,110 @@ runWhenReady(() => {
         });
     })();
 
+    // Shared closing beat: buttons land last with a touch of anticipation.
+    const landButtons = (tl, buttons, at) => {
+        if (!buttons || !buttons.length) return;
+        tl.set(buttons, { opacity: 0, y: 10 }, 0)
+            .to(buttons, { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: "back.out(1.4)" }, at);
+    };
+
+    // --- Booking hero (schedule page): badge -> headline -> copy -> booking widget -> notes ---
+    // Sits outside .page_main, so it needs its own init.
+    (function initAppointmentHeroSection() {
+        document.querySelectorAll('[data-animation-trigger="appointment-hero"]').forEach((sectionRoot) => {
+            const intro = sectionRoot.querySelector(".hero_appointment_contain > .u-content-wrapper");
+            const badge = intro && intro.querySelector(".reviews-badge_outer");
+            const words = splitHeadingIntoWords(sectionRoot, ".hero_appointment_contain > .u-content-wrapper .u-heading");
+            const copy = intro && intro.querySelector(".u-text");
+            const widget = sectionRoot.querySelector(".booking_wrap");
+            const notes = sectionRoot.querySelectorAll(".hero_appointment_layout ~ .u-content-wrapper .u-text");
+
+            const tl = gsap.timeline({ paused: true });
+            tl.set(sectionRoot, { visibility: "visible" }, 0);
+            rise(tl, badge, 0.1, { y: 10, duration: 0.5 });
+            riseWords(tl, words, 0.25);
+            rise(tl, copy, 0.65, { ease: "power1.out" });
+            rise(tl, widget, 0.8, { y: 24, duration: 0.8, ease: "power3.out" });
+            rise(tl, notes, 1.2, { stagger: 0.08, ease: "power1.out" });
+
+            revealSectionOnScroll(sectionRoot, tl, "top 100%");
+        });
+    })();
+
+    // --- Slim CTA strip: headline -> copy -> buttons ---
+    (function initCtaStripSection() {
+        document.querySelectorAll('[data-animation-trigger="cta-strip"]').forEach((sectionRoot) => {
+            const words = splitHeadingIntoWords(sectionRoot, ".cta_strip_text .u-heading");
+            const copy = sectionRoot.querySelector(".cta_strip_text .u-text");
+
+            const tl = gsap.timeline({ paused: true });
+            tl.set(sectionRoot, { visibility: "visible" }, 0);
+            riseWords(tl, words, 0);
+            rise(tl, copy, 0.4, { ease: "power1.out" });
+            landButtons(tl, sectionRoot.querySelectorAll(".cta_strip_buttons .button_main_wrap"), 0.6);
+
+            revealSectionOnScroll(sectionRoot, tl);
+        });
+    })();
+
+    // --- Location (area pages): eyebrow + headline -> copy -> quote + address -> buttons; map card settles ---
+    (function initLocationSection() {
+        document.querySelectorAll('[data-animation-trigger="location"]').forEach((sectionRoot) => {
+            const header = sectionRoot.querySelector(".location_header");
+            const texts = header ? [...header.querySelectorAll(":scope > .u-text")] : [];
+            const words = splitHeadingIntoWords(sectionRoot, ".location_header > .u-heading");
+            const quote = sectionRoot.querySelector(".location_content .card_quote_wrap");
+            const address = sectionRoot.querySelector(".location_content .icon-label_wrap");
+            const map = sectionRoot.querySelector(".location_map_wrap");
+            const mapCard = sectionRoot.querySelector(".location_address_wrap");
+
+            const tl = gsap.timeline({ paused: true });
+            tl.set(sectionRoot, { visibility: "visible" }, 0);
+            // First text block is the eyebrow above the headline, the rest is body copy.
+            rise(tl, texts[0], 0, { y: 10, duration: 0.45 });
+            riseWords(tl, words, 0.15);
+            rise(tl, texts.slice(1), 0.55, { ease: "power1.out" });
+            rise(tl, quote, 0.75, { duration: 0.55 });
+            rise(tl, address, 0.9, { y: 10, duration: 0.45 });
+            landButtons(tl, sectionRoot.querySelectorAll(".location_content .button_main_wrap"), 1.0);
+            rise(tl, map, 0.2, { y: 24, duration: 0.9, ease: "power3.out" });
+            rise(tl, mapCard, 0.9, { y: 12, duration: 0.5 });
+
+            revealSectionOnScroll(sectionRoot, tl);
+        });
+    })();
+
+    // --- Employers / in-network plans: eyebrow + headline -> copy -> quote/buttons; plan cards or tags in a wave ---
+    (function initEmployersSection() {
+        document.querySelectorAll('[data-animation-trigger="employers"]').forEach((sectionRoot) => {
+            const content = sectionRoot.querySelector(".employers_content");
+            const textWrap = content && content.querySelector(".u-margin-trim");
+            const words = splitHeadingIntoWords(sectionRoot, ".employers_content .u-heading");
+            const texts = textWrap ? [...textWrap.querySelectorAll(":scope > .u-text")] : [];
+            const headingIdx = textWrap
+                ? [...textWrap.children].indexOf(textWrap.querySelector(":scope > .u-heading"))
+                : -1;
+            // Text above the headline is an eyebrow; text below it is body copy.
+            const eyebrow = texts.filter((t) => [...textWrap.children].indexOf(t) < headingIdx);
+            const body = texts.filter((t) => [...textWrap.children].indexOf(t) > headingIdx);
+            const quote = content && content.querySelector(".card_quote_wrap");
+            const items = sectionRoot.querySelectorAll(
+                ".employers_list_item_wrap, .employers_list_wrap > h3, .employers_tag_item"
+            );
+
+            const tl = gsap.timeline({ paused: true });
+            tl.set(sectionRoot, { visibility: "visible" }, 0);
+            rise(tl, eyebrow, 0, { y: 10, duration: 0.45 });
+            riseWords(tl, words, eyebrow.length ? 0.15 : 0);
+            rise(tl, body, 0.55, { stagger: 0.08, ease: "power1.out" });
+            rise(tl, quote, 0.8, { duration: 0.55 });
+            landButtons(tl, content ? content.querySelectorAll(".button_main_wrap") : [], 0.9);
+            rise(tl, items, 0.35, { y: 12, stagger: 0.06, duration: 0.5, ease: "power3.out" });
+
+            revealSectionOnScroll(sectionRoot, tl);
+        });
+    })();
+
     // --- Partners (insurance page): headline -> carrier logo grid in a wave -> note -> quote -> button ---
     (function initPartnersSection() {
         document.querySelectorAll('[data-animation-trigger="partners"]').forEach((sectionRoot) => {
