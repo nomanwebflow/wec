@@ -2198,8 +2198,10 @@ runWhenReady(() => {
                 // One trigger per card: blocks are taller than the viewport, so a
                 // block-level trigger would play the lower cards unseen. The second
                 // card of a pair waits a beat so each row reads left to right.
+                // The cards list is a sibling of .curated_reviews_section (which
+                // only holds the header), so look in their shared wrapper.
                 let prevTop = null;
-                block.querySelectorAll(".curated_reviews_list > .w-dyn-item").forEach((card) => {
+                (block.parentElement || block).querySelectorAll(".curated_reviews_list > .w-dyn-item").forEach((card) => {
                     const top = card.offsetTop;
                     const delay = top === prevTop ? 0.12 : 0;
                     prevTop = top;
