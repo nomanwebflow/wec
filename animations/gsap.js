@@ -991,6 +991,13 @@ runWhenReady(() => {
                     if (immediate) {
                         gsap.set(pending, { opacity: 1, y: 0 });
                     } else {
+                        // Stagger in reading order (row by row), not DOM order,
+                        // since dealReviewColumns groups the cards by column.
+                        const pos = new Map(pending.map((el) => [el, el.getBoundingClientRect()]));
+                        pending.sort((a, b) => {
+                            const ra = pos.get(a), rb = pos.get(b);
+                            return Math.abs(ra.top - rb.top) > 40 ? ra.top - rb.top : ra.left - rb.left;
+                        });
                         gsap.to(pending, {
                             opacity: 1,
                             y: 0,
