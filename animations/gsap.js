@@ -2841,7 +2841,8 @@ runWhenReady(() => {
     deferredInits.push(function initStrayHeadings() {
         document.querySelectorAll(".page_main .u-heading, .page_main h2").forEach((el) => {
             const h = el.matches("h1, h2, h3, p") ? el : el.querySelector("h1, h2, h3, p") || el;
-            if (h.tagName === "H1" || h.dataset.split || h.closest("[data-split]")) return;
+            // Callout titles ride in with their box; splitting them reads as noise.
+            if (h.tagName === "H1" || h.dataset.split || h.closest("[data-split], .card_quote_wrap")) return;
             const words = splitHeadingIntoWords({ querySelector: () => h }, "");
             if (!words.length) return;
             const tl = gsap.timeline({ paused: true });
