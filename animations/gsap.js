@@ -74,6 +74,55 @@ runWhenReady(function dealReviewColumns() {
     });
 });
 
+// --- Link-style button arrows ---
+// A label that wraps is a block as wide as its container, so the arrow beside
+// it lands at the far edge, away from the words. Balance the lines and shrink
+// the label to its longest line so the arrow sits right after the text.
+// Labels on one line are left alone.
+runWhenReady(function hugWrappedLinkLabels() {
+    const scope = '.button_main_wrap[data-wf--button-main--styles-variant="link"]';
+    const wraps = document.querySelectorAll(`${scope} .button_main_text_wrap`);
+    if (!wraps.length) return;
+    const style = document.createElement("style");
+    style.textContent = `${scope} .button_main_text{text-wrap:balance}` +
+        `${scope} .is-wrapped > .button_main_icon_outer{align-self:flex-end}`;
+    document.head.appendChild(style);
+
+    const range = document.createRange();
+    const fit = () => wraps.forEach((wrap) => {
+        const text = wrap.querySelector(".button_main_text:not(.is-absolute)");
+        if (!text) return;
+        const icon = wrap.parentElement.querySelector(":scope > .button_main_icon_outer");
+        wrap.style.width = "";
+        if (icon) icon.style.marginBottom = "";
+        wrap.parentElement.classList.remove("is-wrapped");
+        range.selectNodeContents(text);
+        const rects = [...range.getClientRects()].filter((r) => r.width);
+        const lines = new Set(rects.map((r) => Math.round(r.top))).size;
+        if (lines < 2) return;
+        wrap.parentElement.classList.add("is-wrapped");
+        const left = Math.min(...rects.map((r) => r.left));
+        const right = Math.max(...rects.map((r) => r.right));
+        wrap.style.width = `${Math.ceil(right - left) + 1}px`;
+        // Centre the arrow on the last line the way a one-line label centres
+        // it: the last line's box is the wrap's height minus the lines above
+        // it. offsetHeight ignores the entrance animation's transforms.
+        if (icon) {
+            const lineHeight = parseFloat(getComputedStyle(text).lineHeight);
+            const lastLine = wrap.offsetHeight - (lines - 1) * lineHeight;
+            icon.style.marginBottom = `${(lastLine - icon.offsetHeight) / 2}px`;
+        }
+    });
+    fit();
+    if (document.fonts) document.fonts.ready.then(fit);
+    runWhenLoaded(fit);
+    let frame;
+    window.addEventListener("resize", () => {
+        cancelAnimationFrame(frame);
+        frame = requestAnimationFrame(fit);
+    });
+});
+
 // --- Reviews page table of contents ---
 // The "On this page" list and the condition sections are two lists of the same
 // CMS collection. Pair them by name: each section gets an id slugged from its
