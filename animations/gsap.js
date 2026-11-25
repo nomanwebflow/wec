@@ -119,6 +119,8 @@ runWhenReady(function initContentToc() {
   .is-collapsible .content_toc_body { position: absolute; left: 0; right: 0; top: 100%; padding: 0 1.5rem; background-color: #fff; border-bottom-left-radius: 1rem; border-bottom-right-radius: 1rem; box-shadow: 0 14px 20px -14px rgba(15, 45, 64, 0.28); }
   .is-collapsible .content_toc_list_wrap::after { content: ""; display: block; height: 1.5rem; }
   .is-collapsible .content_toc_header { cursor: pointer; }
+  .is-collapsible .content_toc_title { white-space: nowrap; }
+  .is-collapsible.is-flipping .content_toc_header { overflow: hidden; }
   .is-collapsible .content_toc_icon { transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
   .is-collapsible.is-open .content_toc_icon { transform: rotate(180deg); }
   .is-collapsible .content_toc_body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
@@ -198,12 +200,21 @@ runWhenReady(function initContentToc() {
             placeholder.remove();
         }
         if (state) {
+            // While the box resizes, clip its contents; on the way back to the
+            // bar, hold the label and chevron until there's room for them.
+            const barContent = toc.querySelectorAll(".content_toc_title, .content_toc_icon");
+            toc.classList.add("is-flipping");
+            if (!on) gsap.set(barContent, { opacity: 0 });
             FlipPlugin.from(state, {
                 duration: 0.55,
                 ease: "power3.inOut",
                 scale: false,
-                onComplete: () => gsap.set(toc, { clearProps: "transform,width,height,top,left" })
+                onComplete: () => {
+                    toc.classList.remove("is-flipping");
+                    gsap.set(toc, { clearProps: "transform,width,height,top,left" });
+                }
             });
+            if (!on) gsap.to(barContent, { opacity: 1, duration: 0.25, delay: 0.38, ease: "power1.out", clearProps: "opacity" });
         }
     };
     const checkFab = () => {
