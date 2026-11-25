@@ -123,6 +123,17 @@ runWhenReady(function initContentToc() {
   .is-collapsible .content_toc_body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
   .is-collapsible .content_toc_body > * { min-height: 0; overflow: hidden; }
   .is-collapsible.is-open .content_toc_body { grid-template-rows: 1fr; }
+  .is-collapsible:not(.is-open) .content_toc_body { box-shadow: none; }
+  .content_toc_fab_icon { display: none; width: 1.375rem; height: 1.375rem; }
+  .content_toc_wrap.is-fab { position: fixed; top: auto; left: auto; right: 1rem; bottom: 1rem; width: 3.5rem; height: 3.5rem; margin: 0; z-index: 50; border-radius: 50%; box-shadow: 0 6px 14px -6px rgba(15, 45, 64, 0.45); opacity: 1 !important; transition: opacity 0.3s ease, scale 0.3s ease; }
+  .is-fab.is-open { border-radius: 50%; }
+  .is-fab .content_toc_header { width: 100%; height: 100%; padding: 0; justify-content: center; }
+  .is-fab .content_toc_title, .is-fab .content_toc_icon { display: none; }
+  .is-fab .content_toc_fab_icon { display: block; }
+  .is-fab .content_toc_body { top: auto; left: auto; right: 0; bottom: calc(100% + 0.75rem); width: min(20rem, calc(100vw - 2rem)); max-height: calc(100vh - 12rem); overflow: auto; border-radius: 1rem; }
+  .is-fab.is-open .content_toc_body { box-shadow: 0 0 0 1px rgba(15, 45, 64, 0.08), 0 12px 28px -14px rgba(15, 45, 64, 0.4); }
+  .is-fab .content_toc_list_wrap::before { content: ""; display: block; height: 1.25rem; }
+  .is-fab.is-fab-away { opacity: 0 !important; scale: 0.6; pointer-events: none; }
 }
 @media (min-width: 992px) {
   .content_toc_icon { display: none; }
@@ -133,6 +144,14 @@ runWhenReady(function initContentToc() {
         body.id = body.id || "content-toc-list";
         header.type = "button";
         header.setAttribute("aria-controls", body.id);
+        // The label is hidden in FAB mode, so name the button directly.
+        header.setAttribute("aria-label", "On this page");
+        // FAB glyph: the list's own rail, with its orange active marker.
+        header.insertAdjacentHTML("beforeend", `<svg class="content_toc_fab_icon" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+  <path d="M8 6h10M8 11h10M8 16h7" stroke="#0f2d40" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M4 4.5v3" stroke="#e8512a" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M4 10v2M4 15v2" stroke="#0f2d40" stroke-opacity=".3" stroke-width="1.6" stroke-linecap="round"/>
+</svg>`);
         toc.classList.add("is-collapsible");
     }
     const isOpen = () => toc.classList.contains("is-open");
@@ -153,6 +172,60 @@ runWhenReady(function initContentToc() {
         document.addEventListener("keydown", (event) => { if (event.key === "Escape" && isOpen()) { setOpen(false); header.focus(); } });
         mobile.addEventListener("change", () => setOpen(false));
     }
+
+    // Once the bar scrolls up under the nav, it morphs (GSAP Flip) into a
+    // floating button whose list opens upward; scrolling back restores it.
+    // A placeholder keeps the bar's slot so the page never jumps.
+    const FlipPlugin = window.Flip;
+    if (window.gsap && FlipPlugin) gsap.registerPlugin(FlipPlugin);
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const placeholder = document.createElement("div");
+    placeholder.setAttribute("aria-hidden", "true");
+    const reviewsSection = toc.closest("section");
+    let fab = false;
+    const toFab = (on) => {
+        if (on === fab || !header) return;
+        fab = on;
+        setOpen(false);
+        const state = FlipPlugin && !reduceMotion ? FlipPlugin.getState(toc, { props: "borderRadius,boxShadow" }) : null;
+        if (on) {
+            placeholder.style.height = `${toc.offsetHeight}px`;
+            toc.before(placeholder);
+            toc.classList.add("is-fab");
+        } else {
+            toc.classList.remove("is-fab", "is-fab-away");
+            placeholder.remove();
+        }
+        if (state) {
+            FlipPlugin.from(state, {
+                duration: 0.55,
+                ease: "power3.inOut",
+                scale: false,
+                onComplete: () => gsap.set(toc, { clearProps: "transform,width,height,top,left" })
+            });
+        }
+    };
+    const checkFab = () => {
+        if (!header) return;
+        if (!mobile.matches) { toFab(false); return; }
+        const navEl = document.querySelector(".nav_component");
+        const navBottom = navEl ? navEl.getBoundingClientRect().bottom : 0;
+        const anchorBottom = (fab ? placeholder : toc).getBoundingClientRect().bottom;
+        // A few px of hysteresis so it doesn't flicker at the boundary.
+        toFab(fab ? anchorBottom < navBottom + 8 : anchorBottom < navBottom);
+        if (fab && reviewsSection) {
+            const away = reviewsSection.getBoundingClientRect().bottom < window.innerHeight * 0.75;
+            toc.classList.toggle("is-fab-away", away);
+            if (away && isOpen()) setOpen(false);
+        }
+    };
+    let fabTicking = false;
+    window.addEventListener("scroll", () => {
+        if (fabTicking) return;
+        fabTicking = true;
+        requestAnimationFrame(() => { fabTicking = false; checkFab(); });
+    }, { passive: true });
+    window.addEventListener("resize", checkFab);
 
     // Webflow's and Lenis's anchor scrolling ignore the fixed nav, so the
     // heading lands under it. Scroll ourselves, stopping below the nav.
