@@ -2382,8 +2382,8 @@ runWhenReady(() => {
                 revealSectionOnScroll(sectionRoot, tocTl);
             }
             sectionRoot.querySelectorAll(".legal_section").forEach((block) => {
-                const words = splitHeadingIntoWords(block, ".legal_h2");
-                const rest = [...block.children].filter((el) => !el.matches(".legal_h2"));
+                const words = splitHeadingIntoWords(block, "h2");
+                const rest = [...block.children].filter((el) => !el.matches("h2"));
                 const tl = gsap.timeline({ paused: true });
                 riseWords(tl, words, 0);
                 rise(tl, rest, 0.2, { y: 16, duration: 0.6, stagger: 0.08, ease: "power3.out" });
