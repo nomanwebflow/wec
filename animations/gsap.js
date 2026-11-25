@@ -2214,6 +2214,18 @@ runWhenReady(() => {
                     primeStartState(cardTl);
                     revealSectionOnScroll(card, cardTl, "top 90%");
                 });
+
+                // Help banner under the cards: panel rises, then its lines settle
+                // in reading order and the button lands last.
+                const banner = (block.parentElement || block).querySelector(".reviews_help_wrap");
+                if (banner) {
+                    const bannerTl = gsap.timeline({ paused: true });
+                    rise(bannerTl, banner, 0, { y: 24, duration: 0.7, ease: "power3.out" });
+                    rise(bannerTl, banner.querySelectorAll(".reviews_help_content > *"), 0.15, { y: 12, duration: 0.6, stagger: 0.08, ease: "power3.out" });
+                    landButtons(bannerTl, banner.querySelectorAll(".button_main_wrap"), 0.4);
+                    primeStartState(bannerTl);
+                    revealSectionOnScroll(banner, bannerTl, "top 90%");
+                }
             });
         });
     });
