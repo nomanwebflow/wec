@@ -85,7 +85,8 @@ runWhenReady(function initContentToc() {
     const slug = (s) => s.trim().toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
     const sections = new Map();
-    document.querySelectorAll(".curated_reviews_section").forEach((section) => {
+    // Reviews page condition blocks and Credentials & Compliance sections.
+    document.querySelectorAll(".curated_reviews_section, .legal_section").forEach((section) => {
         const heading = section.querySelector("h2");
         if (!heading) return;
         section.id = section.id || slug(heading.textContent);
@@ -136,7 +137,7 @@ runWhenReady(function initContentToc() {
   .is-fab.is-fab-away { opacity: 0 !important; scale: 0.6; pointer-events: none; }
 }
 @media (min-width: 992px) {
-  .content_toc_icon { display: none; }
+  .content_toc_icon, .content_toc_fab_icon { display: none; }
   .content_toc_header { cursor: default; }
 }`;
         document.head.appendChild(style);
@@ -2358,6 +2359,29 @@ runWhenReady(() => {
     });
 
     // --- Report of findings: headline -> copy (graph animates itself) -> closing copy below the graph ---
+    // --- Credentials & Compliance body: TOC rises, then each section's heading
+    // words and content settle as it scrolls in (same beats as the reviews page) ---
+    deferredInits.push(function initLegalSection() {
+        document.querySelectorAll("section.legal_wrap").forEach((sectionRoot) => {
+            const toc = sectionRoot.querySelector(".content_toc_wrap");
+            if (toc) {
+                const tocTl = gsap.timeline({ paused: true });
+                rise(tocTl, toc, 0, { y: 20, duration: 0.7, ease: "power3.out" });
+                primeStartState(tocTl);
+                revealSectionOnScroll(sectionRoot, tocTl);
+            }
+            sectionRoot.querySelectorAll(".legal_section").forEach((block) => {
+                const words = splitHeadingIntoWords(block, ".legal_h2");
+                const rest = [...block.children].filter((el) => !el.matches(".legal_h2"));
+                const tl = gsap.timeline({ paused: true });
+                riseWords(tl, words, 0);
+                rise(tl, rest, 0.2, { y: 16, duration: 0.6, stagger: 0.08, ease: "power3.out" });
+                primeStartState(tl);
+                revealSectionOnScroll(block, tl, "top 85%");
+            });
+        });
+    });
+
     deferredInits.push(function initReportSection() {
         document.querySelectorAll('[data-animation-trigger="report"]').forEach((sectionRoot) => {
             const contents = sectionRoot.querySelectorAll(".report_content");
