@@ -71,6 +71,21 @@ runWhenReady(function dealReviewColumns() {
         };
         deal();
         window.addEventListener("resize", deal);
+
+        // Finsweet Load More appends new cards straight into the wrap, where
+        // the CSS columns stack them above the grid and leave a gap. Move each
+        // new card into the shortest grid column so the masonry stays closed.
+        const known = new Set(items);
+        new MutationObserver(() => {
+            const fresh = [...wrap.querySelectorAll(".reviews_list_item")].filter((el) => !known.has(el));
+            fresh.forEach((el) => {
+                known.add(el);
+                items.push(el);
+                const cols = [...grid.children];
+                const shortest = cols.reduce((a, b) => (b.offsetHeight < a.offsetHeight ? b : a));
+                shortest.appendChild(el);
+            });
+        }).observe(wrap, { childList: true, subtree: true });
     });
 });
 
