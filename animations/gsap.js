@@ -103,27 +103,21 @@ runWhenReady(function initContentToc() {
     });
     if (!links.length) return;
 
-    // Below desktop the layout stacks, so the list folds into a sticky bar
-    // that names the current section and opens on tap. The collapse is opt-in
-    // via a class JS adds: without JS the list simply stays open.
+    // Below desktop the layout stacks, so the list folds into a bar that
+    // opens on tap. The collapse is opt-in via a class JS adds: without JS
+    // the list simply stays open.
     const mobile = window.matchMedia("(max-width: 991px)");
     const header = toc.querySelector(".content_toc_header");
     const body = toc.querySelector(".content_toc_body");
-    const current = document.createElement("span");
-    current.className = "content_toc_current";
-    current.setAttribute("aria-hidden", "true");
     if (header && body) {
         const style = document.createElement("style");
         style.textContent = `
 @media (max-width: 991px) {
-  .content_layout > div:has(> .content_toc_wrap.is-collapsible) { display: contents; }
-  .content_toc_wrap.is-collapsible { position: sticky; top: 8.5rem; z-index: 5; align-self: start; grid-column: 1 / -1; justify-self: stretch; width: 100%; box-shadow: 0 8px 16px -10px rgba(15, 45, 64, 0.3); }
+  .content_toc_wrap.is-collapsible { position: relative; top: auto; z-index: 5; }
   .is-collapsible.is-open { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
   .is-collapsible .content_toc_body { position: absolute; left: 0; right: 0; top: 100%; padding: 0 1.5rem; background-color: #fff; border-bottom-left-radius: 1rem; border-bottom-right-radius: 1rem; box-shadow: 0 14px 20px -14px rgba(15, 45, 64, 0.28); }
   .is-collapsible .content_toc_list_wrap::after { content: ""; display: block; height: 1.5rem; }
-  .is-collapsible .content_toc_header { cursor: pointer; padding-top: 1rem; padding-bottom: 1rem; }
-  .is-collapsible .content_toc_heading { display: flex; flex-direction: column; align-items: flex-start; row-gap: 0.25rem; text-align: left; }
-  .is-collapsible .content_toc_current { display: block; font-size: 1rem; font-weight: 600; line-height: 1.3; color: #0f2d40; }
+  .is-collapsible .content_toc_header { cursor: pointer; }
   .is-collapsible .content_toc_icon { transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
   .is-collapsible.is-open .content_toc_icon { transform: rotate(180deg); }
   .is-collapsible .content_toc_body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
@@ -133,16 +127,8 @@ runWhenReady(function initContentToc() {
 @media (min-width: 992px) {
   .content_toc_icon { display: none; }
   .content_toc_header { cursor: default; }
-  .content_toc_current { display: none; }
 }`;
         document.head.appendChild(style);
-
-        // Stack the label and the current-section line together, left of the chevron.
-        const title = header.querySelector(".content_toc_title");
-        const heading = document.createElement("span");
-        heading.className = "content_toc_heading";
-        title.replaceWith(heading);
-        heading.append(title, current);
 
         body.id = body.id || "content-toc-list";
         header.type = "button";
@@ -166,13 +152,6 @@ runWhenReady(function initContentToc() {
         document.addEventListener("click", (event) => { if (isOpen() && !toc.contains(event.target)) setOpen(false); });
         document.addEventListener("keydown", (event) => { if (event.key === "Escape" && isOpen()) { setOpen(false); header.focus(); } });
         mobile.addEventListener("change", () => setOpen(false));
-        // Stick just under the fixed nav, whose height differs by breakpoint.
-        const fixedNav = document.querySelector(".nav_component");
-        const placeBar = () => {
-            toc.style.top = mobile.matches && fixedNav ? `${Math.round(fixedNav.getBoundingClientRect().bottom) + 12}px` : "";
-        };
-        placeBar();
-        window.addEventListener("resize", placeBar);
     }
 
     // Webflow's and Lenis's anchor scrolling ignore the fixed nav, so the
@@ -184,11 +163,9 @@ runWhenReady(function initContentToc() {
         event.preventDefault();
         event.stopPropagation();
         const section = sections.get(link.dataset.tocTarget);
-        // On mobile the folded bar also sits over the page: clear it too. The
-        // open list overlays the page, so closing it shifts nothing.
-        const bar = mobile.matches && header ? header.offsetHeight + 16 : 0;
+        // The open list overlays the page, so closing it shifts nothing.
         if (mobile.matches) setOpen(false);
-        const offset = (nav ? nav.offsetHeight : 0) + 32 + bar;
+        const offset = (nav ? nav.offsetHeight : 0) + 32;
         const top = section.getBoundingClientRect().top + window.scrollY - offset;
         if (window.lenis) window.lenis.scrollTo(top);
         else window.scrollTo({ top, behavior: "smooth" });
@@ -210,7 +187,6 @@ runWhenReady(function initContentToc() {
         if (active) active.removeAttribute("aria-current");
         active = link;
         link.setAttribute("aria-current", "location");
-        current.textContent = link.textContent.trim();
         const listTop = list.getBoundingClientRect().top;
         const rect = link.getBoundingClientRect();
         marker.style.transform = `translateY(${rect.top - listTop}px)`;
