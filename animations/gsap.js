@@ -39,15 +39,15 @@ runWhenReady(function fixHeadingTags() {
 // --- Review card order ---
 // The review list is laid out with CSS columns, which fill top to bottom, so
 // CMS order 1-2-3 runs down the first column. Deal the visible cards into one
-// grid of column wrappers instead, left to right (card i -> column i % n), so
-// the CMS order reads across rows as in Figma. The grid spans all the CSS
-// columns, so the wrap's column count stays readable and is re-dealt when a
-// breakpoint changes it. Without this script the CSS columns still show every
-// card, just in column order.
+// grid of column wrappers instead, each card in CMS order going to the
+// shortest column, so the order reads across rows as in Figma and the columns
+// stay level. The grid spans all the CSS columns, so the wrap's column count
+// stays readable and is re-dealt when a breakpoint changes it. Without this
+// script the CSS columns still show every card, just in column order.
 runWhenReady(function dealReviewColumns() {
     document.querySelectorAll(".reviews_list_wrap").forEach((wrap) => {
         // Skip cards in hidden lists (display: none has no client rects).
-        const items = [...wrap.querySelectorAll(".reviews_list_item")].filter(
+        let items = [...wrap.querySelectorAll(".reviews_list_item")].filter(
             (el) => el.getClientRects().length
         );
         if (items.length < 2) return;
@@ -58,34 +58,46 @@ runWhenReady(function dealReviewColumns() {
         wrap.appendChild(grid);
 
         let dealt = 0;
-        const deal = () => {
+        const deal = (force) => {
             const cs = getComputedStyle(wrap);
             const n = Math.max(1, parseInt(cs.columnCount, 10) || 1);
-            if (n === dealt) return;
+            if (n === dealt && !force) return;
             dealt = n;
             grid.style.gridTemplateColumns = `repeat(${n}, minmax(0, 1fr))`;
-            grid.style.columnGap = cs.columnGap === "normal" ? "1.5rem" : cs.columnGap;
+            const gap = cs.columnGap === "normal" ? "1.5rem" : cs.columnGap;
+            grid.style.columnGap = gap;
+            // Measure first (cards keep their column width wherever they sit),
+            // then place, so layout is read once instead of per card.
+            const heights = items.map((el) => el.offsetHeight);
+            const totals = new Array(n).fill(0);
             const cols = Array.from({ length: n }, () => document.createElement("div"));
-            items.forEach((el, i) => cols[i % n].appendChild(el));
+            items.forEach((el, i) => {
+                const c = totals.indexOf(Math.min(...totals));
+                cols[c].appendChild(el);
+                totals[c] += heights[i] + 1;
+            });
             grid.replaceChildren(...cols);
         };
         deal();
-        window.addEventListener("resize", deal);
+        window.addEventListener("resize", () => deal());
 
-        // Finsweet Load More appends new cards straight into the wrap, where
-        // the CSS columns stack them above the grid and leave a gap. Move each
-        // new card into the shortest grid column so the masonry stays closed.
-        const known = new Set(items);
-        new MutationObserver(() => {
-            const fresh = [...wrap.querySelectorAll(".reviews_list_item")].filter((el) => !known.has(el));
-            fresh.forEach((el) => {
-                known.add(el);
-                items.push(el);
-                const cols = [...grid.children];
-                const shortest = cols.reduce((a, b) => (b.offsetHeight < a.offsetHeight ? b : a));
-                shortest.appendChild(el);
+        // Finsweet Load More inserts new cards beside existing ones, which
+        // now live in the grid columns, so a render scrambles the columns and
+        // strands cards above the grid. After every render, re-deal all
+        // rendered cards in Finsweet's own order.
+        if (!wrap.hasAttribute("fs-list-element")) return;
+        window.FinsweetAttributes = window.FinsweetAttributes || [];
+        window.FinsweetAttributes.push(["list", (lists) => {
+            const list = lists.find((l) => l.listElement === wrap);
+            if (!list) return;
+            list.addHook("afterRender", (rendered) => {
+                items = list.items.value
+                    .filter((item) => list.renderedItems.has(item))
+                    .map((item) => item.element);
+                deal(true);
+                return rendered;
             });
-        }).observe(wrap, { childList: true, subtree: true });
+        }]);
     });
 });
 
