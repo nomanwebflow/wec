@@ -1,0 +1,29 @@
+# West End Chiropractic sync worker.
+# Secrets (GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN,
+# WEBFLOW_TOKEN) live in Cloudflare and are kept on deploy; set with
+# `wrangler secret put NAME`.
+name = "wec-reviews-sync"
+main = "src/index.js"
+compatibility_date = "2026-11-19"
+workers_dev = true
+
+[triggers]
+crons = [
+  "*/5 * * * *",  # business open/closed banner
+  "0 */12 * * *", # Google review sync + aggregate stats
+  "0 8 * * *"     # daily: fill empty blog read times
+]
+
+[vars]
+BUSINESS_TIMEZONE = "America/Chicago"
+DRY_RUN = "false"
+GBP_ACCOUNT = "accounts/115987159540366755020"
+GBP_LOCATION = "accounts/115987159540366755020/locations/7691607714173198596"
+GBP_MAPS_URL = "https://maps.google.com/maps?cid=16470900741283217699"
+GBP_PLACE_ID = "ChIJU86XGkC1RIYRI4HnJvVklOQ"
+WEBFLOW_COLLECTION_ID = "6afe8ce2a0f72ec54023be69"
+WEBFLOW_STATS_COLLECTION_ID = "6af05119e6b0b92339bf609e"
+WEBFLOW_STATS_ITEM_ID = "6af0512a8d5e99300da835a8"
+WEBFLOW_STATUS_COLLECTION_ID = "6afe90b8a0f72ec54024d4af"
+WEBFLOW_STATUS_ITEM_ID = "6afe90c9a0f72ec54024dcdc"
+WEBFLOW_BLOG_COLLECTION_ID = "6b06c59c7d739dc9c8473f7d"
