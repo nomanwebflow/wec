@@ -2833,6 +2833,84 @@ runWhenReady(() => {
         );
     })();
 
+    // --- Resources hero: eyebrow -> headline -> copy + author -> featured card -> slider controls ---
+    (function initResourcesHero() {
+        document.querySelectorAll('[data-animation-trigger="resources-hero"]').forEach((sectionRoot) => {
+            const layout = sectionRoot.querySelector(".resources_hero_layout");
+            if (!layout) return;
+            const tag = layout.querySelector(".tag_wrap");
+            const words = splitHeadingIntoWords(layout, ".u-heading");
+            const copy = layout.querySelector(".resources_hero_row .u-text");
+            const author = layout.querySelector(".resources_hero_author_wrap");
+            const featured = sectionRoot.querySelector(".resources_featured_list");
+            const controls = sectionRoot.querySelector(".resources_slider_controls");
+
+            const tl = gsap.timeline({ paused: true });
+            tl.set(sectionRoot, { visibility: "visible" }, 0);
+            rise(tl, tag, 0.1, { y: 10, duration: 0.45 });
+            riseWords(tl, words, 0.2);
+            rise(tl, copy, 0.6, { ease: "power1.out" });
+            rise(tl, author, 0.72, { y: 10, duration: 0.5 });
+            // The featured card is the page's focal object: a longer, heavier settle.
+            rise(tl, featured, 0.7, { y: 32, duration: 1, ease: "power3.out" });
+            rise(tl, controls, 1.15, { y: 10, duration: 0.5 });
+
+            revealSectionOnScroll(sectionRoot, tl, "top 100%");
+        });
+    })();
+
+    // --- Resources latest articles: headline -> topic pills in a wave -> visible cards in reading order ---
+    deferredInits.push(function initResourcesLatest() {
+        document.querySelectorAll('[data-animation-trigger="resources-latest"]').forEach((sectionRoot) => {
+            const words = splitHeadingIntoWords(sectionRoot, ".resources_contain > div > .u-heading");
+            const pills = sectionRoot.querySelectorAll(".resources_filters_item");
+            // Only the cards on screen now; the rest show when a topic is picked
+            // and must not be left at a start state.
+            const cards = [...sectionRoot.querySelectorAll(".resources_list > .w-dyn-item")].filter((c) => c.offsetParent);
+
+            const tl = gsap.timeline({ paused: true });
+            tl.set(sectionRoot, { visibility: "visible" }, 0);
+            riseWords(tl, words, 0);
+            rise(tl, pills, 0.3, { y: 10, stagger: 0.04, duration: 0.45 });
+            rise(tl, cards, 0.45, { y: 20, stagger: 0.07, duration: 0.7, ease: "power3.out" });
+
+            revealSectionOnScroll(sectionRoot, tl);
+        });
+    });
+
+    // --- Resources topic rows: eyebrow + headline for the section, then each row reveals on its own ---
+    deferredInits.push(function initResourcesTopics() {
+        document.querySelectorAll('[data-animation-trigger="resources-topics"]').forEach((sectionRoot) => {
+            const header = sectionRoot.querySelector(".resources_contain > div");
+            const eyebrow = header && header.querySelector(".u-text");
+            const words = splitHeadingIntoWords(sectionRoot, ".resources_contain > div > .u-heading");
+
+            const tl = gsap.timeline({ paused: true });
+            tl.set(sectionRoot, { visibility: "visible" }, 0);
+            rise(tl, eyebrow, 0, { y: 10, duration: 0.45 });
+            riseWords(tl, words, 0.15);
+            revealSectionOnScroll(sectionRoot, tl);
+
+            sectionRoot.querySelectorAll(".resources_topic_wrap").forEach((row) => {
+                if (!row.offsetParent) return; // empty topic rows are hidden
+                const title = row.querySelector(".resources_topic_title");
+                const desc = row.querySelector(".resources_topic_desc");
+                const link = row.querySelector(".resources_topic_header .button_main_wrap");
+                const cards = row.querySelectorAll(".resources_topic_item > *");
+
+                const rowTl = gsap.timeline({ paused: true });
+                rise(rowTl, title, 0, { y: 12, duration: 0.55 });
+                rise(rowTl, desc, 0.12, { ease: "power1.out" });
+                rise(rowTl, link, 0.2, { y: 8, duration: 0.45 });
+                rise(rowTl, cards, 0.25, { y: 20, stagger: 0.07, duration: 0.7, ease: "power3.out" });
+                // Render the start state now: the section turns visible before
+                // lower rows reach their own trigger.
+                primeStartState(rowTl);
+                revealSectionOnScroll(row, rowTl, "top 85%");
+            });
+        });
+    });
+
     // --- Catch-all: any section headline no section timeline claimed ---
     // Runs after every section init, so it only touches headings that are
     // still unsplit (sections with no trigger, or secondary headings a
