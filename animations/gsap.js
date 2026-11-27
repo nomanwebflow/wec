@@ -299,10 +299,13 @@ runWhenReady(function initContentToc() {
         if (on) {
             placeholder.style.height = `${toc.offsetHeight}px`;
             toc.before(placeholder);
+            // Float from <body>: an ancestor with container-type or z-index
+            // (the blog layout has both) would trap position: fixed and z-index.
+            document.body.appendChild(toc);
             toc.classList.add("is-fab");
         } else {
             toc.classList.remove("is-fab", "is-fab-away");
-            placeholder.remove();
+            placeholder.replaceWith(toc);
         }
         if (state) {
             // While the box resizes, clip its contents; on the way back to the
