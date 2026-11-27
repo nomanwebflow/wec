@@ -199,6 +199,15 @@ runWhenReady(function initContentToc() {
         sections.set(section.id, section);
     });
 
+    // Terms: the list points at H3 subheads inside one long legal section.
+    document.querySelectorAll(".legal_section h3").forEach((heading) => {
+        const id = heading.id || slug(heading.textContent);
+        if (!id || sections.has(id)) return;
+        heading.id = id;
+        heading.style.scrollMarginTop = "11rem";
+        sections.set(id, heading);
+    });
+
     const links = [...toc.querySelectorAll(".content_toc_list_link")].filter((link) => {
         const id = link.dataset.tocTarget || slug(link.textContent);
         if (!sections.has(id)) return false;
