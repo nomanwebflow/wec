@@ -231,6 +231,8 @@ runWhenReady(function initContentToc() {
   .is-collapsible .content_toc_body > * { min-height: 0; overflow: hidden; }
   .is-collapsible.is-open .content_toc_body { grid-template-rows: 1fr; }
   .is-collapsible:not(.is-open) .content_toc_body { box-shadow: none; }
+  /* Blog bar carries a 1px border on mobile; continue it around the open list. */
+  .content_toc_wrap.is-blog.is-open:not(.is-fab) .content_toc_body { left: -1px; right: -1px; border: 1px solid var(--swatch--dark-900-o20); border-top: 0; }
   .content_toc_fab_icon { display: none; width: 1.375rem; height: 1.375rem; }
   .content_toc_wrap.is-fab { position: fixed; top: auto; left: auto; right: 1rem; bottom: 1rem; width: 3.5rem; height: 3.5rem; margin: 0; z-index: 50; border-radius: 50%; box-shadow: 0 6px 14px -6px rgba(15, 45, 64, 0.45); opacity: 1 !important; transition: opacity 0.3s ease, scale 0.3s ease; }
   .is-fab.is-open { border-radius: 50%; }
