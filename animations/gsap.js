@@ -161,6 +161,34 @@ runWhenReady(function initContentToc() {
     const slug = (s) => s.trim().toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
     const sections = new Map();
+
+    // Blog posts: the Designer ships one placeholder link. Build the list from
+    // the article's H2s, cloning that link so the Designer styling carries over.
+    const article = toc.classList.contains("is-blog") && document.querySelector(".blog_content_text");
+    if (article) {
+        const template = toc.querySelector(".content_toc_list_wrap > li");
+        const headings = [...article.querySelectorAll("h2")].filter((h) => h.textContent.trim());
+        if (!template || !headings.length) {
+            toc.hidden = true;
+            return;
+        }
+        headings.forEach((heading) => {
+            const base = heading.id || slug(heading.textContent);
+            let id = base;
+            for (let n = 2; sections.has(id) || (document.getElementById(id) && document.getElementById(id) !== heading); n++) id = `${base}-${n}`;
+            heading.id = id;
+            heading.style.scrollMarginTop = "11rem";
+            sections.set(id, heading);
+            const item = template.cloneNode(true);
+            const link = item.querySelector(".content_toc_list_link");
+            const text = item.querySelector(".content_toc_list_text") || link;
+            text.textContent = heading.textContent.trim();
+            link.dataset.tocTarget = id;
+            template.parentElement.appendChild(item);
+        });
+        template.remove();
+    }
+
     // Reviews page condition blocks and Credentials & Compliance sections.
     document.querySelectorAll(".curated_reviews_section, .legal_section").forEach((section) => {
         const heading = section.querySelector("h2");
@@ -172,7 +200,7 @@ runWhenReady(function initContentToc() {
     });
 
     const links = [...toc.querySelectorAll(".content_toc_list_link")].filter((link) => {
-        const id = slug(link.textContent);
+        const id = link.dataset.tocTarget || slug(link.textContent);
         if (!sections.has(id)) return false;
         link.setAttribute("href", `#${id}`);
         link.dataset.tocTarget = id;
@@ -224,7 +252,8 @@ runWhenReady(function initContentToc() {
         header.type = "button";
         header.setAttribute("aria-controls", body.id);
         // The label is hidden in FAB mode, so name the button directly.
-        header.setAttribute("aria-label", "On this page");
+        const title = toc.querySelector(".content_toc_title");
+        header.setAttribute("aria-label", title ? title.textContent.trim() : "On this page");
         // FAB glyph: the list's own rail, with its orange active marker.
         header.insertAdjacentHTML("beforeend", `<svg class="content_toc_fab_icon" viewBox="0 0 22 22" fill="none" aria-hidden="true">
   <path d="M8 6h10M8 11h10M8 16h7" stroke="#0f2d40" stroke-width="1.8" stroke-linecap="round"/>
